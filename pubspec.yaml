@@ -1,0 +1,80 @@
+name: watch_atlas
+description: "WatchAtlas - Media tracker app"
+publish_to: 'none'
+
+# Author: Omar Khaled (OK)
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # State Management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Routing
+  go_router: ^14.8.1
+
+  # Networking
+  dio: ^5.7.0
+
+  # Data Models
+  freezed_annotation: ^3.0.0
+  json_annotation: ^4.9.0
+
+  # Local Database / Cache
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+
+  # Image Caching
+  cached_network_image: ^3.4.1
+
+  # Environment Variables
+  flutter_dotenv: ^5.2.1
+
+  # Animations
+  flutter_animate: ^4.5.2
+
+  # Pagination
+  infinite_scroll_pagination: ^4.1.0
+
+  # Markdown Rendering
+  flutter_markdown: ^0.7.6
+
+  # Backend
+  supabase_flutter: ^2.8.4
+
+  # Notifications (Optional)
+  firebase_core: ^3.12.1
+  firebase_messaging: ^15.2.4
+
+  # Analytics (Optional)
+  firebase_analytics: ^11.4.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+  # Code Generation
+  build_runner: ^2.4.14
+  freezed: ^3.0.0
+  json_serializable: ^6.9.5
+  riverpod_generator: ^2.6.4
+  riverpod_lint: ^2.6.5
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - .env
+    - assets/images/
+    - assets/fonts/
