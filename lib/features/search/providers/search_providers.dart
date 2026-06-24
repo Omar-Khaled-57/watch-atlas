@@ -48,9 +48,7 @@ final trendingSearchesProvider = FutureProvider<List<MediaModel>>((ref) async {
         voteAverage: (json['vote_average'] as num?)?.toDouble(),
         voteCount: json['vote_count'] as int?,
         popularity: (json['popularity'] as num?)?.toDouble() ?? 0,
-        releaseDate: json['release_date'] as String? != null
-            ? DateTime.tryParse(json['release_date'] as String)
-            : null,
+        releaseDate: _parseDate(json['release_date'] as String?),
         genres: (json['genre_ids'] as List<dynamic>?)?.cast<String>(),
       );
     }).toList();
@@ -83,9 +81,7 @@ final searchResultsProvider = FutureProvider<List<MediaModel>>((ref) async {
         voteAverage: (json['vote_average'] as num?)?.toDouble(),
         voteCount: json['vote_count'] as int?,
         popularity: (json['popularity'] as num?)?.toDouble() ?? 0,
-        releaseDate: json['release_date'] as String? != null
-            ? DateTime.tryParse(json['release_date'] as String)
-            : null,
+        releaseDate: _parseDate(json['release_date'] as String?),
         genres: (json['genre_ids'] as List<dynamic>?)?.cast<String>(),
       );
     }).toList();
@@ -123,6 +119,11 @@ class SearchHistoryNotifier extends StateNotifier<List<String>> {
   void clearAll() {
     state = [];
   }
+}
+
+DateTime? _parseDate(String? dateStr) {
+  if (dateStr == null) return null;
+  return DateTime.tryParse(dateStr);
 }
 
 MediaType _parseMediaType(String? type) {

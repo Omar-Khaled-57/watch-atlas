@@ -24,9 +24,7 @@ final mediaDetailsProvider = FutureProvider<MediaModel>((ref) async {
     voteAverage: (data['vote_average'] as num?)?.toDouble(),
     voteCount: data['vote_count'] as int?,
     popularity: (data['popularity'] as num?)?.toDouble() ?? 0,
-    releaseDate: data['release_date'] as String? != null
-        ? DateTime.tryParse(data['release_date'] as String)
-        : null,
+    releaseDate: _parseDate(data['release_date'] as String?),
     runtime: data['runtime'] as int?,
     genres: (data['genres'] as List<dynamic>?)
         ?.map((g) => g['name'] as String)
@@ -106,6 +104,11 @@ final mediaTrailersProvider = FutureProvider<List<Map<String, dynamic>>>((ref) a
       .take(5)
       .toList();
 });
+
+DateTime? _parseDate(String? dateStr) {
+  if (dateStr == null) return null;
+  return DateTime.tryParse(dateStr);
+}
 
 String? _extractTrailerUrl(Map<String, dynamic>? videos) {
   if (videos == null) return null;

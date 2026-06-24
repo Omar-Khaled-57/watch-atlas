@@ -4,8 +4,12 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
+  connectivity_plus
+  dynamic_color
+  file_selector_windows
   firebase_core
   isar_flutter_libs
+  share_plus
   url_launcher_windows
 )
 
