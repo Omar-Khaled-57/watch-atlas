@@ -1,0 +1,220 @@
+{
+  "@@locale": "en",
+  "@@last_modified": "2026-06-24",
+
+  "appName": "WatchAtlas",
+
+  "@_Common": {
+    "description": "Common app strings"
+  },
+  "loading": "Loading...",
+  "loadingMore": "Loading more...",
+  "error": "Error",
+  "retry": "Retry",
+  "cancel": "Cancel",
+  "save": "Save",
+  "delete": "Delete",
+  "search": "Search",
+  "edit": "Edit",
+  "close": "Close",
+  "back": "Back",
+  "next": "Next",
+  "done": "Done",
+  "yes": "Yes",
+  "no": "No",
+  "ok": "OK",
+  "errorOccurred": "An error occurred",
+  "noInternet": "No internet connection",
+  "pullToRefresh": "Pull to refresh",
+  "somethingWentWrong": "Something went wrong",
+
+  "@_Navigation": {
+    "description": "Bottom navigation tabs"
+  },
+  "navHome": "Home",
+  "navDiscover": "Discover",
+  "navSearch": "Search",
+  "navLists": "Lists",
+  "navProfile": "Profile",
+
+  "@_Auth": {
+    "description": "Authentication strings"
+  },
+  "signIn": "Sign In",
+  "signUp": "Sign Up",
+  "signOut": "Sign Out",
+  "email": "Email",
+  "password": "Password",
+  "forgotPassword": "Forgot Password?",
+  "signInWithGoogle": "Sign in with Google",
+  "signInWithApple": "Sign in with Apple",
+  "welcomeBack": "Welcome back",
+  "createAccount": "Create Account",
+  "dontHaveAccount": "Don't have an account?",
+  "alreadyHaveAccount": "Already have an account?",
+
+  "@_Home": {
+    "description": "Home screen section titles"
+  },
+  "trendingNow": "Trending Now",
+  "popularThisWeek": "Popular This Week",
+  "continueWatching": "Continue Watching",
+  "recentlyAdded": "Recently Added",
+  "upcomingReleases": "Upcoming Releases",
+  "recommendedForYou": "Recommended for You",
+  "seeAll": "See All",
+
+  "@_Media": {
+    "description": "Media type and detail labels"
+  },
+  "movies": "Movies",
+  "tvShows": "TV Shows",
+  "anime": "Anime",
+  "kdrama": "K-Drama",
+  "ratings": "Ratings",
+  "overview": "Overview",
+  "cast": "Cast",
+  "crew": "Crew",
+  "trailers": "Trailers",
+  "recommendations": "Recommendations",
+  "reviews": "Reviews",
+  "similar": "Similar",
+  "addToList": "Add to List",
+  "share": "Share",
+  "mediaType": "Media Type",
+  "releaseDate": "Release Date",
+  "runtime": "Runtime",
+  "genres": "Genres",
+  "status": "Status",
+  "language": "Language",
+  "country": "Country",
+
+  "@_WatchStatus": {
+    "description": "Media watch statuses"
+  },
+  "watching": "Watching",
+  "completed": "Completed",
+  "onHold": "On Hold",
+  "dropped": "Dropped",
+  "planToWatch": "Plan to Watch",
+  "rewatching": "Rewatching",
+
+  "@_Tracking": {
+    "description": "Tracking and progress"
+  },
+  "myTracking": "My Tracking",
+  "totalWatched": "Total Watched",
+  "totalEpisodes": "Total Episodes",
+  "totalHours": "Total Hours",
+  "progress": "Progress",
+  "updateStatus": "Update Status",
+  "addToTracking": "Add to Tracking",
+  "removeFromTracking": "Remove from Tracking",
+  "trackingCount": "{count, plural, one{{count} title} other{{count} titles}}",
+  "episodeCount": "{count, plural, one{{count} episode} other{{count} episodes}}",
+
+  "@_Lists": {
+    "description": "User lists"
+  },
+  "myLists": "My Lists",
+  "createList": "Create List",
+  "listTitle": "List Title",
+  "listDescription": "List Description",
+  "publicList": "Public",
+  "privateList": "Private",
+  "collaborative": "Collaborative",
+  "addToListTitle": "Add {title} to List",
+  "noListsYet": "No lists yet",
+  "createFirstList": "Create your first list",
+
+  "@_Profile": {
+    "description": "User profile"
+  },
+  "editProfile": "Edit Profile",
+  "bio": "Bio",
+  "followers": "Followers",
+  "following": "Following",
+  "activity": "Activity",
+  "stats": "Stats",
+  "joinedOn": "Joined on {date}",
+
+  "@_Social": {
+    "description": "Social features"
+  },
+  "findFriends": "Find Friends",
+  "follow": "Follow",
+  "unfollow": "Unfollow",
+  "friendActivity": "Friend Activity",
+  "noFriendsYet": "No friends yet",
+  "suggestedFriends": "Suggested Friends",
+
+  "@_Search": {
+    "description": "Search screen"
+  },
+  "searchHint": "Search movies, shows, anime...",
+  "searchHistory": "Search History",
+  "trendingSearches": "Trending Searches",
+  "noResults": "No results found",
+  "filters": "Filters",
+  "clearHistory": "Clear History",
+  "searchResults": "Search Results",
+
+  "@_Notifications": {
+    "description": "Notifications"
+  },
+  "notifications": "Notifications",
+  "markAllRead": "Mark All Read",
+  "clearAll": "Clear All",
+  "noNotifications": "No notifications yet",
+  "notificationFollow": "{name} started following you",
+  "notificationLike": "{name} liked your review",
+  "notificationComment": "{name} commented on your review",
+  "notificationList": "{name} added you to a list",
+
+  "@_Settings": {
+    "description": "Settings screen"
+  },
+  "settings": "Settings",
+  "theme": "Theme",
+  "contentLanguage": "Content Language",
+  "darkMode": "Dark Mode",
+  "lightMode": "Light Mode",
+  "systemMode": "System Mode",
+  "about": "About",
+  "appVersion": "App Version",
+  "privacyPolicy": "Privacy Policy",
+  "termsOfService": "Terms of Service",
+  "licenses": "Licenses",
+  "rateApp": "Rate App",
+  "shareApp": "Share App",
+  "logout": "Log Out",
+  "deleteAccount": "Delete Account",
+
+  "@_Analytics": {
+    "description": "Analytics and statistics"
+  },
+  "statistics": "Statistics",
+  "yourStats": "Your Stats",
+  "totalWatchedCount": "Total Watched",
+  "totalHoursCount": "Total Hours",
+  "averageRating": "Average Rating",
+  "genreDistribution": "Genre Distribution",
+  "weeklyActivity": "Weekly Activity",
+  "monthlyActivity": "Monthly Activity",
+  "favoriteGenre": "Favorite Genre",
+  "favoriteCountry": "Favorite Country",
+  "mostWatchedGenre": "Most Watched Genre",
+  "topRated": "Top Rated",
+  "recentActivity": "Recent Activity",
+
+  "@_Time": {
+    "description": "Time-related strings"
+  },
+  "justNow": "Just now",
+  "minutesAgo": "{minutes}m ago",
+  "hoursAgo": "{hours}h ago",
+  "daysAgo": "{days}d ago",
+  "weeksAgo": "{weeks}w ago",
+  "monthsAgo": "{months}mo ago",
+  "yearsAgo": "{years}y ago"
+}

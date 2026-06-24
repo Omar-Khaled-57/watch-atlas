@@ -1,0 +1,220 @@
+{
+  "@@locale": "ar",
+  "@@last_modified": "2026-06-24",
+
+  "appName": "واتش أطلس",
+
+  "@_Common": {
+    "description": "سلاسل شائعة في التطبيق"
+  },
+  "loading": "جارٍ التحميل...",
+  "loadingMore": "جارٍ تحميل المزيد...",
+  "error": "خطأ",
+  "retry": "إعادة المحاولة",
+  "cancel": "إلغاء",
+  "save": "حفظ",
+  "delete": "حذف",
+  "search": "بحث",
+  "edit": "تعديل",
+  "close": "إغلاق",
+  "back": "رجوع",
+  "next": "التالي",
+  "done": "تم",
+  "yes": "نعم",
+  "no": "لا",
+  "ok": "موافق",
+  "errorOccurred": "حدث خطأ",
+  "noInternet": "لا يوجد اتصال بالإنترنت",
+  "pullToRefresh": "اسحب للتحديث",
+  "somethingWentWrong": "حدث خطأ ما",
+
+  "@_Navigation": {
+    "description": "علامات تبويب التنقل السفلي"
+  },
+  "navHome": "الرئيسية",
+  "navDiscover": "اكتشف",
+  "navSearch": "بحث",
+  "navLists": "القوائم",
+  "navProfile": "الملف الشخصي",
+
+  "@_Auth": {
+    "description": "نصوص المصادقة"
+  },
+  "signIn": "تسجيل الدخول",
+  "signUp": "إنشاء حساب",
+  "signOut": "تسجيل الخروج",
+  "email": "البريد الإلكتروني",
+  "password": "كلمة المرور",
+  "forgotPassword": "نسيت كلمة المرور؟",
+  "signInWithGoogle": "تسجيل الدخول عبر Google",
+  "signInWithApple": "تسجيل الدخول عبر Apple",
+  "welcomeBack": "مرحبًا بعودتك",
+  "createAccount": "إنشاء حساب",
+  "dontHaveAccount": "ليس لديك حساب؟",
+  "alreadyHaveAccount": "لديك حساب بالفعل؟",
+
+  "@_Home": {
+    "description": "عناوين أقسام الشاشة الرئيسية"
+  },
+  "trendingNow": "رائج الآن",
+  "popularThisWeek": "الأكثر مشاهدة هذا الأسبوع",
+  "continueWatching": "مشاهدة مستمرة",
+  "recentlyAdded": "أُضيف مؤخرًا",
+  "upcomingReleases": "الإصدارات القادمة",
+  "recommendedForYou": "موصى به لك",
+  "seeAll": "عرض الكل",
+
+  "@_Media": {
+    "description": "تسميات أنواع المحتوى والتفاصيل"
+  },
+  "movies": "أفلام",
+  "tvShows": "مسلسلات",
+  "anime": "أنمي",
+  "kdrama": "دراما كورية",
+  "ratings": "التقييمات",
+  "overview": "نظرة عامة",
+  "cast": "طاقم التمثيل",
+  "crew": "طاقم العمل",
+  "trailers": "المقاطع الدعائية",
+  "recommendations": "التوصيات",
+  "reviews": "المراجعات",
+  "similar": "مشابهة",
+  "addToList": "أضف إلى القائمة",
+  "share": "مشاركة",
+  "mediaType": "نوع الوسائط",
+  "releaseDate": "تاريخ الإصدار",
+  "runtime": "المدة",
+  "genres": "التصنيفات",
+  "status": "الحالة",
+  "language": "اللغة",
+  "country": "البلد",
+
+  "@_WatchStatus": {
+    "description": "حالات المشاهدة"
+  },
+  "watching": "يشاهد",
+  "completed": "مكتمل",
+  "onHold": "متوقف",
+  "dropped": "تم الإلغاء",
+  "planToWatch": "يخطط للمشاهدة",
+  "rewatching": "يعيد المشاهدة",
+
+  "@_Tracking": {
+    "description": "التتبع والتقدم"
+  },
+  "myTracking": "تتبعي",
+  "totalWatched": "إجمالي المشاهدات",
+  "totalEpisodes": "إجمالي الحلقات",
+  "totalHours": "إجمالي الساعات",
+  "progress": "التقدم",
+  "updateStatus": "تحديث الحالة",
+  "addToTracking": "أضف إلى التتبع",
+  "removeFromTracking": "إزالة من التتبع",
+  "trackingCount": "{count, plural, one{عنوان واحد} other{{count} عناوين}}",
+  "episodeCount": "{count, plural, one{حلقة واحدة} other{{count} حلقات}}",
+
+  "@_Lists": {
+    "description": "قوائم المستخدم"
+  },
+  "myLists": "قوائمي",
+  "createList": "إنشاء قائمة",
+  "listTitle": "عنوان القائمة",
+  "listDescription": "وصف القائمة",
+  "publicList": "عام",
+  "privateList": "خاص",
+  "collaborative": "تعاوني",
+  "addToListTitle": "أضف {title} إلى القائمة",
+  "noListsYet": "لا توجد قوائم بعد",
+  "createFirstList": "أنشئ قائمتك الأولى",
+
+  "@_Profile": {
+    "description": "الملف الشخصي للمستخدم"
+  },
+  "editProfile": "تعديل الملف الشخصي",
+  "bio": "السيرة الذاتية",
+  "followers": "المتابعون",
+  "following": "يتابع",
+  "activity": "النشاط",
+  "stats": "الإحصائيات",
+  "joinedOn": "انضم في {date}",
+
+  "@_Social": {
+    "description": "الميزات الاجتماعية"
+  },
+  "findFriends": "البحث عن أصدقاء",
+  "follow": "متابعة",
+  "unfollow": "إلغاء المتابعة",
+  "friendActivity": "نشاط الأصدقاء",
+  "noFriendsYet": "لا يوجد أصدقاء بعد",
+  "suggestedFriends": "أصدقاء مقترحون",
+
+  "@_Search": {
+    "description": "شاشة البحث"
+  },
+  "searchHint": "ابحث عن أفلام، مسلسلات، أنمي...",
+  "searchHistory": "سجل البحث",
+  "trendingSearches": "عمليات البحث الرائجة",
+  "noResults": "لم يتم العثور على نتائج",
+  "filters": "عوامل التصفية",
+  "clearHistory": "مسح السجل",
+  "searchResults": "نتائج البحث",
+
+  "@_Notifications": {
+    "description": "الإشعارات"
+  },
+  "notifications": "الإشعارات",
+  "markAllRead": "تحديد الكل كمقروء",
+  "clearAll": "مسح الكل",
+  "noNotifications": "لا توجد إشعارات بعد",
+  "notificationFollow": "بدأ {name} بمتابعتك",
+  "notificationLike": "أعجب {name} بمراجعتك",
+  "notificationComment": "علق {name} على مراجعتك",
+  "notificationList": "أضافك {name} إلى قائمة",
+
+  "@_Settings": {
+    "description": "شاشة الإعدادات"
+  },
+  "settings": "الإعدادات",
+  "theme": "المظهر",
+  "contentLanguage": "لغة المحتوى",
+  "darkMode": "الوضع الداكن",
+  "lightMode": "الوضع الفاتح",
+  "systemMode": "وضع النظام",
+  "about": "حول",
+  "appVersion": "إصدار التطبيق",
+  "privacyPolicy": "سياسة الخصوصية",
+  "termsOfService": "شروط الخدمة",
+  "licenses": "التراخيص",
+  "rateApp": "تقييم التطبيق",
+  "shareApp": "مشاركة التطبيق",
+  "logout": "تسجيل الخروج",
+  "deleteAccount": "حذف الحساب",
+
+  "@_Analytics": {
+    "description": "التحليلات والإحصائيات"
+  },
+  "statistics": "الإحصائيات",
+  "yourStats": "إحصائياتك",
+  "totalWatchedCount": "إجمالي المشاهدات",
+  "totalHoursCount": "إجمالي الساعات",
+  "averageRating": "متوسط التقييم",
+  "genreDistribution": "توزيع التصنيفات",
+  "weeklyActivity": "النشاط الأسبوعي",
+  "monthlyActivity": "النشاط الشهري",
+  "favoriteGenre": "التصنيف المفضل",
+  "favoriteCountry": "البلد المفضل",
+  "mostWatchedGenre": "التصنيف الأكثر مشاهدة",
+  "topRated": "الأعلى تقييمًا",
+  "recentActivity": "النشاط الأخير",
+
+  "@_Time": {
+    "description": "نصوص متعلقة بالوقت"
+  },
+  "justNow": "الآن",
+  "minutesAgo": "منذ {minutes} د",
+  "hoursAgo": "منذ {hours} س",
+  "daysAgo": "منذ {days} ي",
+  "weeksAgo": "منذ {weeks} أ",
+  "monthsAgo": "منذ {months} ش",
+  "yearsAgo": "منذ {years} س"
+}

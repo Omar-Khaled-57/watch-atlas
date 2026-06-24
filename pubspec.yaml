@@ -1,8 +1,6 @@
 name: watch_atlas
-description: "WatchAtlas - Media tracker app"
+description: "WatchAtlas - Modern media tracking platform"
 publish_to: 'none'
-
-# Author: Omar Khaled (OK)
 version: 1.0.0+1
 
 environment:
@@ -24,51 +22,73 @@ dependencies:
 
   # Networking
   dio: ^5.7.0
+  connectivity_plus: ^6.1.4
 
   # Data Models
   freezed_annotation: ^3.0.0
   json_annotation: ^4.9.0
 
-  # Local Database / Cache
+  # Local Database
   isar: ^3.1.0+1
   isar_flutter_libs: ^3.1.0+1
+  path_provider: ^2.1.5
 
   # Image Caching
   cached_network_image: ^3.4.1
 
-  # Environment Variables
-  flutter_dotenv: ^5.2.1
-
   # Animations
   flutter_animate: ^4.5.2
+  lottie: ^3.3.1
+  shimmer: ^3.0.0
+
+  # UI
+  dynamic_color: ^1.7.0
+  flutter_local_notifications: ^18.0.1
+
+  # Environment
+  flutter_dotenv: ^5.2.1
 
   # Pagination
   infinite_scroll_pagination: ^4.1.0
 
-  # Markdown Rendering
-  flutter_markdown: ^0.7.6
-
   # Backend
   supabase_flutter: ^2.8.4
 
-  # Notifications (Optional)
+  # Notifications
   firebase_core: ^3.12.1
   firebase_messaging: ^15.2.4
 
-  # Analytics (Optional)
+  # Analytics
   firebase_analytics: ^11.4.4
+
+  # Markdown
+  flutter_markdown: ^0.7.6
+
+  # Charts
+  fl_chart: ^0.70.2
+
+  # Auth
+  google_sign_in: ^6.3.1
+  sign_in_with_apple: ^6.1.4
+
+  # Utils
+  intl: ^0.19.0
+  url_launcher: ^6.3.1
+  share_plus: ^10.1.4
+  image_picker: ^1.1.2
+  flutter_cache_manager: ^3.4.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-
-  # Code Generation
   build_runner: ^2.4.14
   freezed: ^3.0.0
   json_serializable: ^6.9.5
   riverpod_generator: ^2.6.4
   riverpod_lint: ^2.6.5
+  mocktail: ^1.1.0
+  isar_generator: ^3.1.0+1
 
 flutter:
   uses-material-design: true
@@ -78,3 +98,4 @@ flutter:
     - .env
     - assets/images/
     - assets/fonts/
+    - assets/lottie/
