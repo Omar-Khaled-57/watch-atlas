@@ -536,9 +536,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 width: 40,
                 child: Text(
                   '${bucket.count}',
+                  textAlign: TextAlign.end,
                   style: tt.bodySmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    textAlign: TextAlign.end,
                   ),
                 ),
               ),

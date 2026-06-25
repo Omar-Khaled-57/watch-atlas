@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 enum SocialButtonType { google, apple }
@@ -54,7 +53,7 @@ class SocialButton extends StatelessWidget {
 
   Widget _buildIcon() {
     if (type == SocialButtonType.apple) {
-      return const Icon(CupertinoIcons.apple, size: 22);
+      return const Icon(Icons.phone_iphone_rounded, size: 22);
     }
 
     return Container(

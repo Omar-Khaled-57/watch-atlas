@@ -5,7 +5,7 @@ part 'sync_queue_model.freezed.dart';
 part 'sync_queue_model.g.dart';
 
 @freezed
-class SyncQueueModel with _$SyncQueueModel {
+abstract class SyncQueueModel with _$SyncQueueModel {
   const factory SyncQueueModel({
     required String id,
     required String tableName,

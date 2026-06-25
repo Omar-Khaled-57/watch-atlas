@@ -1,7 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'sign_in_with_apple/sign_in_with_apple.dart';
 import 'supabase_service.dart';
 import '../../models/user_model.dart';
 
@@ -31,31 +29,11 @@ class AuthService {
   }
 
   Future<void> signInWithGoogle() async {
-    if (kIsWeb) {
-      await SupabaseService.instance.auth.signInWithOAuth(OAuthProvider.google);
-    } else {
-      final googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return;
-      final googleAuth = await googleUser.authentication;
-      await SupabaseService.instance.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
-        idToken: googleAuth.idToken!,
-        accessToken: googleAuth.accessToken,
-      );
-    }
+    await SupabaseService.instance.auth.signInWithOAuth(OAuthProvider.google);
   }
 
   Future<void> signInWithApple() async {
-    final credential = await SignInWithApple.getAppleIDCredential(
-      scopes: [
-        AppleIDAuthorizationScopes.email,
-        AppleIDAuthorizationScopes.fullName,
-      ],
-    );
-    await SupabaseService.instance.auth.signInWithIdToken(
-      provider: OAuthProvider.apple,
-      idToken: credential.identityToken!,
-    );
+    await SupabaseService.instance.auth.signInWithOAuth(OAuthProvider.apple);
   }
 
   Future<void> signOut() async {
@@ -67,11 +45,15 @@ class AuthService {
   }
 
   Future<UserModel?> getProfile() async {
-    final response = await SupabaseService.instance.profiles
-        .select()
-        .eq('id', userId)
-        .single();
-    return UserModel.fromJson(response);
+    try {
+      final response = await SupabaseService.instance.profiles
+          .select()
+          .eq('id', userId)
+          .single();
+      return UserModel.fromJson(response);
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<void> updateProfile(Map<String, dynamic> updates) async {

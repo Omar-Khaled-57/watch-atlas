@@ -80,15 +80,15 @@ class _MobileScaffold extends StatelessWidget {
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentIndex >= 0 ? currentIndex : 0,
         onDestinationSelected: (index) {
-          if (index >= 0 && index < _navItems.length) {
-            context.go(_navItems[index].path);
+          if (index >= 0 && index < AppScaffold._navItems.length) {
+            context.go(AppScaffold._navItems[index].path);
           }
         },
         animationDuration: const Duration(milliseconds: 300),
         height: 64,
         labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-        destinations: _navItems.map((item) {
-          final isSelected = _navItems.indexOf(item) == currentIndex;
+        destinations: AppScaffold._navItems.map((item) {
+          final isSelected = AppScaffold._navItems.indexOf(item) == currentIndex;
           return NavigationDestination(
             icon: Icon(item.inactiveIcon),
             selectedIcon: Icon(item.activeIcon),
@@ -118,8 +118,8 @@ class _DesktopScaffold extends StatelessWidget {
           NavigationRail(
             selectedIndex: currentIndex >= 0 ? currentIndex : 0,
             onDestinationSelected: (index) {
-              if (index >= 0 && index < _navItems.length) {
-                context.go(_navItems[index].path);
+              if (index >= 0 && index < AppScaffold._navItems.length) {
+                context.go(AppScaffold._navItems[index].path);
               }
             },
             labelType: NavigationRailLabelType.all,
@@ -136,11 +136,11 @@ class _DesktopScaffold extends StatelessWidget {
               child: IconButton(
                 icon: const Icon(Icons.settings_outlined),
                 onPressed: () => context.go('/settings'),
-                tooltip: MaterialLocalizations.of(context).settingsLabel,
+                tooltip: 'Settings',
               ),
             ),
-            destinations: _navItems.map((item) {
-              final isSelected = _navItems.indexOf(item) == currentIndex;
+            destinations: AppScaffold._navItems.map((item) {
+              final isSelected = AppScaffold._navItems.indexOf(item) == currentIndex;
               return NavigationRailDestination(
                 icon: Icon(item.inactiveIcon),
                 selectedIcon: Icon(item.activeIcon),

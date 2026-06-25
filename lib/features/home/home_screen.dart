@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/constants/app_constants.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/shared/featured_carousel.dart';
 import '../../core/shared/media_row.dart';
@@ -40,11 +41,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final isDesktop = context.isDesktop;
     final isTablet = context.isTablet;
-    final itemWidth = isDesktop
-        ? 180.0
-        : isTablet
-            ? 160.0
-            : 140.0;
 
     return Scaffold(
       body: RefreshIndicator(
@@ -56,47 +52,83 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             trending.isEmpty
                 ? _buildShimmerCarousel()
                 : FeaturedCarousel(
-                    items: trending,
-                    onItemTap: (media) => _navigateToDetail(media),
+                    items: trending.map((m) => FeaturedCarouselItem(
+                      title: m.title,
+                      backdropUrl: m.backdropPath != null
+                          ? '${AppConstants.tmdbImageBaseUrl}/w1280${m.backdropPath}'
+                          : null,
+                      voteAverage: m.voteAverage,
+                      onTap: () => _navigateToDetail(m),
+                    )).toList(),
                   ).animate().fadeIn(duration: 400.ms),
             SizedBox(height: 16),
             if (continueWatching.isNotEmpty)
               MediaRow(
                 title: 'Continue Watching',
-                items: continueWatching,
-                itemWidth: itemWidth,
-                isLoading: continueWatchingAsync.isLoading,
+                items: continueWatching.map((m) => MediaRowItem(
+                  id: m.id,
+                  title: m.title,
+                  posterUrl: m.posterPath != null
+                      ? '${AppConstants.tmdbImageBaseUrl}/w342${m.posterPath}'
+                      : null,
+                  voteAverage: m.voteAverage,
+                  mediaType: m.mediaType,
+                )).toList(),
               ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.05),
             if (popular.isNotEmpty)
               MediaRow(
                 title: 'Popular This Week',
-                items: popular,
-                itemWidth: itemWidth,
-                isLoading: popularAsync.isLoading,
+                items: popular.map((m) => MediaRowItem(
+                  id: m.id,
+                  title: m.title,
+                  posterUrl: m.posterPath != null
+                      ? '${AppConstants.tmdbImageBaseUrl}/w342${m.posterPath}'
+                      : null,
+                  voteAverage: m.voteAverage,
+                  mediaType: m.mediaType,
+                )).toList(),
                 onSeeAll: () {},
               ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.05),
             if (recentlyAdded.isNotEmpty)
               MediaRow(
                 title: 'Recently Added',
-                items: recentlyAdded,
-                itemWidth: itemWidth,
-                isLoading: recentlyAddedAsync.isLoading,
+                items: recentlyAdded.map((m) => MediaRowItem(
+                  id: m.id,
+                  title: m.title,
+                  posterUrl: m.posterPath != null
+                      ? '${AppConstants.tmdbImageBaseUrl}/w342${m.posterPath}'
+                      : null,
+                  voteAverage: m.voteAverage,
+                  mediaType: m.mediaType,
+                )).toList(),
                 onSeeAll: () {},
               ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.05),
             if (upcoming.isNotEmpty)
               MediaRow(
                 title: 'Upcoming Releases',
-                items: upcoming,
-                itemWidth: itemWidth,
-                isLoading: upcomingAsync.isLoading,
+                items: upcoming.map((m) => MediaRowItem(
+                  id: m.id,
+                  title: m.title,
+                  posterUrl: m.posterPath != null
+                      ? '${AppConstants.tmdbImageBaseUrl}/w342${m.posterPath}'
+                      : null,
+                  voteAverage: m.voteAverage,
+                  mediaType: m.mediaType,
+                )).toList(),
                 onSeeAll: () {},
               ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.05),
             if (recommended.isNotEmpty)
               MediaRow(
                 title: 'Recommended For You',
-                items: recommended,
-                itemWidth: itemWidth,
-                isLoading: recommendedAsync.isLoading,
+                items: recommended.map((m) => MediaRowItem(
+                  id: m.id,
+                  title: m.title,
+                  posterUrl: m.posterPath != null
+                      ? '${AppConstants.tmdbImageBaseUrl}/w342${m.posterPath}'
+                      : null,
+                  voteAverage: m.voteAverage,
+                  mediaType: m.mediaType,
+                )).toList(),
                 onSeeAll: () {},
               ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.05),
             SizedBox(height: 24),
@@ -107,14 +139,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _refresh() async {
-    await Future.wait([
-      ref.refresh(trendingProvider).future,
-      ref.refresh(continueWatchingProvider).future,
-      ref.refresh(popularThisWeekProvider).future,
-      ref.refresh(recentlyAddedProvider).future,
-      ref.refresh(upcomingReleasesProvider).future,
-      ref.refresh(recommendedProvider).future,
-    ]);
+    ref.invalidate(trendingProvider);
+    ref.invalidate(continueWatchingProvider);
+    ref.invalidate(popularThisWeekProvider);
+    ref.invalidate(recentlyAddedProvider);
+    ref.invalidate(upcomingReleasesProvider);
+    ref.invalidate(recommendedProvider);
   }
 
   void _navigateToDetail(MediaModel media) {

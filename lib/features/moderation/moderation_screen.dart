@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/models/media_enums.dart';
 import '../../core/shared/loading_widget.dart';
+import '../../models/user_model.dart';
 import 'providers/moderation_providers.dart';
 
 class ModerationScreen extends ConsumerStatefulWidget {
@@ -218,14 +219,14 @@ class _ReportCard extends ConsumerWidget {
             const SizedBox(height: 12),
           ],
           if (report.reportedUser != null) ...[
-            _buildDetailRow('Reported User', report.reportedUser?['username'] as String? ?? 'Unknown'),
+            _buildDetailRow(context, 'Reported User', report.reportedUser?['username'] as String? ?? 'Unknown'),
             const SizedBox(height: 4),
           ],
           if (report.mediaId != null) ...[
-            _buildDetailRow('Media ID', report.mediaId.toString()),
+            _buildDetailRow(context, 'Media ID', report.mediaId.toString()),
             const SizedBox(height: 4),
           ],
-          _buildDetailRow('Reporter', report.reporter?['username'] as String? ?? 'Unknown'),
+          _buildDetailRow(context, 'Reporter', report.reporter?['username'] as String? ?? 'Unknown'),
           const SizedBox(height: 16),
           if (report.status == 'pending')
             Row(
@@ -244,7 +245,7 @@ class _ReportCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(BuildContext context, String label, String value) {
     final cs = Theme.of(context).colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -274,7 +275,7 @@ class _ReportCard extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadiusDirectional.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (ctx) => _ActionSheet(report: report),
     );
@@ -442,7 +443,7 @@ class _ActionButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadiusDirectional.all(Radius.circular(12)),
+        borderRadius: BorderRadius.all(Radius.circular(12)),
         child: Padding(
           padding: const EdgeInsetsDirectional.symmetric(vertical: 12, horizontal: 4),
           child: Row(

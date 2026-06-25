@@ -392,7 +392,7 @@ class _DesktopShell extends StatelessWidget {
               child: IconButton(
                 icon: const Icon(Icons.settings_outlined),
                 onPressed: () => context.go('/settings'),
-                tooltip: MaterialLocalizations.of(context).settingsLabel,
+                tooltip: 'Settings',
               ),
             ),
             destinations: ShellScaffold._navItems.map((item) {

@@ -1,11 +1,12 @@
 import 'dart:async';
-import 'package:isar/isar.dart';
-import '../constants/isar_constants.dart';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/app_constants.dart';
+import '../models/media_enums.dart';
 import '../../models/sync_queue_model.dart';
 import 'connectivity_service.dart';
 import 'supabase_service.dart';
-import 'isar_service.dart';
 
 class SyncService {
   static final SyncService instance = SyncService._();
@@ -13,12 +14,39 @@ class SyncService {
 
   Timer? _syncTimer;
   bool _isSyncing = false;
+  List<SyncQueueModel> _queue = [];
+
+  List<SyncQueueModel> get queue => List.unmodifiable(_queue);
 
   void init() {
+    _loadQueue();
     ConnectivityService.instance.onConnectivityChanged.listen((online) {
       if (online) syncNow();
     });
     _syncTimer = Timer.periodic(AppConstants.syncInterval, (_) => syncNow());
+  }
+
+  Future<void> _loadQueue() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final data = prefs.getString('sync_queue');
+      if (data != null) {
+        final list = jsonDecode(data) as List<dynamic>;
+        _queue = list.map((e) => SyncQueueModel.fromJson(e as Map<String, dynamic>)).toList();
+      }
+    } catch (e) {
+      debugPrint('Failed to load sync queue: $e');
+    }
+  }
+
+  Future<void> _saveQueue() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final data = jsonEncode(_queue.map((e) => e.toJson()).toList());
+      await prefs.setString('sync_queue', data);
+    } catch (e) {
+      debugPrint('Failed to save sync queue: $e');
+    }
   }
 
   Future<void> syncNow() async {
@@ -27,23 +55,30 @@ class SyncService {
 
     _isSyncing = true;
     try {
-      final isar = IsarService.instance.db;
-      final queue = await isar.syncQueues.where().findAll();
-      for (final item in queue) {
+      final items = List<SyncQueueModel>.from(_queue);
+      for (final item in items) {
         try {
           await _processSyncItem(item);
-          await isar.writeTxn(() => isar.syncQueues.delete(item.id));
+          _queue.removeWhere((q) => q.id == item.id);
         } catch (e) {
-          await isar.writeTxn(() {
-            item.retryCount++;
-            item.errorMessage = e.toString();
-            isar.syncQueues.put(item);
-          });
-          if (item.retryCount >= AppConstants.maxRetries) {
-            await isar.writeTxn(() => isar.syncQueues.delete(item.id));
+          final index = _queue.indexWhere((q) => q.id == item.id);
+          if (index != -1) {
+            _queue[index] = SyncQueueModel(
+              id: item.id,
+              tableName: item.tableName,
+              recordId: item.recordId,
+              operation: item.operation,
+              data: item.data,
+              retryCount: item.retryCount + 1,
+              errorMessage: e.toString(),
+            );
+            if (_queue[index].retryCount >= AppConstants.maxRetries) {
+              _queue.removeAt(index);
+            }
           }
         }
       }
+      await _saveQueue();
     } finally {
       _isSyncing = false;
     }
@@ -67,7 +102,6 @@ class SyncService {
     required SyncOperation operation,
     required Map<String, dynamic> data,
   }) async {
-    final isar = IsarService.instance.db;
     final item = SyncQueueModel(
       id: '${tableName}_${recordId}_${DateTime.now().millisecondsSinceEpoch}',
       tableName: tableName,
@@ -75,7 +109,8 @@ class SyncService {
       operation: operation,
       data: data,
     );
-    await isar.writeTxn(() => isar.syncQueues.put(item));
+    _queue.add(item);
+    await _saveQueue();
     if (ConnectivityService.instance.isOnline) {
       syncNow();
     }

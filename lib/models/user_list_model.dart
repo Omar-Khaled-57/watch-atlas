@@ -5,7 +5,7 @@ part 'user_list_model.freezed.dart';
 part 'user_list_model.g.dart';
 
 @freezed
-class UserListModel with _$UserListModel {
+abstract class UserListModel with _$UserListModel {
   const factory UserListModel({
     required String id,
     required String userId,

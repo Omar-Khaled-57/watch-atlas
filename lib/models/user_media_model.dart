@@ -1,12 +1,11 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:isar/isar.dart';
 import '../core/models/media_enums.dart';
 
 part 'user_media_model.freezed.dart';
 part 'user_media_model.g.dart';
 
 @freezed
-class UserMediaModel with _$UserMediaModel {
+abstract class UserMediaModel with _$UserMediaModel {
   const factory UserMediaModel({
     required String id,
     required int mediaId,

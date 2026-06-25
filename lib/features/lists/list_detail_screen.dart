@@ -59,9 +59,7 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
                 icon: const Icon(Icons.share_rounded),
                 tooltip: 'Share',
                 onPressed: () {
-                  SharePlus.instance.share(
-                    ShareParams(text: 'Check out my list: ${listData.title} on WatchAtlas'),
-                  );
+                  Share.share('Check out my list: ${listData.title} on WatchAtlas');
                 },
               ),
             ],
@@ -122,19 +120,12 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
                         ),
                       );
                     }
-                    return ReorderableGridView.count(
+                    return GridView.count(
                       crossAxisCount: crossAxisCount,
                       mainAxisSpacing: 8,
                       crossAxisSpacing: 8,
                       padding: const EdgeInsetsDirectional.all(12),
                       childAspectRatio: 0.65,
-                      onReorder: (oldIndex, newIndex) {
-                        final mediaIds = items.map((m) => m['media_id'] as int).toList();
-                        final item = mediaIds.removeAt(oldIndex);
-                        mediaIds.insert(newIndex > oldIndex ? newIndex - 1 : newIndex, item);
-                        ref.read(userListsProvider.notifier).reorderItems(widget.listId, mediaIds);
-                      },
-                      buildDefaultDragHandles: false,
                       children: [
                         for (final item in items)
                           _ListGridItem(

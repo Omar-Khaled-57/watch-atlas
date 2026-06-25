@@ -19,7 +19,7 @@ class StatusDropdown extends StatelessWidget {
       decoration: InputDecoration(
         labelText: 'Watch Status',
         border: OutlineInputBorder(
-          borderRadius: BorderRadiusDirectional.all(
+          borderRadius: BorderRadius.all(
             Radius.circular(12),
           ),
         ),

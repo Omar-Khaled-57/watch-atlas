@@ -53,7 +53,9 @@ class UserMediaNotifier extends StateNotifier<AsyncValue<List<UserMediaModel>>> 
   }
 
   int get totalEpisodesWatched {
-    return state.value?.fold(0, (int sum, m) => sum + m.episodeProgress) ?? 0;
+    final list = state.value;
+    if (list == null) return 0;
+    return list.fold(0, (int sum, m) => sum + m.episodeProgress);
   }
 
   int get totalHours {

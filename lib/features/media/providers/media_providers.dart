@@ -4,6 +4,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../models/media_model.dart';
 import '../../../models/review_model.dart';
+import '../../../core/models/media_enums.dart';
 
 final mediaIdProvider = StateProvider<int?>((ref) => null);
 

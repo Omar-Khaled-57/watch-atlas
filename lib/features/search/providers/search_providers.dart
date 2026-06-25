@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../models/media_model.dart';
+import '../../../core/models/media_enums.dart';
 
 final searchQueryProvider = StateProvider<String>((ref) => '');
 

@@ -6,7 +6,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/extensions/number_extensions.dart';
 import '../../core/models/media_enums.dart';
-import '../../core/widgets/poster_card.dart';
+import '../../core/extensions/string_extensions.dart';
 import 'providers/media_providers.dart';
 import 'widgets/cast_card.dart';
 import 'widgets/media_stats.dart';
@@ -380,7 +380,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
 
   Widget _buildTitleSection(BuildContext context, media) {
     return Padding(
-      padding: EdgeInsetsDirectional.only(start: posterUrl != null ? 116 : 0),
+      padding: EdgeInsetsDirectional.only(start: media.posterPath != null ? 116 : 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -702,12 +702,35 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
               final item = items[index];
               return SizedBox(
                 width: AppConstants.posterWidth,
-                child: PosterCard(
-                  title: item.title,
-                  imageUrl: item.posterPath != null
-                      ? '${AppConstants.tmdbImageBaseUrl}/w342${item.posterPath}'
-                      : null,
+                child: GestureDetector(
                   onTap: () {},
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadiusDirectional.all(Radius.circular(8)),
+                          child: item.posterPath != null
+                              ? CachedNetworkImage(
+                                  imageUrl: '${AppConstants.tmdbImageBaseUrl}/w342${item.posterPath}',
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                )
+                              : Container(
+                                  color: context.colorScheme.surfaceContainerHighest,
+                                  child: Icon(Icons.movie_outlined, size: 32),
+                                ),
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        item.title ?? '',
+                        style: context.textTheme.bodySmall,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               );
             },

@@ -90,12 +90,12 @@ class _CreateListDialogState extends ConsumerState<CreateListDialog> {
                   padding: const EdgeInsetsDirectional.only(bottom: 8),
                   child: InkWell(
                     onTap: () => setState(() => _selectedType = type),
-                    borderRadius: BorderRadiusDirectional.all(Radius.circular(10)),
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
                     child: Container(
                       padding: const EdgeInsetsDirectional.symmetric(vertical: 12, horizontal: 16),
                       decoration: BoxDecoration(
                         color: isSelected ? colorScheme.primary.withValues(alpha: 0.1) : null,
-                        borderRadius: BorderRadiusDirectional.all(Radius.circular(10)),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
                         border: Border.all(
                           color: isSelected ? colorScheme.primary : colorScheme.outline,
                         ),

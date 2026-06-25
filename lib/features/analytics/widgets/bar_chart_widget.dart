@@ -107,9 +107,9 @@ class BarChartWidget extends StatelessWidget {
                   toY: entry.value.value,
                   color: color,
                   width: data.length > 10 ? 12 : 20,
-                  borderRadius: BorderRadiusDirectional.only(
-                    topStart: Radius.circular(4),
-                    topEnd: Radius.circular(4),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(4),
+                    topRight: Radius.circular(4),
                   ),
                 ),
               ],

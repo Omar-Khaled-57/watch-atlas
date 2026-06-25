@@ -1,21 +1,29 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar/isar.dart';
 
 import '../../../core/models/media_enums.dart';
-import '../../../core/services/isar_service.dart';
+import '../../../core/providers/app_providers.dart';
 import '../../../models/media_model.dart';
 import '../../../models/user_media_model.dart';
 
-final isarServiceProvider = Provider<IsarService>((ref) => IsarService.instance);
-
 final allUserMediaProvider = FutureProvider<List<UserMediaModel>>((ref) async {
-  final isar = IsarService.instance.db;
-  return await isar.userMedia.where().findAll();
+  final supabase = ref.watch(supabaseServiceProvider);
+  final auth = ref.watch(authServiceProvider);
+  if (auth.userId.isEmpty) return [];
+  final response = await supabase.userMedia
+      .select()
+      .eq('user_id', auth.userId)
+      .order('updated_at', ascending: false);
+  return (response as List<dynamic>)
+      .map((json) => UserMediaModel.fromJson(json as Map<String, dynamic>))
+      .toList();
 });
 
 final allMediaProvider = FutureProvider<List<MediaModel>>((ref) async {
-  final isar = IsarService.instance.db;
-  return await isar.media.where().findAll();
+  final supabase = ref.watch(supabaseServiceProvider);
+  final response = await supabase.media.select().limit(100);
+  return (response as List<dynamic>)
+      .map((json) => MediaModel.fromJson(json as Map<String, dynamic>))
+      .toList();
 });
 
 final watchStatisticsProvider = FutureProvider<WatchStatistics>((ref) async {

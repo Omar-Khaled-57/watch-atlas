@@ -114,7 +114,13 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
               ),
               builderDelegate: PagedChildBuilderDelegate<MediaModel>(
                 itemBuilder: (context, item, index) => MediaCard(
-                  media: item,
+                  id: item.id,
+                  title: item.title,
+                  posterUrl: item.posterPath != null
+                      ? 'https://image.tmdb.org/t/p/w342${item.posterPath}'
+                      : null,
+                  voteAverage: item.voteAverage,
+                  mediaType: item.mediaType,
                   width: cardWidth,
                   onTap: () => _navigateToDetail(item),
                 ).animate().fadeIn(

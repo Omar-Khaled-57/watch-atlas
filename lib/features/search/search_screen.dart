@@ -129,7 +129,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 separatorBuilder: (_, __) => SizedBox(width: 8),
                 itemBuilder: (context, index) {
                   final item = searchHistory[index];
-                  return Chip(
+                  return InputChip(
                     label: Text(item),
                     deleteIcon: Icon(Icons.close, size: 16),
                     onDeleted: () {

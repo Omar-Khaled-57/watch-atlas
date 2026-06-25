@@ -46,7 +46,6 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen>
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(userMediaProvider);
-          await ref.read(userMediaProvider.future);
         },
         child: CustomScrollView(
           slivers: [

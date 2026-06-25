@@ -8,7 +8,7 @@ import '../../../models/user_model.dart';
 
 final userRoleProvider = Provider<UserRole>((ref) {
   final user = ref.watch(currentUserProvider);
-  return user?.role ?? UserRole.user;
+  return user.valueOrNull?.role ?? UserRole.user;
 });
 
 final isModeratorProvider = Provider<bool>((ref) {
