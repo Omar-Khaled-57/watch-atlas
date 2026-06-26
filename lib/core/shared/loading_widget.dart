@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../constants/dimensions.dart';
+
 class ShimmerCard extends StatelessWidget {
   final double width;
   final double height;
@@ -51,16 +53,16 @@ class ShimmerMediaRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsetsDirectional.only(start: 16, end: 16, bottom: 12),
+            padding: const EdgeInsetsDirectional.only(start: Spacing.lg, end: Spacing.lg, bottom: Spacing.md),
             child: _ShimmerLine(width: 160, height: 20),
           ),
           Expanded(
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsetsDirectional.only(start: 12, end: 12),
+              padding: const EdgeInsetsDirectional.only(start: Spacing.md, end: Spacing.md),
               itemCount: itemCount,
               itemBuilder: (context, index) => Padding(
-                padding: const EdgeInsetsDirectional.only(end: 8),
+                padding: const EdgeInsetsDirectional.only(end: Spacing.sm),
                 child: ShimmerCard(width: cardWidth, height: cardHeight),
               ),
             ),
@@ -93,29 +95,29 @@ class ShimmerDetailsPage extends StatelessWidget {
               color: baseColor,
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.all(16),
+              padding: const EdgeInsetsDirectional.all(Spacing.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _ShimmerLine(width: 280, height: 28),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: Spacing.sm),
                   _ShimmerLine(width: 200, height: 16),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: Spacing.lg),
                   _ShimmerLine(width: double.infinity, height: 14),
                   const SizedBox(height: 6),
                   _ShimmerLine(width: double.infinity, height: 14),
                   const SizedBox(height: 6),
                   _ShimmerLine(width: 180, height: 14),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: Spacing.xl),
                   _ShimmerLine(width: 120, height: 20),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: Spacing.md),
                   SizedBox(
                     height: 160,
                     child: Row(
                       children: List.generate(
                         3,
                         (index) => Padding(
-                          padding: const EdgeInsetsDirectional.only(end: 12),
+                          padding: const EdgeInsetsDirectional.only(end: Spacing.md),
                           child: Container(
                             width: 100,
                             height: 160,
@@ -174,7 +176,7 @@ class FullScreenLoader extends StatelessWidget {
         children: [
           CircularProgressIndicator(color: colorScheme.primary),
           if (message != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: Spacing.lg),
             Text(
               message!,
               style: textTheme.bodyMedium?.copyWith(
@@ -208,7 +210,7 @@ class ErrorWidgetView extends StatelessWidget {
 
     return Center(
       child: Padding(
-        padding: const EdgeInsetsDirectional.all(32),
+        padding: const EdgeInsetsDirectional.all(Spacing.xxl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -217,7 +219,7 @@ class ErrorWidgetView extends StatelessWidget {
               size: 64,
               color: colorScheme.error,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: Spacing.lg),
             Text(
               message,
               style: textTheme.titleMedium?.copyWith(
@@ -226,7 +228,7 @@ class ErrorWidgetView extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             if (detail != null) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: Spacing.sm),
               Text(
                 detail!,
                 style: textTheme.bodySmall?.copyWith(
@@ -236,7 +238,7 @@ class ErrorWidgetView extends StatelessWidget {
               ),
             ],
             if (onRetry != null) ...[
-              const SizedBox(height: 24),
+              const SizedBox(height: Spacing.xl),
               FilledButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh_rounded),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/models/media_enums.dart';
 import '../../models/user_media_model.dart';
@@ -43,6 +44,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen>
     final crossAxisCount = isDesktop ? 5 : isTablet ? 4 : 3;
 
     return Scaffold(
+      appBar: AppBar(title: const Text('Tracking')),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(userMediaProvider);
@@ -51,22 +53,10 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen>
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsetsDirectional.only(
-                  start: 16,
-                  end: 16,
-                  top: MediaQuery.of(context).padding.top + 16,
-                  bottom: 8,
-                ),
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'My Tracking',
-                      style: textTheme.headlineMedium?.copyWith(
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
                     _StatsRow(stats: stats, colorScheme: colorScheme, textTheme: textTheme),
                   ],
                 ),
@@ -75,7 +65,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen>
             if (recentlyUpdated.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 4),
+                  padding: const EdgeInsetsDirectional.fromSTEB(Spacing.lg, Spacing.sm, Spacing.lg, Spacing.xs),
                   child: Text(
                     'Recently Updated',
                     style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant),
@@ -90,7 +80,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen>
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsetsDirectional.fromSTEB(12, 0, 12, 8),
                     itemCount: recentlyUpdated.length,
-                    separatorBuilder: (context, index) => const SizedBox(width: 8),
+                    separatorBuilder: (context, index) => const SizedBox(width: Spacing.sm),
                     itemBuilder: (context, index) {
                       final item = recentlyUpdated[index];
                       return SizedBox(
@@ -99,7 +89,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen>
                           userMedia: item,
                           title: 'Media #${item.mediaId}',
                           posterUrl: null,
-                          onTap: () => _navigateToDetail(item.mediaId),
+                          onTap: () => _navigateToDetail(item.mediaId, item.mediaType),
                           onLongPress: () => _showQuickStatus(context, item),
                         ),
                       );
@@ -152,8 +142,8 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen>
     );
   }
 
-  void _navigateToDetail(int mediaId) {
-    context.push('/media/$mediaId');
+  void _navigateToDetail(int mediaId, MediaType mediaType) {
+    context.push('/media/${mediaType.name}/$mediaId');
   }
 }
 
@@ -263,7 +253,7 @@ class _MediaGrid extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Center(
         child: Padding(
-          padding: const EdgeInsetsDirectional.all(32),
+          padding: const EdgeInsetsDirectional.all(Spacing.xxl),
           child: Text('Failed to load tracking data', style: textTheme.bodyMedium?.copyWith(color: colorScheme.error)),
         ),
       ),
@@ -272,12 +262,12 @@ class _MediaGrid extends ConsumerWidget {
         if (filtered.isEmpty) {
           return Center(
             child: Padding(
-              padding: const EdgeInsetsDirectional.all(48),
+              padding: const EdgeInsetsDirectional.all(Spacing.section),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.inbox_rounded, size: 64, color: colorScheme.onSurfaceVariant),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: Spacing.lg),
                   Text(
                     'No media in this list',
                     style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
@@ -288,15 +278,15 @@ class _MediaGrid extends ConsumerWidget {
           );
         }
         return Padding(
-          padding: const EdgeInsetsDirectional.all(12),
+          padding: const EdgeInsetsDirectional.all(Spacing.md),
           child: GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
               childAspectRatio: 0.6,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
+            crossAxisSpacing: Spacing.sm,
+            mainAxisSpacing: Spacing.sm,
             ),
             itemCount: filtered.length,
             itemBuilder: (context, index) {
@@ -304,7 +294,7 @@ class _MediaGrid extends ConsumerWidget {
               return ProgressCard(
                 userMedia: item,
                 title: 'Media #${item.mediaId}',
-                onTap: () => context.push('/media/${item.mediaId}'),
+                onTap: () => context.push('/media/${item.mediaType.name}/${item.mediaId}'),
                 onLongPress: () {
                   showDialog(
                     context: context,

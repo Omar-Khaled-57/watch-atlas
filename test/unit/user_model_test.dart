@@ -9,15 +9,15 @@ void main() {
         'id': 'user_1',
         'email': 'test@example.com',
         'username': 'testuser',
-        'displayName': 'Test User',
-        'avatarUrl': 'https://example.com/avatar.jpg',
+        'display_name': 'Test User',
+        'avatar_url': 'https://example.com/avatar.jpg',
         'bio': 'A test user',
         'role': 'user',
-        'isVerified': true,
-        'followersCount': 10,
-        'followingCount': 5,
-        'listsCount': 3,
-        'reviewsCount': 2,
+        'is_verified': true,
+        'followers_count': 10,
+        'following_count': 5,
+        'lists_count': 3,
+        'reviews_count': 2,
       };
 
       final model = UserModel.fromJson(json);

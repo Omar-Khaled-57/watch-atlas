@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/constants/dimensions.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../models/review_model.dart';
 
@@ -19,7 +20,7 @@ class ReviewCard extends StatelessWidget {
     return Card(
       margin: EdgeInsetsDirectional.only(bottom: 12),
       child: Padding(
-        padding: EdgeInsetsDirectional.all(16),
+        padding: EdgeInsetsDirectional.all(Spacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -48,7 +49,7 @@ class ReviewCard extends StatelessWidget {
                           color: context.colorScheme.onSurfaceVariant,
                         ),
                 ),
-                SizedBox(width: 12),
+                SizedBox(width: Spacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,7 +123,7 @@ class ReviewCard extends StatelessWidget {
                   ),
                 ),
               ),
-            SizedBox(height: 8),
+            SizedBox(height: Spacing.sm),
             Text(
               review.content,
               maxLines: 6,
@@ -131,7 +132,7 @@ class ReviewCard extends StatelessWidget {
                 height: 1.5,
               ),
             ),
-            SizedBox(height: 8),
+            SizedBox(height: Spacing.sm),
             Row(
               children: [
                 Icon(
@@ -139,20 +140,20 @@ class ReviewCard extends StatelessWidget {
                   size: 16,
                   color: context.colorScheme.onSurfaceVariant,
                 ),
-                SizedBox(width: 4),
+                SizedBox(width: Spacing.xs),
                 Text(
                   '${review.likesCount}',
                   style: context.textTheme.labelSmall?.copyWith(
                     color: context.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                SizedBox(width: 16),
+                SizedBox(width: Spacing.lg),
                 Icon(
                   Icons.chat_bubble_outline_rounded,
                   size: 16,
                   color: context.colorScheme.onSurfaceVariant,
                 ),
-                SizedBox(width: 4),
+                SizedBox(width: Spacing.xs),
                 Text(
                   '${review.commentsCount}',
                   style: context.textTheme.labelSmall?.copyWith(

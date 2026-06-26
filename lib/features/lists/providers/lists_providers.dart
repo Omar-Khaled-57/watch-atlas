@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/media_enums.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/services/supabase_service.dart';
+import '../../../models/media_model.dart';
 import '../../../models/user_list_model.dart';
 
 class UserListsNotifier extends StateNotifier<AsyncValue<List<UserListModel>>> {
@@ -23,6 +25,7 @@ class UserListsNotifier extends StateNotifier<AsyncValue<List<UserListModel>>> {
           .toList();
       state = AsyncValue.data(list);
     } catch (e) {
+      debugPrint('Failed to load lists: $e');
       state = AsyncValue.data([]);
     }
   }
@@ -84,12 +87,33 @@ class UserListsNotifier extends StateNotifier<AsyncValue<List<UserListModel>>> {
     } catch (_) {}
   }
 
-  Future<void> addItemToList(String listId, int mediaId, MediaType mediaType, {String? note}) async {
+  Future<void> addItemToList(String listId, MediaModel media, {String? note}) async {
     try {
+      await _supabase.media.upsert({
+        'id': media.id,
+        'media_type': media.mediaType.name,
+        'title': media.title,
+        'original_title': media.originalTitle,
+        'overview': media.overview,
+        'poster_path': media.posterPath,
+        'backdrop_path': media.backdropPath,
+        'vote_average': media.voteAverage,
+        'vote_count': media.voteCount,
+        'popularity': media.popularity,
+        'release_date': media.releaseDate?.toIso8601String(),
+        'runtime': media.runtime,
+        'genres': media.genres,
+        'countries': media.countries,
+        'status': media.status,
+        'language': media.language,
+        'adult': media.adult,
+        'total_episodes': media.totalEpisodes,
+        'total_seasons': media.totalSeasons,
+        'updated_at': DateTime.now().toIso8601String(),
+      });
       await _supabase.listItems.insert({
         'list_id': listId,
-        'media_id': mediaId,
-        'media_type': mediaType.name,
+        'media_id': media.id,
         'note': note,
         'sort_order': 0,
       });
@@ -103,7 +127,9 @@ class UserListsNotifier extends StateNotifier<AsyncValue<List<UserListModel>>> {
         current[index] = updated;
         state = AsyncValue.data(List.from(current));
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Failed to add item to list: $e');
+    }
   }
 
   Future<void> removeItemFromList(String listId, int mediaId) async {
@@ -174,4 +200,45 @@ final listItemsProvider = FutureProvider.family<List<Map<String, dynamic>>, Stri
   } catch (_) {
     return [];
   }
+});
+
+final listsSearchProvider = StateProvider<String>((ref) => '');
+
+final allListItemsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final supabase = ref.watch(supabaseServiceProvider);
+  final userId = ref.watch(authServiceProvider).userId;
+  try {
+    final listIdsResponse = await supabase.userLists
+        .select('id')
+        .eq('user_id', userId);
+    final listIds = (listIdsResponse as List<dynamic>).map((j) => j['id'] as String).toList();
+    if (listIds.isEmpty) return [];
+    final allItems = <Map<String, dynamic>>[];
+    for (final lid in listIds) {
+      final response = await supabase.listItems
+          .select()
+          .eq('list_id', lid)
+          .order('sort_order', ascending: true);
+      allItems.addAll((response as List<dynamic>).cast<Map<String, dynamic>>());
+    }
+    return allItems;
+  } catch (_) {
+    return [];
+  }
+});
+
+final totalTitlesProvider = Provider<int>((ref) {
+  final lists = ref.watch(userListsProvider).valueOrNull ?? [];
+  return lists.fold(0, (sum, l) => sum + l.itemCount);
+});
+
+final listCategoriesProvider = FutureProvider.family<List<String>, String>((ref, listId) async {
+  final items = await ref.watch(listItemsProvider(listId).future);
+  final categories = items.map((item) => item['media_type'] as String? ?? 'unknown').toSet();
+  final ordered = <String>[];
+  if (categories.contains('tv')) ordered.add('TV Shows');
+  if (categories.contains('movie')) ordered.add('Movies');
+  if (categories.contains('anime')) ordered.add('Anime');
+  ordered.addAll(categories.where((c) => c != 'tv' && c != 'movie' && c != 'anime').map((c) => c[0].toUpperCase() + c.substring(1)));
+  return ordered;
 });

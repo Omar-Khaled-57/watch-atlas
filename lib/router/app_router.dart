@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../core/providers/app_providers.dart';
 import '../features/auth/auth_screen.dart';
+import '../features/auth/providers/auth_providers.dart';
+import '../features/splash/splash_screen.dart';
 import '../features/analytics/analytics_screen.dart';
 import '../features/discover/discover_screen.dart';
 import '../features/home/home_screen.dart';
@@ -15,11 +17,10 @@ import '../features/moderation/moderation_screen.dart';
 import '../features/notifications/notifications_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/profile/edit_profile_screen.dart';
-import '../features/search/search_screen.dart';
-import '../features/search/providers/search_providers.dart';
-import '../features/settings/settings_screen.dart';
-import '../features/social/social_screen.dart';
+import '../features/auth/onboarding_screen.dart';
 import '../features/tracking/tracking_screen.dart';
+import '../features/legal/privacy_screen.dart';
+import '../features/legal/terms_screen.dart';
 
 class _RouterRefreshNotifier extends ChangeNotifier {
   void requestRefresh() {
@@ -33,25 +34,61 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   ref.listen(authStateProvider, (prev, next) {
     refreshNotifier.requestRefresh();
   });
+  ref.listen(authNotifierProvider, (prev, next) {
+    refreshNotifier.requestRefresh();
+  });
+  ref.listen(appInitializationProvider, (prev, next) {
+    refreshNotifier.requestRefresh();
+  });
   ref.onDispose(() => refreshNotifier.dispose());
 
   return GoRouter(
     refreshListenable: refreshNotifier,
-    initialLocation: '/',
+    initialLocation: '/splash',
     debugLogDiagnostics: kDebugMode,
     redirect: (context, state) {
       final init = ref.read(appInitializationProvider);
-      if (init.isLoading || init.hasError) return null;
+      final isSplashRoute = state.matchedLocation == '/splash';
 
-      final auth = ref.read(authStateProvider);
-      final isAuthenticated = auth.valueOrNull ?? false;
+      if (init.isLoading) {
+        if (!isSplashRoute) return '/splash';
+        return null;
+      }
+
+      final authState = ref.read(authNotifierProvider);
+
+      // Auth resolution still in progress — stay on splash
+      if (authState.status == AuthStatus.initial || authState.status == AuthStatus.loading) {
+        if (!isSplashRoute) return '/splash';
+        return null;
+      }
+
+      final isAuthenticated = authState.status == AuthStatus.authenticated;
       final isAuthRoute = state.matchedLocation == '/auth';
+      final location = state.matchedLocation;
+      final isPublicRoute = location == '/privacy' || location == '/terms';
 
-      if (!isAuthenticated && !isAuthRoute) return '/auth';
+      if (isSplashRoute) return isAuthenticated ? '/' : '/auth';
+      if (!isAuthenticated && !isAuthRoute && !isPublicRoute) return '/auth';
       if (isAuthenticated && isAuthRoute) return '/';
+
+      final isOnboardingRoute = state.matchedLocation == '/onboarding';
+      if (isAuthenticated && authState.isNewUser && !isOnboardingRoute) return '/onboarding';
+      if (isOnboardingRoute && !authState.isNewUser) return '/';
+
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/splash',
+        name: 'splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: '/auth',
+        name: 'auth',
+        builder: (context, state) => const AuthScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return ShellScaffold(navigationShell: navigationShell);
@@ -75,28 +112,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   child: const DiscoverScreen(),
                   state: state,
                 ),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/search',
-                name: 'search',
-                pageBuilder: (context, state) => _buildTabTransition(
-                  child: const SearchScreen(),
-                  state: state,
-                ),
-                routes: [
-                  GoRoute(
-                    path: ':query',
-                    name: 'searchQuery',
-                    builder: (context, state) {
-                      final query = Uri.decodeComponent(state.pathParameters['query']!);
-                      return _SearchWithQuery(query: query);
-                    },
-                  ),
-                ],
               ),
             ],
           ),
@@ -132,16 +147,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 ),
                 routes: [
                   GoRoute(
+                    path: 'edit',
+                    name: 'editProfile',
+                    builder: (context, state) => const EditProfileScreen(),
+                  ),
+                  GoRoute(
                     path: ':id',
                     name: 'userProfile',
                     builder: (context, state) => ProfileScreen(
                       userId: state.pathParameters['id'],
                     ),
-                  ),
-                  GoRoute(
-                    path: 'edit',
-                    name: 'editProfile',
-                    builder: (context, state) => const EditProfileScreen(),
                   ),
                 ],
               ),
@@ -150,20 +165,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(
-        path: '/auth',
-        name: 'auth',
-        pageBuilder: (context, state) => _buildPageTransition(
-          child: const AuthScreen(),
-          state: state,
-        ),
-      ),
-      GoRoute(
-        path: '/media/:id',
+        path: '/media/:type/:id',
         name: 'mediaDetail',
         pageBuilder: (context, state) => _buildPageTransition(
           child: MediaDetailsScreen(
             mediaId: state.pathParameters['id']!,
+            mediaType: state.pathParameters['type'] ?? 'movie',
           ),
+          state: state,
+        ),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        name: 'onboarding',
+        pageBuilder: (context, state) => _buildPageTransition(
+          child: const OnboardingScreen(),
           state: state,
         ),
       ),
@@ -176,26 +192,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
-        path: '/social',
-        name: 'social',
-        pageBuilder: (context, state) => _buildPageTransition(
-          child: const SocialScreen(),
-          state: state,
-        ),
-      ),
-      GoRoute(
         path: '/notifications',
         name: 'notifications',
         pageBuilder: (context, state) => _buildPageTransition(
           child: const NotificationsScreen(),
-          state: state,
-        ),
-      ),
-      GoRoute(
-        path: '/settings',
-        name: 'settings',
-        pageBuilder: (context, state) => _buildPageTransition(
-          child: const SettingsScreen(),
           state: state,
         ),
       ),
@@ -214,6 +214,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           child: const ModerationScreen(),
           state: state,
         ),
+      ),
+      GoRoute(
+        path: '/privacy',
+        name: 'privacy',
+        builder: (context, state) => const PrivacyScreen(),
+      ),
+      GoRoute(
+        path: '/terms',
+        name: 'terms',
+        builder: (context, state) => const TermsScreen(),
       ),
     ],
   );
@@ -263,28 +273,6 @@ Page<T> _buildTabTransition<T>({
   );
 }
 
-class _SearchWithQuery extends ConsumerStatefulWidget {
-  final String query;
-
-  const _SearchWithQuery({required this.query});
-
-  @override
-  ConsumerState<_SearchWithQuery> createState() => _SearchWithQueryState();
-}
-
-class _SearchWithQueryState extends ConsumerState<_SearchWithQuery> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() {
-      ref.read(searchQueryProvider.notifier).state = widget.query;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) => const SearchScreen();
-}
-
 class ShellScaffold extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
@@ -293,7 +281,6 @@ class ShellScaffold extends StatelessWidget {
   static const _destinations = (
     home: _NavDest(Icons.home_rounded, Icons.home_outlined, 'Home'),
     discover: _NavDest(Icons.explore_rounded, Icons.explore_outlined, 'Discover'),
-    search: _NavDest(Icons.search_rounded, Icons.search_off_outlined, 'Search'),
     lists: _NavDest(Icons.folder_rounded, Icons.folder_outlined, 'Lists'),
     profile: _NavDest(Icons.person_rounded, Icons.person_outlined, 'Profile'),
   );
@@ -301,7 +288,6 @@ class ShellScaffold extends StatelessWidget {
   static final _navItems = [
     _destinations.home,
     _destinations.discover,
-    _destinations.search,
     _destinations.lists,
     _destinations.profile,
   ];
@@ -335,7 +321,10 @@ class _MobileShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: navigationShell,
+      body: SafeArea(
+        bottom: false,
+        child: navigationShell,
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: (index) {
@@ -366,7 +355,6 @@ class _DesktopShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return SafeArea(
       child: Row(
         children: [
@@ -381,18 +369,31 @@ class _DesktopShell extends StatelessWidget {
             labelType: NavigationRailLabelType.all,
             leading: Padding(
               padding: const EdgeInsetsDirectional.only(bottom: 16),
-              child: Icon(
-                Icons.explore_rounded,
-                color: colorScheme.primary,
-                size: 32,
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF8B5CF6).withValues(alpha: 0.3),
+                      blurRadius: 12,
+                    ),
+                  ],
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Image.asset(
+                  'assets/images/logo/logo.png',
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
-            trailing: Padding(
+              trailing: Padding(
               padding: const EdgeInsetsDirectional.only(top: 16),
-              child: IconButton(
-                icon: const Icon(Icons.settings_outlined),
-                onPressed: () => context.go('/settings'),
-                tooltip: 'Settings',
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                ],
               ),
             ),
             destinations: ShellScaffold._navItems.map((item) {

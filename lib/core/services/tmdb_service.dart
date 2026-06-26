@@ -78,6 +78,12 @@ class TmdbService {
   Future<Map<String, dynamic>> discoverTv({Map<String, dynamic>? filters}) async =>
       get(ApiEndpoints.discoverTv, params: filters);
 
+  Future<Map<String, dynamic>> searchMovie(String query, {int page = 1}) async =>
+      get(ApiEndpoints.searchMovie, params: {'query': query, 'page': page});
+
+  Future<Map<String, dynamic>> searchTv(String query, {int page = 1}) async =>
+      get(ApiEndpoints.searchTv, params: {'query': query, 'page': page});
+
   Future<Map<String, dynamic>> personDetails(int id) async =>
       get(ApiEndpoints.personDetails.replaceFirst('{id}', id.toString()),
           params: {'append_to_response': 'movie_credits,tv_credits'});

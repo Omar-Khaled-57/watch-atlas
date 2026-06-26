@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../constants/dimensions.dart';
+
 class RatingDisplay extends StatelessWidget {
   final double rating;
   final int? voteCount;
@@ -102,7 +104,7 @@ class _StarRating extends StatelessWidget {
           ),
         ),
         if (voteCount != null) ...[
-          const SizedBox(width: 4),
+          const SizedBox(width: Spacing.xs),
           Text(
             '($voteCount)',
             style: textTheme.bodySmall?.copyWith(

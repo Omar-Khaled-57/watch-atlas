@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/models/media_enums.dart';
 import '../../core/shared/loading_widget.dart';
@@ -46,12 +47,12 @@ class _ModerationScreenState extends ConsumerState<ModerationScreen>
                 size: 64,
                 color: context.colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: Spacing.lg),
               Text(
                 'Access Denied',
                 style: context.textTheme.titleLarge,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: Spacing.sm),
               Text(
                 'You do not have moderator permissions.',
                 style: context.textTheme.bodyMedium?.copyWith(
@@ -107,9 +108,9 @@ class _ReportsTab extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.check_circle_outline_rounded, size: 64, color: cs.onSurfaceVariant),
-                const SizedBox(height: 16),
+                const SizedBox(height: Spacing.lg),
                 Text('No pending reports', style: tt.titleMedium),
-                const SizedBox(height: 8),
+                const SizedBox(height: Spacing.sm),
                 Text('All clear!', style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
               ],
             ),
@@ -119,9 +120,9 @@ class _ReportsTab extends ConsumerWidget {
         return RefreshIndicator(
           onRefresh: () async => ref.invalidate(reportsProvider),
           child: ListView.separated(
-            padding: const EdgeInsetsDirectional.all(16),
+            padding: const EdgeInsetsDirectional.all(Spacing.lg),
             itemCount: reports.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            separatorBuilder: (_, __) => const SizedBox(height: Spacing.md),
             itemBuilder: (context, index) {
               final report = reports[index];
               return _ReportCard(report: report);
@@ -152,7 +153,7 @@ class _ReportCard extends ConsumerWidget {
     return Card(
       margin: EdgeInsetsDirectional.zero,
       child: ExpansionTile(
-        tilePadding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 8),
+        tilePadding: const EdgeInsetsDirectional.fromSTEB(Spacing.lg, Spacing.sm, Spacing.lg, Spacing.sm),
         childrenPadding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 16),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadiusDirectional.all(Radius.circular(12)),
@@ -196,7 +197,7 @@ class _ReportCard extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: Spacing.sm),
             Expanded(
               child: Text(
                 _timeAgo(report.createdAt),
@@ -211,23 +212,25 @@ class _ReportCard extends ConsumerWidget {
           if (report.description.isNotEmpty) ...[
             Align(
               alignment: AlignmentDirectional.centerStart,
-              child: Text(
-                report.description,
-                style: tt.bodyMedium,
-              ),
+          child: Text(
+            report.description,
+            maxLines: 6,
+            overflow: TextOverflow.ellipsis,
+            style: tt.bodyMedium,
+          ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: Spacing.md),
           ],
           if (report.reportedUser != null) ...[
             _buildDetailRow(context, 'Reported User', report.reportedUser?['username'] as String? ?? 'Unknown'),
-            const SizedBox(height: 4),
+            const SizedBox(height: Spacing.xs),
           ],
           if (report.mediaId != null) ...[
             _buildDetailRow(context, 'Media ID', report.mediaId.toString()),
-            const SizedBox(height: 4),
+            const SizedBox(height: Spacing.xs),
           ],
           _buildDetailRow(context, 'Reporter', report.reporter?['username'] as String? ?? 'Unknown'),
-          const SizedBox(height: 16),
+          const SizedBox(height: Spacing.lg),
           if (report.status == 'pending')
             Row(
               children: [
@@ -254,6 +257,8 @@ class _ReportCard extends ConsumerWidget {
           width: 120,
           child: Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 12,
               color: cs.onSurfaceVariant,
@@ -264,6 +269,8 @@ class _ReportCard extends ConsumerWidget {
         Expanded(
           child: Text(
             value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(fontSize: 12, color: cs.onSurface),
           ),
         ),
@@ -302,18 +309,18 @@ class _ActionSheet extends ConsumerWidget {
     final tt = Theme.of(context).textTheme;
 
     return Padding(
-      padding: const EdgeInsetsDirectional.all(24),
+      padding: const EdgeInsetsDirectional.all(Spacing.xl),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Take Action', style: tt.titleLarge),
-          const SizedBox(height: 4),
+          const SizedBox(height: Spacing.xs),
           Text(
             '${report.reasonLabel} - ${report.mediaId != null ? "Content Report" : "User Report"}',
             style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: Spacing.xl),
           _ActionButton(
             icon: Icons.warning_amber_rounded,
             color: Colors.orange,
@@ -327,7 +334,7 @@ class _ActionSheet extends ConsumerWidget {
               if (context.mounted) Navigator.of(context).pop();
             },
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: Spacing.sm),
           _ActionButton(
             icon: Icons.visibility_off_rounded,
             color: Colors.blue,
@@ -341,7 +348,7 @@ class _ActionSheet extends ConsumerWidget {
               if (context.mounted) Navigator.of(context).pop();
             },
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: Spacing.sm),
           _ActionButton(
             icon: Icons.delete_forever_rounded,
             color: Colors.redAccent,
@@ -372,7 +379,7 @@ class _ActionSheet extends ConsumerWidget {
               }
             },
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: Spacing.sm),
           _ActionButton(
             icon: Icons.block_rounded,
             color: Colors.red,
@@ -404,7 +411,7 @@ class _ActionSheet extends ConsumerWidget {
               }
             },
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: Spacing.xl),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
@@ -412,7 +419,7 @@ class _ActionSheet extends ConsumerWidget {
               child: const Text('Cancel'),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: Spacing.sm),
         ],
       ),
     );
@@ -457,15 +464,17 @@ class _ActionButton extends StatelessWidget {
                 ),
                 child: Icon(icon, color: color, size: 22),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: Spacing.lg),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(label, style: tt.titleSmall),
+                    Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: tt.titleSmall),
                     const SizedBox(height: 2),
                     Text(
                       description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                     ),
                   ],
@@ -501,7 +510,7 @@ class _UsersTab extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.people_outline_rounded, size: 64, color: cs.onSurfaceVariant),
-                const SizedBox(height: 16),
+                const SizedBox(height: Spacing.lg),
                 Text('No users found', style: tt.titleMedium),
               ],
             ),
@@ -514,19 +523,19 @@ class _UsersTab extends ConsumerWidget {
         return RefreshIndicator(
           onRefresh: () async => ref.invalidate(reportedUsersProvider),
           child: ListView(
-            padding: const EdgeInsetsDirectional.all(16),
+            padding: const EdgeInsetsDirectional.all(Spacing.lg),
             children: [
               if (moderators.isNotEmpty) ...[
                 Text('Staff', style: tt.titleSmall?.copyWith(color: cs.onSurfaceVariant)),
-                const SizedBox(height: 8),
+                const SizedBox(height: Spacing.sm),
                 ...moderators.map((user) => Padding(
                   padding: const EdgeInsetsDirectional.only(bottom: 8),
                   child: _UserCard(user: user),
                 )),
-                const SizedBox(height: 16),
+                const SizedBox(height: Spacing.lg),
               ],
               Text('Users', style: tt.titleSmall?.copyWith(color: cs.onSurfaceVariant)),
-              const SizedBox(height: 8),
+              const SizedBox(height: Spacing.sm),
               ...regularUsers.map((user) => Padding(
                 padding: const EdgeInsetsDirectional.only(bottom: 8),
                 child: _UserCard(user: user),
@@ -558,7 +567,7 @@ class _UserCard extends StatelessWidget {
     return Card(
       margin: EdgeInsetsDirectional.zero,
       child: ListTile(
-        contentPadding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 8),
+        contentPadding: const EdgeInsetsDirectional.fromSTEB(Spacing.lg, Spacing.sm, Spacing.lg, Spacing.sm),
         leading: CircleAvatar(
           radius: 24,
           backgroundColor: cs.surfaceContainerHighest,

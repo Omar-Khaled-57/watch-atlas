@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/isar_service.dart';
 import '../services/supabase_service.dart';
@@ -36,19 +35,23 @@ final currentUserProvider = FutureProvider<UserModel?>((ref) async {
 });
 
 final isAuthenticatedProvider = Provider<bool>((ref) {
-  return ref.watch(authServiceProvider).isAuthenticated;
+  final service = ref.watch(authServiceProvider);
+  ref.watch(authStateProvider);
+  return service.isAuthenticated;
 });
 
 final appInitializationProvider = FutureProvider<void>((ref) async {
-  await SupabaseService.instance.init();
-  TmdbService.instance.init();
-  AnilistService.instance.init();
-  await IsarService.instance.init();
-  ConnectivityService.instance.init();
-  SyncService.instance.init();
+  const timeout = Duration(seconds: 10);
+
   try {
-    await NotificationService.instance.init();
-  } catch (e) {
-    debugPrint('Notification init skipped: $e');
-  }
+    await Future.wait([
+      IsarService.instance.init().timeout(timeout).catchError((_) {}),
+      NotificationService.instance.init().timeout(timeout).catchError((_) {}),
+    ]);
+  } catch (_) {}
+
+  try { TmdbService.instance.init(); } catch (_) {}
+  try { AnilistService.instance.init(); } catch (_) {}
+  try { ConnectivityService.instance.init(); } catch (_) {}
+  try { SyncService.instance.init(); } catch (_) {}
 });

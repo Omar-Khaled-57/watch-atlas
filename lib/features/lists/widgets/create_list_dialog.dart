@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/constants/dimensions.dart';
 import '../../../core/models/media_enums.dart';
 import '../providers/lists_providers.dart';
 
@@ -47,9 +48,15 @@ class _CreateListDialogState extends ConsumerState<CreateListDialog> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
+    final isWide = MediaQuery.of(context).size.width > 600;
+
     return Dialog(
+      constraints: BoxConstraints(
+        maxWidth: isWide ? 480 : double.infinity,
+        minWidth: isWide ? 0 : double.infinity,
+      ),
       child: Padding(
-        padding: const EdgeInsetsDirectional.all(24),
+        padding: const EdgeInsetsDirectional.all(Spacing.xl),
         child: Form(
           key: _formKey,
           child: Column(
@@ -60,7 +67,7 @@ class _CreateListDialogState extends ConsumerState<CreateListDialog> {
                 widget.editId != null ? 'Edit List' : 'Create List',
                 style: textTheme.titleLarge?.copyWith(color: colorScheme.onSurface),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: Spacing.xl),
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(
@@ -69,7 +76,7 @@ class _CreateListDialogState extends ConsumerState<CreateListDialog> {
                 ),
                 validator: (v) => (v == null || v.trim().isEmpty) ? 'Title is required' : null,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: Spacing.lg),
               TextFormField(
                 controller: _descriptionController,
                 decoration: const InputDecoration(
@@ -83,7 +90,7 @@ class _CreateListDialogState extends ConsumerState<CreateListDialog> {
                 'Visibility',
                 style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: Spacing.sm),
               ...MediaListType.values.map((type) {
                 final isSelected = _selectedType == type;
                 return Padding(
@@ -111,7 +118,7 @@ class _CreateListDialogState extends ConsumerState<CreateListDialog> {
                             size: 20,
                             color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: Spacing.md),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,7 +154,7 @@ class _CreateListDialogState extends ConsumerState<CreateListDialog> {
                       child: const Text('Cancel'),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: Spacing.md),
                   Expanded(
                     child: FilledButton(
                       onPressed: _submit,
@@ -173,7 +180,7 @@ class _CreateListDialogState extends ConsumerState<CreateListDialog> {
           : _descriptionController.text.trim(),
       listType: _selectedType,
     );
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(true);
   }
 
   String _typeDescription(MediaListType type) {

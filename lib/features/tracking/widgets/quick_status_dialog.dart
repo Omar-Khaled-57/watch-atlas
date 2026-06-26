@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/constants/dimensions.dart';
 import '../../../core/models/media_enums.dart';
 import '../../../models/user_media_model.dart';
 import '../providers/tracking_providers.dart';
@@ -16,7 +17,7 @@ class QuickStatusDialog extends ConsumerWidget {
 
     return Dialog(
       child: Padding(
-        padding: const EdgeInsetsDirectional.all(24),
+        padding: const EdgeInsetsDirectional.all(Spacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,7 +55,7 @@ class QuickStatusDialog extends ConsumerWidget {
                           size: 20,
                           color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: Spacing.md),
                         Text(
                           _statusLabel(status),
                           style: textTheme.bodyMedium?.copyWith(
@@ -71,7 +72,7 @@ class QuickStatusDialog extends ConsumerWidget {
                 ),
               );
             }),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.sm),
             SizedBox(
               width: double.infinity,
               child: TextButton(

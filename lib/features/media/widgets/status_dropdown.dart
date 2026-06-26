@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/extensions/context_extensions.dart';
+import '../../../core/constants/dimensions.dart';
 import '../../../core/models/media_enums.dart';
 
 class StatusDropdown extends StatelessWidget {
@@ -47,7 +47,7 @@ class StatusDropdown extends StatelessWidget {
                   size: 18,
                   color: _statusColor(status, context),
                 ),
-                SizedBox(width: 12),
+                SizedBox(width: Spacing.md),
                 Text(_statusLabel(status)),
               ],
             ),

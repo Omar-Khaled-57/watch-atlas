@@ -2,8 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/media_enums.dart';
 import '../../../core/providers/app_providers.dart';
-import '../../../core/services/supabase_service.dart';
-import '../../../models/media_model.dart';
 import '../../../models/user_model.dart';
 
 final userRoleProvider = Provider<UserRole>((ref) {

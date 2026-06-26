@@ -5,8 +5,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
+import '../../core/models/gender.dart';
 import '../../core/providers/app_providers.dart';
+import '../../core/services/auth_service.dart';
+import '../../core/services/supabase_service.dart';
 import 'providers/profile_providers.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
@@ -23,7 +27,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   final _imagePicker = ImagePicker();
 
   String? _avatarPath;
-  String? _bannerPath;
+  Gender? _gender;
+  DateTime? _dateOfBirth;
   bool _isSaving = false;
 
   @override
@@ -35,8 +40,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   Future<void> _loadProfile() async {
     final profile = await ref.read(currentUserProfileProvider.future);
     if (profile != null && mounted) {
-      _displayNameController.text = profile.displayName ?? '';
-      _bioController.text = profile.bio ?? '';
+      setState(() {
+        _displayNameController.text = profile.displayName ?? '';
+        _bioController.text = profile.bio ?? '';
+        _gender = profile.gender;
+        _dateOfBirth = profile.dateOfBirth;
+      });
     }
   }
 
@@ -47,7 +56,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     super.dispose();
   }
 
-  Future<void> _pickImage({required bool banner}) async {
+  Future<void> _pickImage() async {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -79,19 +88,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     final picked = await _imagePicker.pickImage(
       source: source,
-      maxWidth: banner ? 1920 : 512,
-      maxHeight: banner ? 1080 : 512,
+      maxWidth: 512,
+      maxHeight: 512,
       imageQuality: 85,
     );
 
     if (picked != null && mounted) {
-      setState(() {
-        if (banner) {
-          _bannerPath = picked.path;
-        } else {
-          _avatarPath = picked.path;
-        }
-      });
+      setState(() => _avatarPath = picked.path);
     }
   }
 
@@ -101,13 +104,26 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     setState(() => _isSaving = true);
 
     try {
+      final supabase = SupabaseService.instance;
+      final currentUser = AuthService.instance.currentUser;
+      final userId = ref.read(authServiceProvider).userId;
+
       final updates = <String, dynamic>{
+        'email': currentUser?.email ?? '',
+        'username': currentUser?.email?.split('@').first ?? 'user_$userId',
         'display_name': _displayNameController.text.trim(),
         'bio': _bioController.text.trim(),
+        'gender': _gender?.name,
+        'dob': _dateOfBirth?.toIso8601String().split('T').first,
         'updated_at': DateTime.now().toIso8601String(),
       };
 
-      await ref.read(updateProfileProvider(updates).future);
+      if (_avatarPath != null) {
+        updates['avatar_url'] = await supabase.uploadAvatar(userId, _avatarPath!);
+      }
+
+      await AuthService.instance.updateProfile(updates);
+      ref.invalidate(currentUserProfileProvider);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -132,7 +148,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final textTheme = context.textTheme;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
     return Scaffold(
       appBar: AppBar(
@@ -150,162 +166,176 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildBannerPicker(colorScheme),
-              const SizedBox(height: 16),
-              Center(child: _buildAvatarPicker(colorScheme)),
-              const SizedBox(height: 24),
-              Text(
-                'Display Name',
-                style: textTheme.titleSmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _displayNameController,
-                decoration: const InputDecoration(
-                  hintText: 'Enter your display name',
-                  prefixIcon: Icon(Icons.person_rounded),
-                ),
-                textCapitalization: TextCapitalization.words,
-                maxLength: 50,
-                validator: (value) {
-                  if (value != null && value.trim().length > 50) {
-                    return 'Display name must be 50 characters or less';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Bio',
-                style: textTheme.titleSmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _bioController,
-                decoration: const InputDecoration(
-                  hintText: 'Tell others about yourself',
-                  alignLabelWithHint: true,
-                ),
-                maxLines: 5,
-                maxLength: 500,
-                textCapitalization: TextCapitalization.sentences,
-                validator: (value) {
-                  if (value != null && value.trim().length > 500) {
-                    return 'Bio must be 500 characters or less';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _isSaving ? null : _save,
-                  child: _isSaving
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Save Changes'),
-                ),
-              ),
-            ],
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: EdgeInsetsDirectional.symmetric(
+              horizontal: isLandscape ? 40 : 24,
+              vertical: isLandscape ? 24 : 32,
+            ),
+            child: Form(
+              key: _formKey,
+              child: isLandscape
+                  ? _buildLandscapeForm(colorScheme)
+                  : _buildPortraitForm(colorScheme),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildBannerPicker(ColorScheme colorScheme) {
-    return GestureDetector(
-      onTap: () => _pickImage(banner: true),
-      child: ClipRRect(
-        borderRadius: BorderRadiusDirectional.all(Radius.circular(12)),
-        child: SizedBox(
-          width: double.infinity,
-          height: 180,
-          child: _bannerPath != null
-              ? Image.file(
-                  File(_bannerPath!),
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      _buildBannerPlaceholder(colorScheme),
+  Widget _buildPortraitForm(ColorScheme colorScheme) {
+    return Column(
+      children: [
+        Center(
+          child: Padding(
+            padding: const EdgeInsetsDirectional.only(bottom: Spacing.xl),
+            child: _buildAvatarPicker(colorScheme, radius: 72),
+          ),
+        ),
+        ..._buildFormFields(colorScheme),
+      ],
+    );
+  }
+
+  Widget _buildLandscapeForm(ColorScheme colorScheme) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsetsDirectional.only(top: Spacing.lg),
+          child: _buildAvatarPicker(colorScheme, radius: 56),
+        ),
+        const SizedBox(width: Spacing.xl * 2),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: _buildFormFields(colorScheme),
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildFormFields(ColorScheme colorScheme) {
+    final textTheme = Theme.of(context).textTheme;
+    return [
+      Text('Display Name', style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+      const SizedBox(height: Spacing.sm),
+      TextFormField(
+        controller: _displayNameController,
+        decoration: const InputDecoration(
+          hintText: 'Enter your display name',
+          prefixIcon: Icon(Icons.person_rounded),
+        ),
+        textCapitalization: TextCapitalization.words,
+        maxLength: 50,
+        validator: (value) {
+          if (value != null && value.trim().length > 50) {
+            return 'Display name must be 50 characters or less';
+          }
+          return null;
+        },
+      ),
+      const SizedBox(height: Spacing.xl),
+      Text('Bio', style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+      const SizedBox(height: Spacing.sm),
+      TextFormField(
+        controller: _bioController,
+        decoration: const InputDecoration(
+          hintText: 'Tell others about yourself',
+          alignLabelWithHint: true,
+        ),
+        maxLines: 5,
+        maxLength: 500,
+        textCapitalization: TextCapitalization.sentences,
+        validator: (value) {
+          if (value != null && value.trim().length > 500) {
+            return 'Bio must be 500 characters or less';
+          }
+          return null;
+        },
+      ),
+      const SizedBox(height: Spacing.xl),
+      Text('Gender', style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+      const SizedBox(height: Spacing.sm),
+      DropdownButtonFormField<Gender?>(
+        value: _gender,
+        decoration: const InputDecoration(prefixIcon: Icon(Icons.wc_rounded)),
+        items: [
+          DropdownMenuItem(value: null, child: Text('Not specified', style: textTheme.bodyMedium)),
+          DropdownMenuItem(value: Gender.male, child: const Text('Male')),
+          DropdownMenuItem(value: Gender.female, child: const Text('Female')),
+          DropdownMenuItem(value: Gender.ratherNotSay, child: const Text('Rather not say')),
+        ],
+        onChanged: (value) => setState(() => _gender = value),
+      ),
+      const SizedBox(height: Spacing.xl),
+      Text('Date of Birth', style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+      const SizedBox(height: Spacing.sm),
+      InkWell(
+        onTap: () async {
+          final now = DateTime.now();
+          final picked = await showDatePicker(
+            context: context,
+            initialDate: _dateOfBirth ?? DateTime(now.year - 18),
+            firstDate: DateTime(now.year - 120),
+            lastDate: now,
+            helpText: 'Select date of birth',
+          );
+          if (picked != null) setState(() => _dateOfBirth = picked);
+        },
+        child: InputDecorator(
+          decoration: const InputDecoration(
+            prefixIcon: Icon(Icons.cake_rounded),
+            suffixIcon: Icon(Icons.calendar_month_rounded),
+          ),
+          child: Text(
+            _dateOfBirth != null
+                ? '${_dateOfBirth!.month}/${_dateOfBirth!.day}/${_dateOfBirth!.year}'
+                : 'Select your date of birth',
+            style: textTheme.bodyLarge?.copyWith(
+              color: _dateOfBirth != null ? null : colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ),
+      const SizedBox(height: Spacing.xxl),
+      SizedBox(
+        width: double.infinity,
+        child: FilledButton(
+          onPressed: _isSaving ? null : _save,
+          child: _isSaving
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
                 )
-              : Consumer(builder: (context, ref, child) {
-                  final profile =
-                      ref.watch(currentUserProfileProvider).asData?.value;
-                  if (profile?.bannerUrl != null) {
-                    return CachedNetworkImage(
-                      imageUrl: profile!.bannerUrl!,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) =>
-                          _buildBannerPlaceholder(colorScheme),
-                      errorWidget: (context, url, error) =>
-                          _buildBannerPlaceholder(colorScheme),
-                    );
-                  }
-                  return _buildBannerPlaceholder(colorScheme);
-                }),
+              : const Text('Save Changes'),
         ),
       ),
-    );
+    ];
   }
 
-  Widget _buildBannerPlaceholder(ColorScheme colorScheme) {
-    return Container(
-      color: colorScheme.surfaceContainerHighest,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.add_photo_alternate_rounded,
-              size: 40,
-              color: colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tap to change banner',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: colorScheme.onSurfaceVariant),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAvatarPicker(ColorScheme colorScheme) {
+  Widget _buildAvatarPicker(ColorScheme colorScheme, {double radius = 48}) {
+    final diameter = radius * 2;
     return GestureDetector(
-      onTap: () => _pickImage(banner: false),
+      onTap: () => _pickImage(),
       child: Stack(
         children: [
           CircleAvatar(
-            radius: 48,
+            radius: radius,
             backgroundColor: colorScheme.surfaceContainerHighest,
             child: _avatarPath != null
                 ? ClipOval(
                     child: Image.file(
                       File(_avatarPath!),
-                      width: 96,
-                      height: 96,
+                      width: diameter,
+                      height: diameter,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) =>
                           _buildAvatarPlaceholder(colorScheme),
@@ -318,13 +348,24 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       return ClipOval(
                         child: CachedNetworkImage(
                           imageUrl: profile!.avatarUrl!,
-                          width: 96,
-                          height: 96,
+                          width: diameter,
+                          height: diameter,
                           fit: BoxFit.cover,
                           placeholder: (context, url) =>
                               _buildAvatarPlaceholder(colorScheme),
                           errorWidget: (context, url, error) =>
                               _buildAvatarPlaceholder(colorScheme),
+                        ),
+                      );
+                    }
+                    if (profile?.defaultAvatar != null) {
+                      return ClipOval(
+                        child: Image.asset(
+                          profile!.defaultAvatar!,
+                          width: diameter,
+                          height: diameter,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => _buildAvatarPlaceholder(colorScheme),
                         ),
                       );
                     }

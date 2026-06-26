@@ -1,3 +1,5 @@
+import 'package:json_annotation/json_annotation.dart';
+
 enum MediaType {
   movie,
   tv,
@@ -19,9 +21,9 @@ enum MediaType {
 enum WatchStatus {
   watching,
   completed,
-  onHold,
+  @JsonValue('on_hold') onHold,
   dropped,
-  planToWatch,
+  @JsonValue('plan_to_watch') planToWatch,
   rewatching,
 }
 

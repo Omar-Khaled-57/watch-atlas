@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/constants/dimensions.dart';
 import '../../../core/models/media_enums.dart';
 import '../../../models/user_media_model.dart';
 
@@ -65,7 +66,7 @@ class ProgressCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(8, 8, 8, 4),
+              padding: const EdgeInsetsDirectional.fromSTEB(Spacing.sm, Spacing.sm, Spacing.sm, Spacing.xs),
               child: Text(
                 title,
                 style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
@@ -88,7 +89,7 @@ class ProgressCard extends StatelessWidget {
                         color: colorScheme.primary,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: Spacing.xs),
                     Text(
                       '${userMedia.episodeProgress} / ${userMedia.totalEpisodes}',
                       style: textTheme.labelSmall?.copyWith(fontSize: 10),
@@ -97,7 +98,7 @@ class ProgressCard extends StatelessWidget {
                 ),
               )
             else
-              const SizedBox(height: 4),
+              const SizedBox(height: Spacing.xs),
           ],
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/constants/dimensions.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/extensions/number_extensions.dart';
 
@@ -66,9 +67,11 @@ class MediaStats extends StatelessWidget {
               size: 16,
               color: context.colorScheme.onSurfaceVariant,
             ),
-            SizedBox(width: 4),
-            Text(
+          SizedBox(width: Spacing.xs),
+          Text(
               item.label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: context.textTheme.labelMedium?.copyWith(
                 color: context.colorScheme.onSurfaceVariant,
               ),

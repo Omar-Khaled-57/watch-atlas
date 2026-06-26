@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
+import '../constants/dimensions.dart';
+
 class EmptyState extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -24,7 +26,7 @@ class EmptyState extends StatelessWidget {
 
     return Center(
       child: SingleChildScrollView(
-        padding: const EdgeInsetsDirectional.all(32),
+        padding: const EdgeInsetsDirectional.all(Spacing.xxl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -51,7 +53,7 @@ class EmptyState extends StatelessWidget {
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
-            const SizedBox(height: 24),
+            const SizedBox(height: Spacing.xl),
             Text(
               title,
               style: textTheme.titleLarge?.copyWith(
@@ -60,7 +62,7 @@ class EmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             if (subtitle != null) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: Spacing.sm),
               Text(
                 subtitle!,
                 style: textTheme.bodyMedium?.copyWith(
@@ -70,7 +72,7 @@ class EmptyState extends StatelessWidget {
               ),
             ],
             if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: 24),
+              const SizedBox(height: Spacing.xl),
               FilledButton.icon(
                 onPressed: onAction,
                 icon: const Icon(Icons.add_rounded),

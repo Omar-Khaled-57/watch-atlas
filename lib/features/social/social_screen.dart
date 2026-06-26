@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/shared/user_avatar.dart';
 import '../../core/shared/empty_state.dart';
@@ -80,7 +81,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen>
 
   Widget _buildSearchBar(ColorScheme colorScheme, TextTheme textTheme) {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 8),
+      padding: const EdgeInsetsDirectional.fromSTEB(Spacing.lg, Spacing.sm, Spacing.lg, Spacing.sm),
       child: TextField(
         controller: _searchController,
         decoration: InputDecoration(

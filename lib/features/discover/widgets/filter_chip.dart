@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/constants/dimensions.dart';
+
 class FilterChipWidget extends StatelessWidget {
   final String label;
   final bool isSelected;
@@ -22,15 +24,15 @@ class FilterChipWidget extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: Duration(milliseconds: 250),
-        padding: EdgeInsetsDirectional.symmetric(
-          horizontal: 16,
-          vertical: 8,
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: Spacing.md,
+          vertical: Spacing.xs,
         ),
         decoration: BoxDecoration(
           color: isSelected
               ? theme.colorScheme.primary
               : theme.colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? theme.colorScheme.primary
@@ -44,16 +46,16 @@ class FilterChipWidget extends StatelessWidget {
             if (icon != null) ...[
               Icon(
                 icon,
-                size: 16,
+                size: 14,
                 color: isSelected
                     ? theme.colorScheme.onPrimary
                     : theme.colorScheme.onSurfaceVariant,
               ),
-              SizedBox(width: 6),
+              const SizedBox(width: 4),
             ],
             Text(
               label,
-              style: theme.textTheme.labelMedium?.copyWith(
+              style: theme.textTheme.labelSmall?.copyWith(
                 color: isSelected
                     ? theme.colorScheme.onPrimary
                     : theme.colorScheme.onSurfaceVariant,

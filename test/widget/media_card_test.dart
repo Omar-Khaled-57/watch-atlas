@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:watch_atlas/core/models/media_enums.dart';
 import 'package:watch_atlas/core/shared/media_card.dart';
 
 void main() {
@@ -8,10 +9,10 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: MediaCard(
+            id: 1,
             title: 'Test Movie',
-            posterPath: null,
-            rating: 7.5,
-            mediaType: 'movie',
+            voteAverage: 7.5,
+            mediaType: MediaType.movie,
           ),
         ),
       ),
@@ -26,10 +27,10 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: MediaCard(
+            id: 2,
             title: 'Anime Title',
-            posterPath: null,
-            rating: 8.0,
-            mediaType: 'anime',
+            voteAverage: 8.0,
+            mediaType: MediaType.anime,
           ),
         ),
       ),
@@ -44,10 +45,10 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: MediaCard(
+            id: 3,
             title: 'Test',
-            posterPath: null,
-            rating: 5.0,
-            mediaType: 'movie',
+            voteAverage: 5.0,
+            mediaType: MediaType.movie,
             onTap: () => tapped = true,
           ),
         ),

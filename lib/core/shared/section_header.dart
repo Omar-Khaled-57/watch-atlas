@@ -40,11 +40,18 @@ class SectionHeader extends StatelessWidget {
             onTap: onAction,
             child: Padding(
               padding: const EdgeInsetsDirectional.only(start: 16),
-              child: Text(
-                actionLabel!,
-                style: actionStyle ?? textTheme.bodySmall?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w600,
+              child: ShaderMask(
+                shaderCallback: (bounds) => const LinearGradient(
+                  colors: [Color(0xFF00D4FF), Color(0xFF8B5CF6)],
+                  begin: Alignment(-0.5, -0.5),
+                  end: Alignment(0.5, 0.5),
+                ).createShader(bounds),
+                child: Text(
+                  actionLabel!,
+                  style: actionStyle ?? textTheme.bodySmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),

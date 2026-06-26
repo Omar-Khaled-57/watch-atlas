@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
+import '../../../core/constants/dimensions.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../providers/profile_providers.dart';
 
@@ -28,7 +29,7 @@ class ActivityTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildIcon(colorScheme),
-            const SizedBox(width: 12),
+            const SizedBox(width: Spacing.md),
             if (activity.mediaPoster != null)
               ClipRRect(
                 borderRadius: BorderRadiusDirectional.all(Radius.circular(6)),
@@ -52,7 +53,7 @@ class ActivityTile extends StatelessWidget {
                   ),
                 ),
               ),
-            if (activity.mediaPoster != null) const SizedBox(width: 12),
+            if (activity.mediaPoster != null) const SizedBox(width: Spacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,7 +79,7 @@ class ActivityTile extends StatelessWidget {
                     ),
                   ],
                   if (activity.createdAt != null) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: Spacing.xs),
                     Text(
                       _formatTime(activity.createdAt!),
                       style: textTheme.labelSmall?.copyWith(

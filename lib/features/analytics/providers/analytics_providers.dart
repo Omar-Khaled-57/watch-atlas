@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/media_enums.dart';
@@ -9,43 +10,66 @@ final allUserMediaProvider = FutureProvider<List<UserMediaModel>>((ref) async {
   final supabase = ref.watch(supabaseServiceProvider);
   final auth = ref.watch(authServiceProvider);
   if (auth.userId.isEmpty) return [];
-  final response = await supabase.userMedia
-      .select()
-      .eq('user_id', auth.userId)
-      .order('updated_at', ascending: false);
-  return (response as List<dynamic>)
-      .map((json) => UserMediaModel.fromJson(json as Map<String, dynamic>))
-      .toList();
+  try {
+    final response = await supabase.userMedia
+        .select()
+        .eq('user_id', auth.userId)
+        .order('updated_at', ascending: false);
+    return (response as List<dynamic>)
+        .map((json) => UserMediaModel.fromJson(json as Map<String, dynamic>))
+        .toList();
+  } catch (e) {
+    debugPrint('allUserMediaProvider: $e');
+    return [];
+  }
 });
 
-final allMediaProvider = FutureProvider<List<MediaModel>>((ref) async {
-  final supabase = ref.watch(supabaseServiceProvider);
-  final response = await supabase.media.select().limit(100);
-  return (response as List<dynamic>)
-      .map((json) => MediaModel.fromJson(json as Map<String, dynamic>))
-      .toList();
-});
-
-final watchStatisticsProvider = FutureProvider<WatchStatistics>((ref) async {
+final watchedMediaDetailsProvider = FutureProvider<Map<int, MediaModel>>((ref) async {
   final userMedia = await ref.watch(allUserMediaProvider.future);
-  final mediaList = await ref.watch(allMediaProvider.future);
-  return WatchStatistics.compute(userMedia, mediaList);
+  final tmdb = ref.watch(tmdbServiceProvider);
+  final result = <int, MediaModel>{};
+  for (final um in userMedia) {
+    if (result.containsKey(um.mediaId)) continue;
+    try {
+      final Map<String, dynamic> data;
+      if (um.mediaType == MediaType.movie) {
+        data = await tmdb.movieDetails(um.mediaId);
+      } else {
+        data = await tmdb.tvDetails(um.mediaId);
+      }
+      final genres = (data['genres'] as List<dynamic>?)
+          ?.map((g) => g['name'] as String)
+          .toList();
+      result[um.mediaId] = MediaModel(
+        id: data['id'] as int,
+        mediaType: um.mediaType,
+        title: data['title'] as String? ?? data['name'] as String? ?? '',
+        genres: genres,
+        countries: data['origin_country'] as List<String>?,
+        releaseDate: _parseDate(data['release_date'] as String? ?? data['first_air_date'] as String?),
+      );
+    } catch (e) {
+      debugPrint('Failed to fetch media ${um.mediaId} for analytics: $e');
+    }
+  }
+  return result;
 });
+
+DateTime? _parseDate(String? dateStr) {
+  if (dateStr == null) return null;
+  return DateTime.tryParse(dateStr);
+}
 
 final genreDistributionProvider = FutureProvider<List<DistributionItem>>((ref) async {
-  final mediaList = await ref.watch(allMediaProvider.future);
+  final mediaMap = await ref.watch(watchedMediaDetailsProvider.future);
   final userMedia = await ref.watch(allUserMediaProvider.future);
-  final watchedIds = userMedia
-      .where((u) => u.status == WatchStatus.completed || u.status == WatchStatus.watching)
-      .map((u) => u.mediaId)
-      .toSet();
-  final watchedMedia = mediaList.where((m) => watchedIds.contains(m.id)).toList();
   final counts = <String, int>{};
-  for (final media in watchedMedia) {
-    if (media.genres != null) {
-      for (final genre in media.genres!) {
-        counts[genre] = (counts[genre] ?? 0) + 1;
-      }
+  for (final um in userMedia) {
+    if (um.status != WatchStatus.completed && um.status != WatchStatus.watching) continue;
+    final genres = mediaMap[um.mediaId]?.genres;
+    if (genres == null) continue;
+    for (final genre in genres) {
+      counts[genre] = (counts[genre] ?? 0) + 1;
     }
   }
   final sorted = counts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
@@ -58,19 +82,15 @@ final genreDistributionProvider = FutureProvider<List<DistributionItem>>((ref) a
 });
 
 final countryDistributionProvider = FutureProvider<List<DistributionItem>>((ref) async {
-  final mediaList = await ref.watch(allMediaProvider.future);
+  final mediaMap = await ref.watch(watchedMediaDetailsProvider.future);
   final userMedia = await ref.watch(allUserMediaProvider.future);
-  final watchedIds = userMedia
-      .where((u) => u.status == WatchStatus.completed || u.status == WatchStatus.watching)
-      .map((u) => u.mediaId)
-      .toSet();
-  final watchedMedia = mediaList.where((m) => watchedIds.contains(m.id)).toList();
   final counts = <String, int>{};
-  for (final media in watchedMedia) {
-    if (media.countries != null) {
-      for (final country in media.countries!) {
-        counts[country] = (counts[country] ?? 0) + 1;
-      }
+  for (final um in userMedia) {
+    if (um.status != WatchStatus.completed && um.status != WatchStatus.watching) continue;
+    final countries = mediaMap[um.mediaId]?.countries;
+    if (countries == null) continue;
+    for (final country in countries) {
+      counts[country] = (counts[country] ?? 0) + 1;
     }
   }
   final sorted = counts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
@@ -80,6 +100,11 @@ final countryDistributionProvider = FutureProvider<List<DistributionItem>>((ref)
     count: e.value,
     percentage: total > 0 ? e.value / total : 0.0,
   )).toList();
+});
+
+final watchStatisticsProvider = FutureProvider<WatchStatistics>((ref) async {
+  final userMedia = await ref.watch(allUserMediaProvider.future);
+  return WatchStatistics.compute(userMedia);
 });
 
 final weeklyActivityProvider = FutureProvider<List<ActivityDay>>((ref) async {
@@ -154,19 +179,16 @@ final favoriteCountryProvider = FutureProvider<DistributionItem?>((ref) async {
 });
 
 final mostWatchedDecadeProvider = FutureProvider<String?>((ref) async {
-  final mediaList = await ref.watch(allMediaProvider.future);
+  final mediaMap = await ref.watch(watchedMediaDetailsProvider.future);
   final userMedia = await ref.watch(allUserMediaProvider.future);
-  final watchedIds = userMedia
-      .where((u) => u.status == WatchStatus.completed)
-      .map((u) => u.mediaId)
-      .toSet();
-  final watchedMedia = mediaList.where((m) => watchedIds.contains(m.id)).toList();
   final decadeCounts = <String, int>{};
-  for (final media in watchedMedia) {
-    if (media.releaseDate != null) {
-      final decade = '${(media.releaseDate!.year ~/ 10) * 10}s';
-      decadeCounts[decade] = (decadeCounts[decade] ?? 0) + 1;
-    }
+  for (final um in userMedia) {
+    if (um.status != WatchStatus.completed) continue;
+    final media = mediaMap[um.mediaId];
+    final releaseDate = media?.releaseDate;
+    if (releaseDate == null) continue;
+    final decade = '${(releaseDate.year ~/ 10) * 10}s';
+    decadeCounts[decade] = (decadeCounts[decade] ?? 0) + 1;
   }
   if (decadeCounts.isEmpty) return null;
   return decadeCounts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
@@ -210,22 +232,16 @@ class WatchStatistics {
     required this.averageRating,
   });
 
-  factory WatchStatistics.compute(List<UserMediaModel> userMedia, List<MediaModel> mediaList) {
+  factory WatchStatistics.compute(List<UserMediaModel> userMedia) {
     final watched = userMedia.where((u) =>
         u.status == WatchStatus.completed || u.status == WatchStatus.watching).toList();
-    final mediaById = {for (final m in mediaList) m.id: m};
 
     int totalEpisodes = 0;
-    int totalMinutes = 0;
     double totalRating = 0;
     int ratedCount = 0;
 
     for (final um in watched) {
       totalEpisodes += um.episodeProgress;
-      final media = mediaById[um.mediaId];
-      if (media?.runtime != null && um.episodeProgress > 0) {
-        totalMinutes += (media!.runtime! * um.episodeProgress) ~/ (media.totalEpisodes > 0 ? media.totalEpisodes : 1);
-      }
       if (um.userRating != null) {
         totalRating += um.userRating!;
         ratedCount++;
@@ -235,7 +251,7 @@ class WatchStatistics {
     return WatchStatistics(
       totalWatched: watched.length,
       totalEpisodes: totalEpisodes,
-      totalHours: totalMinutes ~/ 60,
+      totalHours: totalEpisodes ~/ 2,
       averageRating: ratedCount > 0 ? totalRating / ratedCount : 0.0,
     );
   }

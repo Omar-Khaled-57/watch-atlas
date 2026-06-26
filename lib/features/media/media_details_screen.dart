@@ -3,36 +3,62 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/extensions/number_extensions.dart';
 import '../../core/models/media_enums.dart';
-import '../../core/extensions/string_extensions.dart';
+import '../../core/shared/app_modal.dart';
+import '../../core/shared/expandable_text.dart';
+import '../lists/providers/lists_providers.dart';
+import '../lists/widgets/create_list_dialog.dart';
+import '../tracking/providers/tracking_providers.dart';
 import 'providers/media_providers.dart';
 import 'widgets/cast_card.dart';
 import 'widgets/media_stats.dart';
 import 'widgets/review_card.dart';
 import 'widgets/status_dropdown.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../core/services/behavior_service.dart';
+import '../../models/media_model.dart';
+import '../../models/review_model.dart';
 
 class MediaDetailsScreen extends ConsumerStatefulWidget {
   final String mediaId;
+  final String mediaType;
 
-  const MediaDetailsScreen({super.key, required this.mediaId});
+  const MediaDetailsScreen({
+    super.key,
+    required this.mediaId,
+    this.mediaType = 'movie',
+  });
 
   @override
   ConsumerState<MediaDetailsScreen> createState() => _MediaDetailsScreenState();
 }
 
 class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
-  final _overviewScrollController = ScrollController();
-  bool _overviewExpanded = false;
-  WatchStatus? _watchStatus;
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(mediaIdProvider.notifier).state = int.tryParse(widget.mediaId);
+      final id = int.tryParse(widget.mediaId);
+      ref.read(mediaIdProvider.notifier).state = id;
+      ref.read(mediaTypeProvider.notifier).state = _parseMediaType(widget.mediaType);
+      if (id != null) {
+        BehaviorService.instance.trackMediaView(id);
+      }
     });
+  }
+
+  MediaType _parseMediaType(String type) {
+    switch (type) {
+      case 'tv':
+        return MediaType.tv;
+      case 'anime':
+        return MediaType.anime;
+      default:
+        return MediaType.movie;
+    }
   }
 
   @override
@@ -61,9 +87,9 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.error_outline_rounded, size: 64, color: context.colorScheme.error),
-              SizedBox(height: 16),
+              SizedBox(height: Spacing.lg),
               Text('Failed to load details', style: context.textTheme.bodyLarge),
-              SizedBox(height: 8),
+              SizedBox(height: Spacing.sm),
               TextButton(onPressed: () => ref.invalidate(mediaDetailsProvider), child: Text('Retry')),
             ],
           ),
@@ -85,7 +111,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
             ),
           ),
           Padding(
-            padding: EdgeInsetsDirectional.all(16),
+            padding: EdgeInsetsDirectional.all(Spacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -98,7 +124,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
                     color: Colors.white,
                   ),
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: Spacing.lg),
                 Shimmer.fromColors(
                   baseColor: context.colorScheme.surfaceContainerHighest,
                   highlightColor: context.colorScheme.surface,
@@ -108,7 +134,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
                     color: Colors.white,
                   ),
                 ),
-                SizedBox(height: 8),
+                SizedBox(height: Spacing.sm),
                 Shimmer.fromColors(
                   baseColor: context.colorScheme.surfaceContainerHighest,
                   highlightColor: context.colorScheme.surface,
@@ -136,12 +162,8 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
     AsyncValue<List<Map<String, dynamic>>> trailersAsync,
   ) {
     final isDesktop = context.isDesktop;
-    final backdropUrl = media.backdropPath != null
-        ? '${AppConstants.tmdbImageBaseUrl}/w1280${media.backdropPath}'
-        : null;
-    final posterUrl = media.posterPath != null
-        ? '${AppConstants.tmdbImageBaseUrl}/w500${media.posterPath}'
-        : null;
+    final backdropUrl = AppConstants.mediaImageUrl(media.backdropPath, size: 'w1280');
+    final posterUrl = AppConstants.mediaImageUrl(media.posterPath, size: 'w500');
 
     if (isDesktop) {
       return _buildDesktopLayout(
@@ -185,7 +207,12 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
         SizedBox(
           width: 320,
           child: SingleChildScrollView(
-            padding: EdgeInsetsDirectional.all(16),
+            padding: EdgeInsetsDirectional.only(
+              top: Spacing.lg,
+              bottom: Spacing.section,
+              start: 0,
+              end: 0,
+            ),
             child: _buildSidePanel(media),
           ),
         ),
@@ -224,60 +251,72 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
     AsyncValue<List> reviewsAsync,
     AsyncValue<List<Map<String, dynamic>>> trailersAsync,
   ) {
+    final isDesktop = context.isDesktop;
+    final mediaQuery = context.mediaQuery;
+    final horizontalPadding = isDesktop ? Spacing.xxl : Spacing.lg;
+    final bottomPadding = isDesktop
+        ? Spacing.section
+        : Spacing.section + mediaQuery.padding.bottom + kBottomNavigationBarHeight;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildHeroSection(context, media, backdropUrl, posterUrl),
         Padding(
-          padding: EdgeInsetsDirectional.all(16),
+          padding: EdgeInsetsDirectional.only(
+            top: Spacing.lg,
+            bottom: bottomPadding,
+            start: horizontalPadding,
+            end: horizontalPadding,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildTitleSection(context, media),
-              SizedBox(height: 12),
+              SizedBox(height: Spacing.md),
               _buildRatingSection(context, media),
-              SizedBox(height: 12),
+              SizedBox(height: Spacing.md),
               if (media.genres != null && media.genres!.isNotEmpty)
                 _buildGenreChips(context, media.genres!),
-              SizedBox(height: 16),
+              SizedBox(height: Spacing.lg),
               _buildOverviewSection(context, media),
-              SizedBox(height: 24),
+              SizedBox(height: Spacing.xxl),
               _buildStats(context, media),
-              SizedBox(height: 24),
+              SizedBox(height: Spacing.xxl),
               creditsAsync.when(
                 data: (credits) => _buildCastSection(context, credits),
                 loading: () => SizedBox.shrink(),
                 error: (_, __) => SizedBox.shrink(),
               ),
-              SizedBox(height: 24),
+              SizedBox(height: Spacing.xxl),
               creditsAsync.when(
                 data: (credits) => _buildCrewSection(context, credits),
                 loading: () => SizedBox.shrink(),
                 error: (_, __) => SizedBox.shrink(),
               ),
-              SizedBox(height: 24),
+              SizedBox(height: Spacing.xxl),
               trailersAsync.when(
                 data: (trailers) => _buildTrailersSection(context, trailers),
                 loading: () => SizedBox.shrink(),
                 error: (_, __) => SizedBox.shrink(),
               ),
-              SizedBox(height: 24),
+              SizedBox(height: Spacing.xxl),
               recommendationsAsync.when(
                 data: (recs) => _buildMediaRow(context, 'Recommendations', recs),
                 loading: () => SizedBox.shrink(),
                 error: (_, __) => SizedBox.shrink(),
               ),
-              SizedBox(height: 24),
+              SizedBox(height: Spacing.xxl),
               similarAsync.when(
                 data: (similar) => _buildMediaRow(context, 'Similar', similar),
                 loading: () => SizedBox.shrink(),
                 error: (_, __) => SizedBox.shrink(),
               ),
-              SizedBox(height: 24),
+              SizedBox(height: Spacing.xxl),
               _buildReviewsSection(context, reviewsAsync),
-              SizedBox(height: 24),
+              SizedBox(height: Spacing.xxl),
               _buildActivitySection(context),
-              SizedBox(height: 80),
+              SizedBox(height: Spacing.section),
             ],
           ),
         ),
@@ -285,7 +324,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
     );
   }
 
-  Widget _buildHeroSection(BuildContext context, media, String? backdropUrl, String? posterUrl) {
+  Widget _buildHeroSection(BuildContext context, MediaModel media, String? backdropUrl, String? posterUrl) {
     return Stack(
       children: [
         Container(
@@ -361,7 +400,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
           start: 8,
           child: IconButton(
             icon: Container(
-              padding: EdgeInsetsDirectional.all(4),
+              padding: EdgeInsetsDirectional.all(Spacing.xs),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.4),
                 shape: BoxShape.circle,
@@ -378,7 +417,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
     );
   }
 
-  Widget _buildTitleSection(BuildContext context, media) {
+  Widget _buildTitleSection(BuildContext context, MediaModel media) {
     return Padding(
       padding: EdgeInsetsDirectional.only(start: media.posterPath != null ? 116 : 0),
       child: Column(
@@ -386,15 +425,19 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
         children: [
           Text(
             media.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: context.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           if (media.originalTitle != null && media.originalTitle != media.title)
             Padding(
-              padding: EdgeInsetsDirectional.only(top: 4),
+              padding: EdgeInsetsDirectional.only(top: Spacing.xs),
               child: Text(
                 media.originalTitle!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: context.textTheme.bodyMedium?.copyWith(
                   color: context.colorScheme.onSurfaceVariant,
                   fontStyle: FontStyle.italic,
@@ -406,7 +449,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
     );
   }
 
-  Widget _buildRatingSection(BuildContext context, media) {
+  Widget _buildRatingSection(BuildContext context, MediaModel media) {
     if (media.voteAverage == null) return SizedBox.shrink();
     final percentage = (media.voteAverage! / 10 * 100).toPercentage();
 
@@ -421,7 +464,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
             size: 24,
           );
         }),
-        SizedBox(width: 8),
+        SizedBox(width: Spacing.sm),
         Container(
           padding: EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 2),
           decoration: BoxDecoration(
@@ -456,11 +499,8 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
     );
   }
 
-  Widget _buildOverviewSection(BuildContext context, media) {
+  Widget _buildOverviewSection(BuildContext context, MediaModel media) {
     if (media.overview == null || media.overview!.isEmpty) return SizedBox.shrink();
-
-    final text = media.overview!;
-    final isLong = text.length > 200;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -471,33 +511,16 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(height: 8),
-        AnimatedCrossFade(
-          firstChild: Text(
-            text,
-            maxLines: 4,
-            overflow: TextOverflow.ellipsis,
-            style: context.textTheme.bodyMedium?.copyWith(height: 1.6),
-          ),
-          secondChild: Text(
-            text,
-            style: context.textTheme.bodyMedium?.copyWith(height: 1.6),
-          ),
-          crossFadeState: _overviewExpanded
-              ? CrossFadeState.showSecond
-              : CrossFadeState.showFirst,
-          duration: const Duration(milliseconds: 200),
+        SizedBox(height: Spacing.sm),
+        ExpandableText(
+          text: media.overview!,
+          style: context.textTheme.bodyMedium?.copyWith(height: 1.6),
         ),
-        if (isLong)
-          TextButton(
-            onPressed: () => setState(() => _overviewExpanded = !_overviewExpanded),
-            child: Text(_overviewExpanded ? 'Show less' : 'Show more'),
-          ),
       ],
     );
   }
 
-  Widget _buildStats(BuildContext context, media) {
+  Widget _buildStats(BuildContext context, MediaModel media) {
     return MediaStats(
       runtime: media.runtime,
       releaseDate: media.releaseDate,
@@ -519,14 +542,14 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(height: 12),
+        SizedBox(height: Spacing.md),
         SizedBox(
           height: 150,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: EdgeInsetsDirectional.zero,
             itemCount: cast.length,
-            separatorBuilder: (_, __) => SizedBox(width: 12),
+            separatorBuilder: (_, __) => SizedBox(width: Spacing.md),
             itemBuilder: (context, index) {
               final person = cast[index] as Map<String, dynamic>;
               return CastCard(
@@ -560,10 +583,10 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(height: 8),
+        SizedBox(height: Spacing.sm),
         ...keyRoles.map((person) {
           return Padding(
-            padding: EdgeInsetsDirectional.only(bottom: 8),
+            padding: EdgeInsetsDirectional.only(bottom: Spacing.sm),
             child: Row(
               children: [
                 CircleAvatar(
@@ -578,7 +601,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
                       ? Icon(Icons.person_rounded, color: context.colorScheme.onSurfaceVariant)
                       : null,
                 ),
-                SizedBox(width: 12),
+                SizedBox(width: Spacing.md),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -616,21 +639,19 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(height: 12),
+        SizedBox(height: Spacing.md),
         SizedBox(
           height: 200,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: EdgeInsetsDirectional.zero,
             itemCount: trailers.length,
-            separatorBuilder: (_, __) => SizedBox(width: 12),
+            separatorBuilder: (_, __) => SizedBox(width: Spacing.md),
             itemBuilder: (context, index) {
               final trailer = trailers[index];
               final key = trailer['key'] as String? ?? '';
               return GestureDetector(
-                onTap: () {
-                  // Play trailer
-                },
+                onTap: () => launchUrl(Uri.parse('https://www.youtube.com/watch?v=$key')),
                 child: Container(
                   width: 320,
                   decoration: BoxDecoration(
@@ -648,7 +669,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
                   ),
                   child: Center(
                     child: Container(
-                      padding: EdgeInsetsDirectional.all(16),
+                      padding: EdgeInsetsDirectional.all(Spacing.lg),
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.5),
                         shape: BoxShape.circle,
@@ -679,31 +700,30 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
           children: [
             Text(
               title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: context.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
             Spacer(),
-            TextButton(
-              onPressed: () {},
-              child: Text('View all'),
-            ),
           ],
         ),
-        SizedBox(height: 12),
+        SizedBox(height: Spacing.md),
         SizedBox(
           height: 200,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: EdgeInsetsDirectional.zero,
             itemCount: items.length,
-            separatorBuilder: (_, __) => SizedBox(width: 8),
+            separatorBuilder: (_, __) => SizedBox(width: Spacing.sm),
             itemBuilder: (context, index) {
-              final item = items[index];
+              final item = items[index] as MediaModel;
+              final mediaTypeStr = item.mediaType == MediaType.tv ? 'tv' : 'movie';
               return SizedBox(
                 width: AppConstants.posterWidth,
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () => context.navigateToMedia(mediaTypeStr, item.id.toString()),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -722,7 +742,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
                                 ),
                         ),
                       ),
-                      SizedBox(height: 4),
+                      SizedBox(height: Spacing.xs),
                       Text(
                         item.title ?? '',
                         style: context.textTheme.bodySmall,
@@ -760,13 +780,13 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
             ),
           ],
         ),
-        SizedBox(height: 12),
+        SizedBox(height: Spacing.md),
         reviewsAsync.when(
           data: (reviews) {
             if (reviews.isEmpty) {
               return Container(
                 width: double.infinity,
-                padding: EdgeInsetsDirectional.all(32),
+                padding: EdgeInsetsDirectional.all(Spacing.xxl),
                 child: Column(
                   children: [
                     Icon(
@@ -774,7 +794,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
                       size: 48,
                       color: context.colorScheme.onSurfaceVariant,
                     ),
-                    SizedBox(height: 12),
+                    SizedBox(height: Spacing.md),
                     Text(
                       'No reviews yet. Be the first to review!',
                       style: context.textTheme.bodyMedium?.copyWith(
@@ -789,9 +809,13 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: reviews.length,
-              itemBuilder: (context, index) => ReviewCard(
-                review: reviews[index],
-              ),
+              itemBuilder: (context, index) {
+                final rev = reviews[index] as ReviewModel;
+                return ReviewCard(
+                  review: rev,
+                  authorName: rev.userId,
+                );
+              },
             );
           },
           loading: () => Center(child: CircularProgressIndicator()),
@@ -811,10 +835,10 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(height: 12),
+        SizedBox(height: Spacing.md),
         Container(
           width: double.infinity,
-          padding: EdgeInsetsDirectional.all(24),
+          padding: EdgeInsetsDirectional.all(Spacing.xl),
           decoration: BoxDecoration(
             color: context.colorScheme.surfaceContainerLow,
             borderRadius: BorderRadiusDirectional.all(Radius.circular(12)),
@@ -826,7 +850,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
                 size: 36,
                 color: context.colorScheme.onSurfaceVariant,
               ),
-              SizedBox(height: 8),
+              SizedBox(height: Spacing.sm),
               Text(
                 'No recent activity',
                 style: context.textTheme.bodyMedium?.copyWith(
@@ -840,35 +864,165 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
     );
   }
 
-  Widget _buildSidePanel(media) {
+  Widget _buildSidePanel(MediaModel media) {
+    final userMediaList = ref.watch(userMediaProvider).valueOrNull ?? [];
+    final currentUserMedia = userMediaList.where((m) => m.mediaId == media.id).firstOrNull;
+    final currentStatus = currentUserMedia?.status;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         StatusDropdown(
-          currentStatus: _watchStatus,
+          currentStatus: currentStatus,
           onChanged: (status) {
-            setState(() => _watchStatus = status);
+            final notifier = ref.read(userMediaProvider.notifier);
+            if (status == null) {
+              if (currentUserMedia != null) {
+                notifier.removeMedia(currentUserMedia);
+                BehaviorService.instance.trackMediaUnsave(media.id);
+              }
+            } else if (currentUserMedia != null) {
+              notifier.updateStatus(currentUserMedia, status);
+              if (status == WatchStatus.completed) {
+                BehaviorService.instance.trackMediaComplete(media.id);
+              }
+            } else {
+              notifier.addMedia(
+                mediaId: media.id,
+                mediaType: media.mediaType,
+                status: status,
+              );
+              BehaviorService.instance.trackMediaSave(media.id);
+              if (status == WatchStatus.completed) {
+                BehaviorService.instance.trackMediaComplete(media.id);
+              }
+            }
           },
         ),
-        SizedBox(height: 16),
+        SizedBox(height: Spacing.lg),
         OutlinedButton.icon(
-          onPressed: () {},
+          onPressed: () => _showAddToListSheet(media),
           icon: Icon(Icons.playlist_add_rounded),
           label: Text('Add to List'),
           style: OutlinedButton.styleFrom(
-            padding: EdgeInsetsDirectional.symmetric(vertical: 12),
+            padding: EdgeInsetsDirectional.symmetric(vertical: Spacing.md),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadiusDirectional.all(Radius.circular(12)),
             ),
           ),
         ),
-        SizedBox(height: 24),
+        SizedBox(height: Spacing.xl),
         _buildSidePanelStats(media),
       ],
     );
   }
 
-  Widget _buildSidePanelStats(media) {
+  void _showAddToListSheet(MediaModel media) {
+    final content = Consumer(builder: (context, ref, _) {
+      final listsAsync = ref.watch(userListsProvider);
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          listsAsync.when(
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(Spacing.xl),
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            error: (e, _) => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(Spacing.xl),
+                child: Text('Failed to load lists'),
+              ),
+            ),
+            data: (lists) {
+              if (lists.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(Spacing.xl),
+                  child: Center(
+                    child: Text('No lists yet.'),
+                  ),
+                );
+              }
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.5,
+                ),
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  children: [
+                    ...lists.map((list) => ListTile(
+                      leading: Icon(
+                        list.isPinned ? Icons.push_pin_rounded : Icons.folder_rounded,
+                      ),
+                      title: Text(
+                        list.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text('${list.itemCount} items'),
+                      onTap: () {
+                        ref.read(userListsProvider.notifier).addItemToList(
+                          list.id, media,
+                        );
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Added to "${list.title}"'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    )),
+                  ],
+                ),
+              );
+            },
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.add_rounded),
+            title: const Text('Create New List'),
+            onTap: () async {
+              final created = await showDialog<bool>(
+                context: context,
+                builder: (dialogContext) => const CreateListDialog(),
+              );
+              if (created == true && context.mounted) {
+                final updatedLists = ref.read(userListsProvider).valueOrNull ?? [];
+                final newList = updatedLists.isNotEmpty ? updatedLists.first : null;
+                if (newList != null) {
+                  ref.read(userListsProvider.notifier).addItemToList(
+                    newList.id, media,
+                  );
+                }
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(newList != null
+                        ? 'Added to "${newList.title}"'
+                        : 'List created'),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+          ),
+        ],
+      );
+    });
+
+    AppDialog.show(
+      context: context,
+      title: 'Add to List',
+      content: content,
+    );
+  }
+
+  Widget _buildSidePanelStats(MediaModel media) {
     final stats = <Map<String, dynamic>>[];
 
     if (media.runtime != null) {
@@ -911,11 +1065,11 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(height: 12),
+        SizedBox(height: Spacing.md),
         ...stats.map((stat) => Padding(
-          padding: EdgeInsetsDirectional.only(bottom: 12),
+          padding: EdgeInsetsDirectional.only(bottom: Spacing.md),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 stat['label'] as String,
@@ -923,10 +1077,16 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
                   color: context.colorScheme.onSurfaceVariant,
                 ),
               ),
-              Text(
-                stat['value'] as String,
-                style: context.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
+              SizedBox(width: Spacing.sm),
+              Expanded(
+                child: Text(
+                  stat['value'] as String,
+                  textAlign: TextAlign.end,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],

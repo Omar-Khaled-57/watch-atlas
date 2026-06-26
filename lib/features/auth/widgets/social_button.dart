@@ -17,6 +17,7 @@ class SocialButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SizedBox(
       width: double.infinity,
@@ -42,10 +43,15 @@ class SocialButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadiusDirectional.circular(12),
           ),
-          side: BorderSide(color: colorScheme.outlineVariant),
-          backgroundColor: Theme.of(context).brightness == Brightness.dark
-              ? colorScheme.surfaceContainerHighest
-              : null,
+          side: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.12)
+                : Colors.black.withValues(alpha: 0.1),
+          ),
+          backgroundColor: isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.white,
+          foregroundColor: isDark ? Colors.white : Colors.black87,
         ),
       ),
     );
@@ -56,23 +62,10 @@ class SocialButton extends StatelessWidget {
       return const Icon(Icons.phone_iphone_rounded, size: 22);
     }
 
-    return Container(
+    return const Image(
+      image: AssetImage('assets/images/icons/google.png'),
       width: 22,
       height: 22,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadiusDirectional.circular(4),
-        color: Colors.white,
-      ),
-      child: const Text(
-        'G',
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Color(0xFF4285F4),
-          fontFamily: 'Product Sans',
-        ),
-      ),
     );
   }
 }

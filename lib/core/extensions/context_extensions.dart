@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 
 extension ContextExtensions on BuildContext {
   ThemeData get theme => Theme.of(this);
@@ -17,4 +18,8 @@ extension ContextExtensions on BuildContext {
   void hideKeyboard() => SystemChannels.textInput.invokeMethod('TextInput.hide');
 
   ScaffoldMessengerState get showSnackBar => ScaffoldMessenger.of(this);
+
+  void navigateToMedia(String mediaType, String mediaId) {
+    push('/media/$mediaType/$mediaId');
+  }
 }

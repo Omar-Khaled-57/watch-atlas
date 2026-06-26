@@ -24,16 +24,6 @@ class IsarService {
     );
   }
 
-  Future<void> writeTxn<T>(Future<T> Function() callback) async {
-    await db.writeTxn(callback);
-  }
-
-  Future<void> clear() async {
-    await db.writeTxn(() async {
-      await db.clear();
-    });
-  }
-
   void dispose() {
     _isar?.close();
     _isar = null;

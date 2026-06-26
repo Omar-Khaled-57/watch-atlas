@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/constants/dimensions.dart';
+
 class StatsCard extends StatelessWidget {
   final String title;
   final String value;
@@ -25,7 +27,7 @@ class StatsCard extends StatelessWidget {
     return Card(
       margin: EdgeInsetsDirectional.zero,
       child: Padding(
-        padding: const EdgeInsetsDirectional.all(16),
+        padding: const EdgeInsetsDirectional.all(Spacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -40,7 +42,7 @@ class StatsCard extends StatelessWidget {
                   ),
                   child: Icon(icon, color: accentColor, size: 20),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: Spacing.md),
                 Expanded(
                   child: Text(
                     title,
@@ -53,7 +55,7 @@ class StatsCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: Spacing.md),
             Text(
               value,
               style: textTheme.displaySmall?.copyWith(
@@ -61,7 +63,7 @@ class StatsCard extends StatelessWidget {
               ),
             ),
             if (subtitle != null) ...[
-              const SizedBox(height: 4),
+              const SizedBox(height: Spacing.xs),
               Text(
                 subtitle!,
                 style: textTheme.bodySmall?.copyWith(

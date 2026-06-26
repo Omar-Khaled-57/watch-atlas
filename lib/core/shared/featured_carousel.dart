@@ -1,8 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+
+import '../constants/dimensions.dart';
 
 class FeaturedCarousel extends StatefulWidget {
   final List<FeaturedCarouselItem> items;
@@ -24,6 +28,13 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
   late PageController _pageController;
   Timer? _autoScrollTimer;
   int _currentPage = 0;
+  bool _navHovered = false;
+
+  bool get _showNavButtons {
+    if (kIsWeb) return true;
+    if (!Platform.isAndroid && !Platform.isIOS) return true;
+    return MediaQuery.of(context).orientation == Orientation.landscape;
+  }
 
   @override
   void initState() {
@@ -53,6 +64,15 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
     });
   }
 
+  void _goToPage(int page) {
+    _autoScrollTimer?.cancel();
+    _pageController.animateToPage(
+      page,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+    );
+  }
+
   void _onPageChanged(int page) {
     setState(() => _currentPage = page);
     _startAutoScroll();
@@ -70,33 +90,82 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
       child: Column(
         children: [
           Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              onPageChanged: _onPageChanged,
-              itemCount: widget.items.length,
-              itemBuilder: (context, index) {
-                final item = widget.items[index];
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  margin: EdgeInsetsDirectional.only(
-                    start: index == _currentPage ? 0 : 8,
-                    end: index == _currentPage ? 0 : 8,
-                    top: index == _currentPage ? 0 : 12,
-                    bottom: index == _currentPage ? 0 : 12,
-                  ),
-                  child: _FeaturedItem(
-                    item: item,
-                    colorScheme: colorScheme,
-                    textTheme: textTheme,
-                    onTap: item.onTap,
-                  ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Stack(
+                  children: [
+                    PageView.builder(
+                      controller: _pageController,
+                      onPageChanged: _onPageChanged,
+                      itemCount: widget.items.length,
+                      itemBuilder: (context, index) {
+                        final item = widget.items[index];
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          margin: EdgeInsetsDirectional.only(
+                            start: index == _currentPage ? 0 : Spacing.sm,
+                            end: index == _currentPage ? 0 : Spacing.sm,
+                            top: index == _currentPage ? 0 : Spacing.md,
+                            bottom: index == _currentPage ? 0 : Spacing.md,
+                          ),
+                          child: _FeaturedItem(
+                            item: item,
+                            colorScheme: colorScheme,
+                            textTheme: textTheme,
+                            onTap: item.onTap,
+                          ),
+                        );
+                      },
+                    ),
+                    if (_showNavButtons && widget.items.length > 1)
+                      MouseRegion(
+                        onEnter: (_) => setState(() => _navHovered = true),
+                        onExit: (_) => setState(() => _navHovered = false),
+                        child: AnimatedOpacity(
+                          duration: const Duration(milliseconds: 200),
+                          opacity: _navHovered ? 1.0 : 0.4,
+                          child: Stack(
+                            children: [
+                              PositionedDirectional(
+                                start: 8,
+                                top: 0,
+                                bottom: 0,
+                                child: Semantics(
+                                  label: 'Previous slide',
+                                  child: _NavButton(
+                                    icon: Icons.chevron_left_rounded,
+                                    onTap: _currentPage > 0
+                                        ? () => _goToPage(_currentPage - 1)
+                                        : null,
+                                  ),
+                                ),
+                              ),
+                              PositionedDirectional(
+                                end: 8,
+                                top: 0,
+                                bottom: 0,
+                                child: Semantics(
+                                  label: 'Next slide',
+                                  child: _NavButton(
+                                    icon: Icons.chevron_right_rounded,
+                                    onTap: _currentPage < widget.items.length - 1
+                                        ? () => _goToPage(_currentPage + 1)
+                                        : null,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
                 );
               },
             ),
           ),
           if (widget.items.length > 1)
             Padding(
-              padding: const EdgeInsetsDirectional.only(top: 16, bottom: 8),
+              padding: const EdgeInsetsDirectional.only(top: Spacing.lg, bottom: Spacing.sm),
               child: _DotIndicators(
                 count: widget.items.length,
                 currentIndex: _currentPage,
@@ -104,6 +173,46 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _NavButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback? onTap;
+
+  const _NavButton({required this.icon, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final disabled = onTap == null;
+    return Center(
+      child: Semantics(
+        button: true,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: disabled ? null : onTap,
+            borderRadius: BorderRadius.circular(24),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: disabled
+                    ? Colors.black26
+                    : Colors.black.withValues(alpha: 0.55),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: disabled ? Colors.white38 : Colors.white,
+                size: 28,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -125,7 +234,7 @@ class _FeaturedItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadiusDirectional.all(Radius.circular(16)),
+      borderRadius: BorderRadiusDirectional.all(Radius.circular(Spacing.cardRadiusLg)),
       child: GestureDetector(
         onTap: onTap,
         child: Stack(
@@ -175,12 +284,12 @@ class _FeaturedItem extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (item.voteAverage != null || item.genreTags != null) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: Spacing.sm),
                       Row(
                         children: [
                           if (item.voteAverage != null) ...[
                             Icon(Icons.star_rounded, color: Colors.amber, size: 18),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: Spacing.xs),
                             Text(
                               item.voteAverage!.toStringAsFixed(1),
                               style: textTheme.bodyMedium?.copyWith(
@@ -188,7 +297,7 @@ class _FeaturedItem extends StatelessWidget {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            if (item.genreTags != null) const SizedBox(width: 12),
+                            if (item.genreTags != null) const SizedBox(width: Spacing.md),
                           ],
                           if (item.genreTags != null)
                             Expanded(

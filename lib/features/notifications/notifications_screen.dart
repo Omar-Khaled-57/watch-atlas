@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/shared/empty_state.dart';
 import '../../core/shared/loading_widget.dart';
@@ -49,7 +50,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                     child: Row(
                       children: [
                         Icon(Icons.done_all_rounded, size: 20),
-                        SizedBox(width: 12),
+                        SizedBox(width: Spacing.md),
                         Text('Mark all as read'),
                       ],
                     ),
@@ -59,7 +60,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                     child: Row(
                       children: [
                         Icon(Icons.delete_sweep_rounded, size: 20),
-                        SizedBox(width: 12),
+                        SizedBox(width: Spacing.md),
                         Text('Clear all'),
                       ],
                     ),
@@ -116,7 +117,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 8),
+          padding: const EdgeInsetsDirectional.fromSTEB(Spacing.lg, Spacing.lg, Spacing.lg, Spacing.sm),
           child: Text(
             dateLabel,
             style: textTheme.titleSmall?.copyWith(
@@ -153,7 +154,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildNotificationIcon(notification.type, colorScheme),
-            const SizedBox(width: 12),
+            const SizedBox(width: Spacing.md),
             if (notification.imageUrl != null)
               ClipRRect(
                 borderRadius: BorderRadiusDirectional.all(Radius.circular(6)),
@@ -177,7 +178,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                   ),
                 ),
               ),
-            if (notification.imageUrl != null) const SizedBox(width: 12),
+            if (notification.imageUrl != null) const SizedBox(width: Spacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,7 +204,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (notification.createdAt != null) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: Spacing.xs),
                     Text(
                       _formatTime(notification.createdAt!),
                       style: textTheme.labelSmall?.copyWith(

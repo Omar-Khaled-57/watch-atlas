@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/services/auth_service.dart';
@@ -9,12 +11,14 @@ class AuthState {
   final String? errorMessage;
   final bool isSignUpMode;
   final bool showResetPassword;
+  final bool isNewUser;
 
   const AuthState({
     this.status = AuthStatus.initial,
     this.errorMessage,
     this.isSignUpMode = false,
     this.showResetPassword = false,
+    this.isNewUser = false,
   });
 
   AuthState copyWith({
@@ -22,27 +26,48 @@ class AuthState {
     String? errorMessage,
     bool? isSignUpMode,
     bool? showResetPassword,
+    bool? isNewUser,
   }) {
     return AuthState(
       status: status ?? this.status,
       errorMessage: errorMessage ?? this.errorMessage,
       isSignUpMode: isSignUpMode ?? this.isSignUpMode,
       showResetPassword: showResetPassword ?? this.showResetPassword,
+      isNewUser: isNewUser ?? this.isNewUser,
     );
   }
 }
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthService _authService;
+  StreamSubscription? _authSub;
 
   AuthNotifier(this._authService)
-    : super(
-        AuthState(
-          status: _authService.isAuthenticated
-              ? AuthStatus.authenticated
-              : AuthStatus.unauthenticated,
-        ),
-      );
+    : super(const AuthState(status: AuthStatus.initial)) {
+    // Subscribe to real-time auth state changes from Supabase.
+    // This handles:
+    //   1. Session restore on startup (initialSession → authenticated)
+    //   2. Session expiry or revocation (SIGNED_OUT → unauthenticated)
+    //   3. External sign-out from other tabs/devices
+    _authSub = _authService.authStateChanges.listen((supabaseAuth) {
+      if (supabaseAuth.session != null) {
+        state = AuthState(status: AuthStatus.authenticated);
+      } else {
+        state = const AuthState(status: AuthStatus.unauthenticated);
+      }
+    });
+    // Also check the current session synchronously in case the stream's
+    // initialSession event was already emitted before we subscribed.
+    if (_authService.isAuthenticated) {
+      state = AuthState(status: AuthStatus.authenticated);
+    }
+  }
+
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
+  }
 
   Future<void> signIn(String email, String password) async {
     state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
@@ -61,7 +86,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
     try {
       await _authService.signUp(email, password);
-      state = state.copyWith(status: AuthStatus.authenticated);
+      await _authService.assignDefaultAvatar();
+      state = state.copyWith(status: AuthStatus.authenticated, isNewUser: true);
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
@@ -70,11 +96,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<void> signInWithGoogle() async {
+  Future<void> signInWithGoogle({String? loginHint}) async {
     state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
     try {
-      await _authService.signInWithGoogle();
-      state = state.copyWith(status: AuthStatus.authenticated);
+      await _authService.signInWithGoogle(loginHint: loginHint);
+      if (!kIsWeb) {
+        await _authService.importOAuthProfile();
+        final profile = await _authService.getProfile();
+        final needsOnboarding = profile?.gender == null && profile?.dateOfBirth == null;
+        state = state.copyWith(
+          status: AuthStatus.authenticated,
+          isNewUser: needsOnboarding,
+        );
+      }
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
@@ -87,7 +121,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
     try {
       await _authService.signInWithApple();
-      state = state.copyWith(status: AuthStatus.authenticated);
+      if (!kIsWeb) {
+        await _authService.importOAuthProfile();
+        final profile = await _authService.getProfile();
+        final needsOnboarding = profile?.gender == null && profile?.dateOfBirth == null;
+        state = state.copyWith(
+          status: AuthStatus.authenticated,
+          isNewUser: needsOnboarding,
+        );
+      }
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
@@ -123,6 +165,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
         errorMessage: _formatError(e),
       );
     }
+  }
+
+  void completeOnboarding() {
+    state = state.copyWith(isNewUser: false);
   }
 
   void toggleMode() {

@@ -16,6 +16,14 @@ class AppConstants {
   static const int pageSize = 20;
   static const int maxRetries = 3;
 
+  static String? mediaImageUrl(String? path, {String size = 'w342'}) {
+    if (path == null) return null;
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    return '$tmdbImageBaseUrl/$size$path';
+  }
+
   static const double homeCarouselHeight = 480;
   static const double posterWidth = 150;
   static const double posterHeight = 225;

@@ -47,6 +47,7 @@ dependencies:
 
   # Environment
   flutter_dotenv: ^5.2.1
+  shared_preferences: ^2.3.5
 
   # Pagination
   infinite_scroll_pagination: ^4.1.0
@@ -87,6 +88,19 @@ dev_dependencies:
   json_serializable: ^6.9.5
   riverpod_generator: ^2.6.4
   mocktail: any
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo/logo.png"
+  adaptive_icon_background: "#0F111A"
+  adaptive_icon_foreground: "assets/images/logo/logo.png"
+  remove_alpha_ios: true
+  web:
+    generate: true
+    background_color: "#0F111A"
+    theme_color: "#E11D48"
 
 flutter:
   uses-material-design: true
@@ -95,5 +109,8 @@ flutter:
   assets:
     - .env
     - assets/images/
+    - assets/images/logo/
+    - assets/images/icons/
+    - assets/images/pfp/
     - assets/fonts/
     - assets/lottie/

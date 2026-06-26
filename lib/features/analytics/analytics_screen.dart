@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
-import '../../core/shared/loading_widget.dart';
 import 'providers/analytics_providers.dart';
 import 'widgets/bar_chart_widget.dart';
 import 'widgets/stats_card.dart';
@@ -65,18 +65,18 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           controller: _scrollController,
           padding: EdgeInsetsDirectional.only(
             top: MediaQuery.of(context).padding.top,
-            start: 16,
-            end: 16,
-            bottom: 32,
+            start: Spacing.lg,
+            end: Spacing.lg,
+            bottom: Spacing.xxl,
           ),
           children: [
-            SizedBox(height: 8),
+            SizedBox(height: Spacing.sm),
             statsAsync.when(
               loading: () => const _StatsGridShimmer(),
               error: (e, _) => Center(child: Text('Failed to load stats: $e')),
               data: (stats) => _buildStatsGrid(stats, colorScheme, textTheme),
             ),
-            SizedBox(height: 24),
+            SizedBox(height: Spacing.xl),
             favoriteGenreAsync.whenData((fg) => fg).maybeWhen(
               data: (fg) {
                 if (fg == null) return const SizedBox.shrink();
@@ -90,9 +90,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               },
               orElse: () => const SizedBox.shrink(),
             ),
-            SizedBox(height: 24),
+            SizedBox(height: Spacing.xl),
             _buildSectionHeader('Weekly Activity', Icons.show_chart_rounded),
-            SizedBox(height: 12),
+            SizedBox(height: Spacing.md),
             weeklyAsync.when(
               loading: () => const _ChartShimmer(),
               error: (e, _) => Center(child: Text('Error: $e')),
@@ -105,9 +105,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 return BarChartWidget(data: points, barColor: colorScheme.primary);
               },
             ),
-            SizedBox(height: 24),
+            SizedBox(height: Spacing.xl),
             _buildSectionHeader('Monthly Activity', Icons.bar_chart_rounded),
-            SizedBox(height: 12),
+            SizedBox(height: Spacing.md),
             monthlyAsync.when(
               loading: () => const _ChartShimmer(),
               error: (e, _) => Center(child: Text('Error: $e')),
@@ -124,9 +124,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 return BarChartWidget(data: points, barColor: colorScheme.secondary);
               },
             ),
-            SizedBox(height: 24),
+            SizedBox(height: Spacing.xl),
             _buildSectionHeader('Genre Distribution', Icons.pie_chart_rounded),
-            SizedBox(height: 12),
+            SizedBox(height: Spacing.md),
             genreDistAsync.when(
               loading: () => const _ChartShimmer(),
               error: (e, _) => Center(child: Text('Error: $e')),
@@ -135,9 +135,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 return _buildPieChart(data, colorScheme);
               },
             ),
-            SizedBox(height: 24),
+            SizedBox(height: Spacing.xl),
             _buildSectionHeader('Country Distribution', Icons.public_rounded),
-            SizedBox(height: 12),
+            SizedBox(height: Spacing.md),
             countryDistAsync.when(
               loading: () => const _ChartShimmer(),
               error: (e, _) => Center(child: Text('Error: $e')),
@@ -146,9 +146,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 return _buildPieChart(data, colorScheme);
               },
             ),
-            SizedBox(height: 24),
+            SizedBox(height: Spacing.xl),
             _buildSectionHeader('Yearly Activity', Icons.trending_up_rounded),
-            SizedBox(height: 12),
+            SizedBox(height: Spacing.md),
             yearlyAsync.when(
               loading: () => const _ChartShimmer(),
               error: (e, _) => Center(child: Text('Error: $e')),
@@ -157,7 +157,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 return _buildLineChart(data, colorScheme, isDark);
               },
             ),
-            SizedBox(height: 24),
+            SizedBox(height: Spacing.xl),
             favoriteCountryAsync.whenData((fc) => fc).maybeWhen(
               data: (fc) {
                 if (fc == null) return const SizedBox.shrink();
@@ -171,15 +171,15 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               },
               orElse: () => const SizedBox.shrink(),
             ),
-            SizedBox(height: 24),
+            SizedBox(height: Spacing.xl),
             _buildSectionHeader('Rating Distribution', Icons.star_rounded),
-            SizedBox(height: 12),
+            SizedBox(height: Spacing.md),
             ratingDistAsync.when(
               loading: () => const _ChartShimmer(),
               error: (e, _) => Center(child: Text('Error: $e')),
               data: (data) => _buildRatingDistribution(data, colorScheme, textTheme),
             ),
-            SizedBox(height: 24),
+            SizedBox(height: Spacing.xl),
             decadeAsync.whenData((d) => d).maybeWhen(
               data: (decade) {
                 if (decade == null) return const SizedBox.shrink();
@@ -188,7 +188,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               },
               orElse: () => const SizedBox.shrink(),
             ),
-            SizedBox(height: 24),
+            SizedBox(height: Spacing.xl),
           ],
         ),
       ),
@@ -203,8 +203,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           crossAxisCount: crossAxisCount,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
+              mainAxisSpacing: Spacing.md,
+              crossAxisSpacing: Spacing.md,
           childAspectRatio: 1.3,
           children: [
             StatsCard(
@@ -245,7 +245,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     return Row(
       children: [
         Icon(icon, size: 20, color: cs.primary),
-        SizedBox(width: 8),
+        SizedBox(width: Spacing.sm),
         Text(title, style: tt.titleMedium),
       ],
     );
@@ -294,14 +294,14 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               ),
             ),
           ),
-          SizedBox(width: 16),
+          SizedBox(width: Spacing.lg),
           Expanded(
             flex: 2,
             child: ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: displayed.length,
-              separatorBuilder: (_, __) => SizedBox(height: 4),
+              separatorBuilder: (_, __) => SizedBox(height: Spacing.xs),
               itemBuilder: (context, index) {
                 final item = displayed[index];
                 return Row(
@@ -314,7 +314,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         borderRadius: BorderRadiusDirectional.all(Radius.circular(2)),
                       ),
                     ),
-                    SizedBox(width: 8),
+                    SizedBox(width: Spacing.sm),
                     Expanded(
                       child: Text(
                         item.label,
@@ -374,7 +374,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   final index = value.toInt();
                   if (index < 0 || index >= data.length) return const SizedBox.shrink();
                   return Padding(
-                    padding: const EdgeInsetsDirectional.only(top: 8),
+                    padding: const EdgeInsetsDirectional.only(top: Spacing.sm),
                     child: Text(
                       '${data[index].year}',
                       style: TextStyle(color: cs.onSurfaceVariant, fontSize: 10),
@@ -456,7 +456,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   ) {
     return Card(
       child: Padding(
-        padding: const EdgeInsetsDirectional.all(16),
+        padding: const EdgeInsetsDirectional.all(Spacing.lg),
         child: Row(
           children: [
             Container(
@@ -468,7 +468,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               ),
               child: Icon(icon, color: cs.primary, size: 24),
             ),
-            SizedBox(width: 16),
+            SizedBox(width: Spacing.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -477,7 +477,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     title,
                     style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                   ),
-                  SizedBox(height: 4),
+                  SizedBox(height: Spacing.xs),
                   Text(
                     value,
                     style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w700),
@@ -501,7 +501,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       children: data.map((bucket) {
         final fraction = maxCount > 0 ? bucket.count / maxCount : 0.0;
         return Padding(
-          padding: const EdgeInsetsDirectional.only(bottom: 8),
+          padding: const EdgeInsetsDirectional.only(bottom: Spacing.sm),
           child: Row(
             children: [
               SizedBox(
@@ -511,7 +511,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   style: tt.bodySmall?.copyWith(fontWeight: FontWeight.w600),
                 ),
               ),
-              SizedBox(width: 8),
+              SizedBox(width: Spacing.sm),
               Expanded(
                 child: ClipRRect(
                   borderRadius: BorderRadiusDirectional.all(Radius.circular(4)),
@@ -531,7 +531,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   ),
                 ),
               ),
-              SizedBox(width: 12),
+              SizedBox(width: Spacing.md),
               SizedBox(
                 width: 40,
                 child: Text(
@@ -552,7 +552,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   Widget _buildMostWatchedDecade(String decade, ColorScheme cs, TextTheme tt) {
     return Card(
       child: Padding(
-        padding: const EdgeInsetsDirectional.all(16),
+        padding: const EdgeInsetsDirectional.all(Spacing.lg),
         child: Row(
           children: [
             Container(
@@ -564,7 +564,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               ),
               child: Icon(Icons.date_range_rounded, color: Colors.amber, size: 24),
             ),
-            SizedBox(width: 16),
+            SizedBox(width: Spacing.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -596,11 +596,11 @@ class EmptyAnalytics extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
-        padding: const EdgeInsetsDirectional.symmetric(vertical: 24),
+        padding: const EdgeInsetsDirectional.symmetric(vertical: Spacing.xl),
         child: Column(
           children: [
             Icon(Icons.info_outline_rounded, color: cs.onSurfaceVariant, size: 32),
-            SizedBox(height: 8),
+            SizedBox(height: Spacing.sm),
             Text(
               'No data available yet',
               style: TextStyle(color: cs.onSurfaceVariant),
@@ -625,8 +625,8 @@ class _StatsGridShimmer extends StatelessWidget {
           crossAxisCount: crossAxisCount,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
+              mainAxisSpacing: Spacing.md,
+              crossAxisSpacing: Spacing.md,
           childAspectRatio: 1.3,
           children: List.generate(4, (_) => Container(
             decoration: BoxDecoration(

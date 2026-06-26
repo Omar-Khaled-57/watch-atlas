@@ -1,27 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/theme/app_theme.dart';
-import 'core/providers/app_providers.dart';
+import 'core/services/supabase_service.dart';
 import 'router/app_router.dart';
 import 'l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
-
-  try {
-    await Supabase.initialize(
-      url: dotenv.env['SUPABASE_URL'] ?? '',
-      anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
-    );
-  } catch (e) {
-    debugPrint('Supabase init skipped: $e');
-  }
-
+  await SupabaseService.instance.init();
   runApp(const ProviderScope(child: WatchAtlasApp()));
 }
 
@@ -33,7 +22,6 @@ class WatchAtlasApp extends ConsumerWidget {
     final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
-      title: 'WatchAtlas',
       routerConfig: router,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),

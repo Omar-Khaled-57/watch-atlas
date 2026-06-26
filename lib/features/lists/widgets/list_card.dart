@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
-import '../../../core/models/media_enums.dart';
+import '../../../core/constants/dimensions.dart';
+import '../../../core/extensions/datetime_extensions.dart';
 import '../../../models/user_list_model.dart';
+import 'collage_cover.dart';
 
 class ListCard extends StatelessWidget {
   final UserListModel listData;
+  final List<String>? posterUrls;
+  final List<String>? categories;
   final VoidCallback? onTap;
-  final VoidCallback? onPin;
   final VoidCallback? onDelete;
 
   const ListCard({
     super.key,
     required this.listData,
+    this.posterUrls,
+    this.categories,
     this.onTap,
-    this.onPin,
     this.onDelete,
   });
 
@@ -23,148 +27,111 @@ class ListCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadiusDirectional.all(Radius.circular(16)),
+        side: BorderSide(color: colorScheme.outline.withValues(alpha: 0.15)),
+      ),
       child: InkWell(
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsetsDirectional.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadiusDirectional.all(Radius.circular(12)),
-                ),
-                child: Icon(
-                  listData.listType == MediaListType.collaborative
-                      ? Icons.group_rounded
-                      : listData.listType == MediaListType.private
-                          ? Icons.lock_rounded
-                          : Icons.list_alt_rounded,
-                  color: colorScheme.primary,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            listData.title,
-                            style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurface),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        _TypeBadge(listType: listData.listType, colorScheme: colorScheme, textTheme: textTheme),
-                      ],
-                    ),
-                    if (listData.description != null && listData.description!.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        listData.description!,
-                        style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  CollageCover(
+                    imageUrls: posterUrls ?? [],
+                    height: double.infinity,
+                    borderRadius: 16,
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.transparent, Colors.black.withValues(alpha: 0.7)],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
                       ),
-                    ],
-                    const SizedBox(height: 8),
-                    Row(
+                    ),
+                  ),
+                  Positioned(
+                    left: 14,
+                    right: 14,
+                    bottom: 14,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.movie_outlined, size: 14, color: colorScheme.onSurfaceVariant),
-                        const SizedBox(width: 4),
                         Text(
-                          '${listData.itemCount} items',
-                          style: textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant),
-                        ),
-                        if (listData.likesCount > 0) ...[
-                          const SizedBox(width: 12),
-                          Icon(Icons.favorite_border_rounded, size: 14, color: colorScheme.onSurfaceVariant),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${listData.likesCount}',
-                            style: textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                          listData.title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.3,
                           ),
-                        ],
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: Spacing.xs),
+                        Text(
+                          '${listData.itemCount} ${listData.itemCount == 1 ? 'Title' : 'Titles'}',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            fontSize: 12,
+                          ),
+                        ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              if (onPin != null || onDelete != null)
-                PopupMenuButton<String>(
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 'pin',
-                      child: Row(
-                        children: [
-                          Icon(listData.isPinned ? Icons.push_pin_rounded : Icons.push_pin_outlined, size: 18),
-                          const SizedBox(width: 8),
-                          Text(listData.isPinned ? 'Unpin' : 'Pin'),
-                        ],
-                      ),
+            ),
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(14, 10, 14, 4),
+              child: Row(
+                children: [
+                  if (listData.updatedAt != null) ...[
+                    Icon(Icons.access_time_rounded, size: 12, color: colorScheme.onSurfaceVariant),
+                    const SizedBox(width: Spacing.xs),
+                    Text(
+                      'Updated ${listData.updatedAt!.timeAgo}',
+                      style: textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant, fontSize: 10),
                     ),
-                    PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete_outline_rounded, size: 18, color: colorScheme.error),
-                          const SizedBox(width: 8),
-                          Text('Delete', style: TextStyle(color: colorScheme.error)),
-                        ],
-                      ),
-                    ),
+                    const SizedBox(width: 10),
                   ],
-                  onSelected: (value) {
-                    if (value == 'pin') onPin?.call();
-                    if (value == 'delete') onDelete?.call();
-                  },
+                  Icon(Icons.movie_outlined, size: 12, color: colorScheme.onSurfaceVariant),
+                  const SizedBox(width: Spacing.xs),
+                  Text(
+                    '${listData.itemCount}',
+                    style: textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant, fontSize: 10),
+                  ),
+                ],
+              ),
+            ),
+            if (categories != null && categories!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(14, 0, 14, 10),
+                child: Wrap(
+                  spacing: 4,
+                  children: categories!.take(3).map((c) => Container(
+                    padding: const EdgeInsetsDirectional.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadiusDirectional.all(Radius.circular(6)),
+                    ),
+                    child: Text(
+                      c,
+                      style: textTheme.labelSmall?.copyWith(fontSize: 9, color: colorScheme.onSurfaceVariant),
+                    ),
+                  )).toList(),
                 ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TypeBadge extends StatelessWidget {
-  final MediaListType listType;
-  final ColorScheme colorScheme;
-  final TextTheme textTheme;
-
-  const _TypeBadge({
-    required this.listType,
-    required this.colorScheme,
-    required this.textTheme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final (label, color) = switch (listType) {
-      MediaListType.public => ('Public', Colors.green),
-      MediaListType.private => ('Private', Colors.orange),
-      MediaListType.collaborative => ('Collab', Colors.blue),
-    };
-
-    return Container(
-      padding: const EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadiusDirectional.all(Radius.circular(20)),
-      ),
-      child: Text(
-        label,
-        style: textTheme.labelSmall?.copyWith(
-          color: color,
-          fontWeight: FontWeight.w600,
-          fontSize: 10,
+              )
+            else
+              const SizedBox(height: 10),
+          ],
         ),
       ),
     );

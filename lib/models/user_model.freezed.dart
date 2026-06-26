@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserModel {
 
- String get id; String get email; String get username; String? get displayName; String? get avatarUrl; String? get bannerUrl; String? get bio; UserRole get role; bool get isVerified; DateTime? get createdAt; DateTime? get updatedAt; int get followersCount; int get followingCount; int get listsCount; int get reviewsCount;
+ String get id; String get email; String get username;@JsonKey(name: 'display_name') String? get displayName;@JsonKey(name: 'avatar_url') String? get avatarUrl;@JsonKey(name: 'banner_url') String? get bannerUrl; String? get bio; Gender? get gender;@JsonKey(name: 'dob') DateTime? get dateOfBirth;@JsonKey(name: 'default_avatar') String? get defaultAvatar; UserRole get role;@JsonKey(name: 'is_verified') bool get isVerified;@JsonKey(name: 'created_at') DateTime? get createdAt;@JsonKey(name: 'updated_at') DateTime? get updatedAt;@JsonKey(name: 'followers_count') int get followersCount;@JsonKey(name: 'following_count') int get followingCount;@JsonKey(name: 'lists_count') int get listsCount;@JsonKey(name: 'reviews_count') int get reviewsCount;
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $UserModelCopyWith<UserModel> get copyWith => _$UserModelCopyWithImpl<UserModel>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserModel&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.username, username) || other.username == username)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.bannerUrl, bannerUrl) || other.bannerUrl == bannerUrl)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.role, role) || other.role == role)&&(identical(other.isVerified, isVerified) || other.isVerified == isVerified)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.followersCount, followersCount) || other.followersCount == followersCount)&&(identical(other.followingCount, followingCount) || other.followingCount == followingCount)&&(identical(other.listsCount, listsCount) || other.listsCount == listsCount)&&(identical(other.reviewsCount, reviewsCount) || other.reviewsCount == reviewsCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserModel&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.username, username) || other.username == username)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.bannerUrl, bannerUrl) || other.bannerUrl == bannerUrl)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.dateOfBirth, dateOfBirth) || other.dateOfBirth == dateOfBirth)&&(identical(other.defaultAvatar, defaultAvatar) || other.defaultAvatar == defaultAvatar)&&(identical(other.role, role) || other.role == role)&&(identical(other.isVerified, isVerified) || other.isVerified == isVerified)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.followersCount, followersCount) || other.followersCount == followersCount)&&(identical(other.followingCount, followingCount) || other.followingCount == followingCount)&&(identical(other.listsCount, listsCount) || other.listsCount == listsCount)&&(identical(other.reviewsCount, reviewsCount) || other.reviewsCount == reviewsCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,email,username,displayName,avatarUrl,bannerUrl,bio,role,isVerified,createdAt,updatedAt,followersCount,followingCount,listsCount,reviewsCount);
+int get hashCode => Object.hash(runtimeType,id,email,username,displayName,avatarUrl,bannerUrl,bio,gender,dateOfBirth,defaultAvatar,role,isVerified,createdAt,updatedAt,followersCount,followingCount,listsCount,reviewsCount);
 
 @override
 String toString() {
-  return 'UserModel(id: $id, email: $email, username: $username, displayName: $displayName, avatarUrl: $avatarUrl, bannerUrl: $bannerUrl, bio: $bio, role: $role, isVerified: $isVerified, createdAt: $createdAt, updatedAt: $updatedAt, followersCount: $followersCount, followingCount: $followingCount, listsCount: $listsCount, reviewsCount: $reviewsCount)';
+  return 'UserModel(id: $id, email: $email, username: $username, displayName: $displayName, avatarUrl: $avatarUrl, bannerUrl: $bannerUrl, bio: $bio, gender: $gender, dateOfBirth: $dateOfBirth, defaultAvatar: $defaultAvatar, role: $role, isVerified: $isVerified, createdAt: $createdAt, updatedAt: $updatedAt, followersCount: $followersCount, followingCount: $followingCount, listsCount: $listsCount, reviewsCount: $reviewsCount)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $UserModelCopyWith<$Res>  {
   factory $UserModelCopyWith(UserModel value, $Res Function(UserModel) _then) = _$UserModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String email, String username, String? displayName, String? avatarUrl, String? bannerUrl, String? bio, UserRole role, bool isVerified, DateTime? createdAt, DateTime? updatedAt, int followersCount, int followingCount, int listsCount, int reviewsCount
+ String id, String email, String username,@JsonKey(name: 'display_name') String? displayName,@JsonKey(name: 'avatar_url') String? avatarUrl,@JsonKey(name: 'banner_url') String? bannerUrl, String? bio, Gender? gender,@JsonKey(name: 'dob') DateTime? dateOfBirth,@JsonKey(name: 'default_avatar') String? defaultAvatar, UserRole role,@JsonKey(name: 'is_verified') bool isVerified,@JsonKey(name: 'created_at') DateTime? createdAt,@JsonKey(name: 'updated_at') DateTime? updatedAt,@JsonKey(name: 'followers_count') int followersCount,@JsonKey(name: 'following_count') int followingCount,@JsonKey(name: 'lists_count') int listsCount,@JsonKey(name: 'reviews_count') int reviewsCount
 });
 
 
@@ -65,7 +65,7 @@ class _$UserModelCopyWithImpl<$Res>
 
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? username = null,Object? displayName = freezed,Object? avatarUrl = freezed,Object? bannerUrl = freezed,Object? bio = freezed,Object? role = null,Object? isVerified = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? followersCount = null,Object? followingCount = null,Object? listsCount = null,Object? reviewsCount = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? username = null,Object? displayName = freezed,Object? avatarUrl = freezed,Object? bannerUrl = freezed,Object? bio = freezed,Object? gender = freezed,Object? dateOfBirth = freezed,Object? defaultAvatar = freezed,Object? role = null,Object? isVerified = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? followersCount = null,Object? followingCount = null,Object? listsCount = null,Object? reviewsCount = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
@@ -74,6 +74,9 @@ as String,displayName: freezed == displayName ? _self.displayName : displayName 
 as String?,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
 as String?,bannerUrl: freezed == bannerUrl ? _self.bannerUrl : bannerUrl // ignore: cast_nullable_to_non_nullable
 as String?,bio: freezed == bio ? _self.bio : bio // ignore: cast_nullable_to_non_nullable
+as String?,gender: freezed == gender ? _self.gender : gender // ignore: cast_nullable_to_non_nullable
+as Gender?,dateOfBirth: freezed == dateOfBirth ? _self.dateOfBirth : dateOfBirth // ignore: cast_nullable_to_non_nullable
+as DateTime?,defaultAvatar: freezed == defaultAvatar ? _self.defaultAvatar : defaultAvatar // ignore: cast_nullable_to_non_nullable
 as String?,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as UserRole,isVerified: null == isVerified ? _self.isVerified : isVerified // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
@@ -167,10 +170,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  String username,  String? displayName,  String? avatarUrl,  String? bannerUrl,  String? bio,  UserRole role,  bool isVerified,  DateTime? createdAt,  DateTime? updatedAt,  int followersCount,  int followingCount,  int listsCount,  int reviewsCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  String username, @JsonKey(name: 'display_name')  String? displayName, @JsonKey(name: 'avatar_url')  String? avatarUrl, @JsonKey(name: 'banner_url')  String? bannerUrl,  String? bio,  Gender? gender, @JsonKey(name: 'dob')  DateTime? dateOfBirth, @JsonKey(name: 'default_avatar')  String? defaultAvatar,  UserRole role, @JsonKey(name: 'is_verified')  bool isVerified, @JsonKey(name: 'created_at')  DateTime? createdAt, @JsonKey(name: 'updated_at')  DateTime? updatedAt, @JsonKey(name: 'followers_count')  int followersCount, @JsonKey(name: 'following_count')  int followingCount, @JsonKey(name: 'lists_count')  int listsCount, @JsonKey(name: 'reviews_count')  int reviewsCount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserModel() when $default != null:
-return $default(_that.id,_that.email,_that.username,_that.displayName,_that.avatarUrl,_that.bannerUrl,_that.bio,_that.role,_that.isVerified,_that.createdAt,_that.updatedAt,_that.followersCount,_that.followingCount,_that.listsCount,_that.reviewsCount);case _:
+return $default(_that.id,_that.email,_that.username,_that.displayName,_that.avatarUrl,_that.bannerUrl,_that.bio,_that.gender,_that.dateOfBirth,_that.defaultAvatar,_that.role,_that.isVerified,_that.createdAt,_that.updatedAt,_that.followersCount,_that.followingCount,_that.listsCount,_that.reviewsCount);case _:
   return orElse();
 
 }
@@ -188,10 +191,10 @@ return $default(_that.id,_that.email,_that.username,_that.displayName,_that.avat
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  String username,  String? displayName,  String? avatarUrl,  String? bannerUrl,  String? bio,  UserRole role,  bool isVerified,  DateTime? createdAt,  DateTime? updatedAt,  int followersCount,  int followingCount,  int listsCount,  int reviewsCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  String username, @JsonKey(name: 'display_name')  String? displayName, @JsonKey(name: 'avatar_url')  String? avatarUrl, @JsonKey(name: 'banner_url')  String? bannerUrl,  String? bio,  Gender? gender, @JsonKey(name: 'dob')  DateTime? dateOfBirth, @JsonKey(name: 'default_avatar')  String? defaultAvatar,  UserRole role, @JsonKey(name: 'is_verified')  bool isVerified, @JsonKey(name: 'created_at')  DateTime? createdAt, @JsonKey(name: 'updated_at')  DateTime? updatedAt, @JsonKey(name: 'followers_count')  int followersCount, @JsonKey(name: 'following_count')  int followingCount, @JsonKey(name: 'lists_count')  int listsCount, @JsonKey(name: 'reviews_count')  int reviewsCount)  $default,) {final _that = this;
 switch (_that) {
 case _UserModel():
-return $default(_that.id,_that.email,_that.username,_that.displayName,_that.avatarUrl,_that.bannerUrl,_that.bio,_that.role,_that.isVerified,_that.createdAt,_that.updatedAt,_that.followersCount,_that.followingCount,_that.listsCount,_that.reviewsCount);case _:
+return $default(_that.id,_that.email,_that.username,_that.displayName,_that.avatarUrl,_that.bannerUrl,_that.bio,_that.gender,_that.dateOfBirth,_that.defaultAvatar,_that.role,_that.isVerified,_that.createdAt,_that.updatedAt,_that.followersCount,_that.followingCount,_that.listsCount,_that.reviewsCount);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -208,10 +211,10 @@ return $default(_that.id,_that.email,_that.username,_that.displayName,_that.avat
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  String username,  String? displayName,  String? avatarUrl,  String? bannerUrl,  String? bio,  UserRole role,  bool isVerified,  DateTime? createdAt,  DateTime? updatedAt,  int followersCount,  int followingCount,  int listsCount,  int reviewsCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  String username, @JsonKey(name: 'display_name')  String? displayName, @JsonKey(name: 'avatar_url')  String? avatarUrl, @JsonKey(name: 'banner_url')  String? bannerUrl,  String? bio,  Gender? gender, @JsonKey(name: 'dob')  DateTime? dateOfBirth, @JsonKey(name: 'default_avatar')  String? defaultAvatar,  UserRole role, @JsonKey(name: 'is_verified')  bool isVerified, @JsonKey(name: 'created_at')  DateTime? createdAt, @JsonKey(name: 'updated_at')  DateTime? updatedAt, @JsonKey(name: 'followers_count')  int followersCount, @JsonKey(name: 'following_count')  int followingCount, @JsonKey(name: 'lists_count')  int listsCount, @JsonKey(name: 'reviews_count')  int reviewsCount)?  $default,) {final _that = this;
 switch (_that) {
 case _UserModel() when $default != null:
-return $default(_that.id,_that.email,_that.username,_that.displayName,_that.avatarUrl,_that.bannerUrl,_that.bio,_that.role,_that.isVerified,_that.createdAt,_that.updatedAt,_that.followersCount,_that.followingCount,_that.listsCount,_that.reviewsCount);case _:
+return $default(_that.id,_that.email,_that.username,_that.displayName,_that.avatarUrl,_that.bannerUrl,_that.bio,_that.gender,_that.dateOfBirth,_that.defaultAvatar,_that.role,_that.isVerified,_that.createdAt,_that.updatedAt,_that.followersCount,_that.followingCount,_that.listsCount,_that.reviewsCount);case _:
   return null;
 
 }
@@ -223,24 +226,27 @@ return $default(_that.id,_that.email,_that.username,_that.displayName,_that.avat
 @JsonSerializable()
 
 class _UserModel implements UserModel {
-  const _UserModel({required this.id, required this.email, required this.username, this.displayName, this.avatarUrl, this.bannerUrl, this.bio, this.role = UserRole.user, this.isVerified = false, this.createdAt, this.updatedAt, this.followersCount = 0, this.followingCount = 0, this.listsCount = 0, this.reviewsCount = 0});
+  const _UserModel({required this.id, required this.email, required this.username, @JsonKey(name: 'display_name') this.displayName, @JsonKey(name: 'avatar_url') this.avatarUrl, @JsonKey(name: 'banner_url') this.bannerUrl, this.bio, this.gender, @JsonKey(name: 'dob') this.dateOfBirth, @JsonKey(name: 'default_avatar') this.defaultAvatar, this.role = UserRole.user, @JsonKey(name: 'is_verified') this.isVerified = false, @JsonKey(name: 'created_at') this.createdAt, @JsonKey(name: 'updated_at') this.updatedAt, @JsonKey(name: 'followers_count') this.followersCount = 0, @JsonKey(name: 'following_count') this.followingCount = 0, @JsonKey(name: 'lists_count') this.listsCount = 0, @JsonKey(name: 'reviews_count') this.reviewsCount = 0});
   factory _UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
 
 @override final  String id;
 @override final  String email;
 @override final  String username;
-@override final  String? displayName;
-@override final  String? avatarUrl;
-@override final  String? bannerUrl;
+@override@JsonKey(name: 'display_name') final  String? displayName;
+@override@JsonKey(name: 'avatar_url') final  String? avatarUrl;
+@override@JsonKey(name: 'banner_url') final  String? bannerUrl;
 @override final  String? bio;
+@override final  Gender? gender;
+@override@JsonKey(name: 'dob') final  DateTime? dateOfBirth;
+@override@JsonKey(name: 'default_avatar') final  String? defaultAvatar;
 @override@JsonKey() final  UserRole role;
-@override@JsonKey() final  bool isVerified;
-@override final  DateTime? createdAt;
-@override final  DateTime? updatedAt;
-@override@JsonKey() final  int followersCount;
-@override@JsonKey() final  int followingCount;
-@override@JsonKey() final  int listsCount;
-@override@JsonKey() final  int reviewsCount;
+@override@JsonKey(name: 'is_verified') final  bool isVerified;
+@override@JsonKey(name: 'created_at') final  DateTime? createdAt;
+@override@JsonKey(name: 'updated_at') final  DateTime? updatedAt;
+@override@JsonKey(name: 'followers_count') final  int followersCount;
+@override@JsonKey(name: 'following_count') final  int followingCount;
+@override@JsonKey(name: 'lists_count') final  int listsCount;
+@override@JsonKey(name: 'reviews_count') final  int reviewsCount;
 
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
@@ -255,16 +261,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserModel&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.username, username) || other.username == username)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.bannerUrl, bannerUrl) || other.bannerUrl == bannerUrl)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.role, role) || other.role == role)&&(identical(other.isVerified, isVerified) || other.isVerified == isVerified)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.followersCount, followersCount) || other.followersCount == followersCount)&&(identical(other.followingCount, followingCount) || other.followingCount == followingCount)&&(identical(other.listsCount, listsCount) || other.listsCount == listsCount)&&(identical(other.reviewsCount, reviewsCount) || other.reviewsCount == reviewsCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserModel&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.username, username) || other.username == username)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.bannerUrl, bannerUrl) || other.bannerUrl == bannerUrl)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.dateOfBirth, dateOfBirth) || other.dateOfBirth == dateOfBirth)&&(identical(other.defaultAvatar, defaultAvatar) || other.defaultAvatar == defaultAvatar)&&(identical(other.role, role) || other.role == role)&&(identical(other.isVerified, isVerified) || other.isVerified == isVerified)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.followersCount, followersCount) || other.followersCount == followersCount)&&(identical(other.followingCount, followingCount) || other.followingCount == followingCount)&&(identical(other.listsCount, listsCount) || other.listsCount == listsCount)&&(identical(other.reviewsCount, reviewsCount) || other.reviewsCount == reviewsCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,email,username,displayName,avatarUrl,bannerUrl,bio,role,isVerified,createdAt,updatedAt,followersCount,followingCount,listsCount,reviewsCount);
+int get hashCode => Object.hash(runtimeType,id,email,username,displayName,avatarUrl,bannerUrl,bio,gender,dateOfBirth,defaultAvatar,role,isVerified,createdAt,updatedAt,followersCount,followingCount,listsCount,reviewsCount);
 
 @override
 String toString() {
-  return 'UserModel(id: $id, email: $email, username: $username, displayName: $displayName, avatarUrl: $avatarUrl, bannerUrl: $bannerUrl, bio: $bio, role: $role, isVerified: $isVerified, createdAt: $createdAt, updatedAt: $updatedAt, followersCount: $followersCount, followingCount: $followingCount, listsCount: $listsCount, reviewsCount: $reviewsCount)';
+  return 'UserModel(id: $id, email: $email, username: $username, displayName: $displayName, avatarUrl: $avatarUrl, bannerUrl: $bannerUrl, bio: $bio, gender: $gender, dateOfBirth: $dateOfBirth, defaultAvatar: $defaultAvatar, role: $role, isVerified: $isVerified, createdAt: $createdAt, updatedAt: $updatedAt, followersCount: $followersCount, followingCount: $followingCount, listsCount: $listsCount, reviewsCount: $reviewsCount)';
 }
 
 
@@ -275,7 +281,7 @@ abstract mixin class _$UserModelCopyWith<$Res> implements $UserModelCopyWith<$Re
   factory _$UserModelCopyWith(_UserModel value, $Res Function(_UserModel) _then) = __$UserModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String email, String username, String? displayName, String? avatarUrl, String? bannerUrl, String? bio, UserRole role, bool isVerified, DateTime? createdAt, DateTime? updatedAt, int followersCount, int followingCount, int listsCount, int reviewsCount
+ String id, String email, String username,@JsonKey(name: 'display_name') String? displayName,@JsonKey(name: 'avatar_url') String? avatarUrl,@JsonKey(name: 'banner_url') String? bannerUrl, String? bio, Gender? gender,@JsonKey(name: 'dob') DateTime? dateOfBirth,@JsonKey(name: 'default_avatar') String? defaultAvatar, UserRole role,@JsonKey(name: 'is_verified') bool isVerified,@JsonKey(name: 'created_at') DateTime? createdAt,@JsonKey(name: 'updated_at') DateTime? updatedAt,@JsonKey(name: 'followers_count') int followersCount,@JsonKey(name: 'following_count') int followingCount,@JsonKey(name: 'lists_count') int listsCount,@JsonKey(name: 'reviews_count') int reviewsCount
 });
 
 
@@ -292,7 +298,7 @@ class __$UserModelCopyWithImpl<$Res>
 
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? username = null,Object? displayName = freezed,Object? avatarUrl = freezed,Object? bannerUrl = freezed,Object? bio = freezed,Object? role = null,Object? isVerified = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? followersCount = null,Object? followingCount = null,Object? listsCount = null,Object? reviewsCount = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? username = null,Object? displayName = freezed,Object? avatarUrl = freezed,Object? bannerUrl = freezed,Object? bio = freezed,Object? gender = freezed,Object? dateOfBirth = freezed,Object? defaultAvatar = freezed,Object? role = null,Object? isVerified = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? followersCount = null,Object? followingCount = null,Object? listsCount = null,Object? reviewsCount = null,}) {
   return _then(_UserModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
@@ -301,6 +307,9 @@ as String,displayName: freezed == displayName ? _self.displayName : displayName 
 as String?,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
 as String?,bannerUrl: freezed == bannerUrl ? _self.bannerUrl : bannerUrl // ignore: cast_nullable_to_non_nullable
 as String?,bio: freezed == bio ? _self.bio : bio // ignore: cast_nullable_to_non_nullable
+as String?,gender: freezed == gender ? _self.gender : gender // ignore: cast_nullable_to_non_nullable
+as Gender?,dateOfBirth: freezed == dateOfBirth ? _self.dateOfBirth : dateOfBirth // ignore: cast_nullable_to_non_nullable
+as DateTime?,defaultAvatar: freezed == defaultAvatar ? _self.defaultAvatar : defaultAvatar // ignore: cast_nullable_to_non_nullable
 as String?,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as UserRole,isVerified: null == isVerified ? _self.isVerified : isVerified // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable

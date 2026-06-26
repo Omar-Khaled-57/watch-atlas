@@ -3,21 +3,121 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
+  // Dark theme
   static const Color _darkBg = Color(0xFF0F1115);
   static const Color _darkSurface = Color(0xFF171A21);
   static const Color _darkSurfaceSecondary = Color(0xFF20242E);
-  static const Color _accent = Color(0xFFE11D48);
   static const Color _darkText = Color(0xFFFFFFFF);
   static const Color _darkMuted = Color(0xFFA1A1AA);
 
+  // Light theme
   static const Color _lightBg = Color(0xFFFFFFFF);
   static const Color _lightSurface = Color(0xFFF5F5F5);
   static const Color _lightText = Color(0xFF111827);
   static const Color _lightSecondary = Color(0xFF6B7280);
 
+  // Accent & states
+  static const Color _accent = Color(0xFF00B8FF);
+  static const Color _accentHover = Color(0xFF009FE0);
+  static const Color _accentPressed = Color(0xFF0088C2);
+
+  // Logo brand colors
+  static const Color _logoCyan = Color(0xFF00D4FF);
+  static const Color _logoPurple = Color(0xFF8B5CF6);
+
+  // Semantic
+  static const Color _success = Color(0xFF22C55E);
+  static const Color _warning = Color(0xFFF59E0B);
+  static const Color _error = Color(0xFFEF4444);
+
   static const _radiusSmall = 8.0;
   static const _radiusMedium = 12.0;
   static const _radiusLarge = 16.0;
+
+  // Logo gradient – Cyan → Purple (135deg)
+  static const LinearGradient logoGradient = LinearGradient(
+    colors: [_logoCyan, _logoPurple],
+    begin: Alignment(-0.5, -0.5),
+    end: Alignment(0.5, 0.5),
+    stops: [0.0, 1.0],
+  );
+
+  // Soft glow shadow for logo accent colors
+  static List<BoxShadow> logoGlow(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return [
+      BoxShadow(
+        color: _logoPurple.withValues(alpha: isDark ? 0.35 : 0.12),
+        blurRadius: 20,
+        spreadRadius: isDark ? 2 : 0,
+      ),
+      BoxShadow(
+        color: _logoCyan.withValues(alpha: isDark ? 0.15 : 0.05),
+        blurRadius: 40,
+        spreadRadius: -4,
+      ),
+    ];
+  }
+
+  static const ColorScheme _darkColorScheme = ColorScheme.dark(
+    primary: _accent,
+    onPrimary: Color(0xFFFFFFFF),
+    primaryContainer: Color(0xFF004D6B),
+    onPrimaryContainer: Color(0xFFB3E8FF),
+    secondary: _logoPurple,
+    onSecondary: Color(0xFFFFFFFF),
+    secondaryContainer: Color(0xFF3B1E6B),
+    onSecondaryContainer: Color(0xFFEDDBFF),
+    tertiary: _logoCyan,
+    onTertiary: Color(0xFF003544),
+    tertiaryContainer: Color(0xFF004E62),
+    onTertiaryContainer: Color(0xFFA8ECFF),
+    error: _error,
+    onError: Color(0xFFFFFFFF),
+    errorContainer: Color(0xFF93000A),
+    onErrorContainer: Color(0xFFFFDAD6),
+    surface: _darkBg,
+    onSurface: _darkText,
+    surfaceContainerHighest: _darkSurfaceSecondary,
+    onSurfaceVariant: _darkMuted,
+    outline: Color(0xFF49454F),
+    outlineVariant: Color(0xFF2A2A35),
+    shadow: Color(0xFF000000),
+    inverseSurface: Color(0xFFE6E1E5),
+    onInverseSurface: Color(0xFF1C1B1F),
+    inversePrimary: _accent,
+    surfaceTint: _accent,
+  );
+
+  static const ColorScheme _lightColorScheme = ColorScheme.light(
+    primary: _accent,
+    onPrimary: Color(0xFFFFFFFF),
+    primaryContainer: Color(0xFFCAE9FF),
+    onPrimaryContainer: Color(0xFF001E31),
+    secondary: _logoPurple,
+    onSecondary: Color(0xFFFFFFFF),
+    secondaryContainer: Color(0xFFEDDBFF),
+    onSecondaryContainer: Color(0xFF1E0040),
+    tertiary: _logoCyan,
+    onTertiary: Color(0xFFFFFFFF),
+    tertiaryContainer: Color(0xFFA8ECFF),
+    onTertiaryContainer: Color(0xFF001F28),
+    error: _error,
+    onError: Color(0xFFFFFFFF),
+    errorContainer: Color(0xFFFFDAD6),
+    onErrorContainer: Color(0xFF410002),
+    surface: _lightBg,
+    onSurface: _lightText,
+    surfaceContainerHighest: Color(0xFFF0F0F0),
+    onSurfaceVariant: _lightSecondary,
+    outline: Color(0xFF79747E),
+    outlineVariant: Color(0xFFCAC4D0),
+    shadow: Color(0xFF000000),
+    inverseSurface: Color(0xFF1C1B1F),
+    onInverseSurface: Color(0xFFE6E1E5),
+    inversePrimary: _accent,
+    surfaceTint: _accent,
+  );
 
   static ThemeData _baseTheme(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
@@ -25,10 +125,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: _accent,
-        brightness: brightness,
-      ),
+      colorScheme: isDark ? _darkColorScheme : _lightColorScheme,
       scaffoldBackgroundColor: isDark ? _darkBg : _lightBg,
       textTheme: _textTheme(isDark),
       appBarTheme: AppBarTheme(
@@ -52,6 +149,32 @@ class AppTheme {
         ),
         clipBehavior: Clip.antiAlias,
         margin: EdgeInsets.zero,
+        surfaceTintColor: Colors.transparent,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: isDark
+            ? _darkSurface.withValues(alpha: 0.85)
+            : _lightSurface.withValues(alpha: 0.92),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(_radiusLarge)),
+          side: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.06)
+                : Colors.black.withValues(alpha: 0.04),
+          ),
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: isDark
+            ? _darkSurface.withValues(alpha: 0.92)
+            : _lightBg.withValues(alpha: 0.95),
+        elevation: 0,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(_radiusLarge),
+          ),
+        ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -150,6 +273,14 @@ class AppTheme {
           borderRadius: BorderRadius.all(Radius.circular(_radiusMedium)),
         ),
       ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: isDark ? _darkSurface : _lightBg,
+        indicatorColor: _accent.withValues(alpha: 0.15),
+        height: 64,
+        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: isDark ? Colors.black38 : Colors.black12,
+      ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: isDark ? _darkSurface : _lightBg,
         selectedItemColor: _accent,
@@ -196,22 +327,6 @@ class AppTheme {
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(_radiusSmall)),
-        ),
-      ),
-      dialogTheme: DialogThemeData(
-        backgroundColor: isDark ? _darkSurface : _lightBg,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(_radiusLarge)),
-        ),
-      ),
-      bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: isDark ? _darkSurface : _lightBg,
-        elevation: 0,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(_radiusLarge),
-          ),
         ),
       ),
       tabBarTheme: TabBarThemeData(

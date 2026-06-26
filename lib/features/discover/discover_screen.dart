@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
+import '../../core/constants/app_constants.dart';
+import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/shared/media_card.dart';
@@ -20,6 +25,9 @@ class DiscoverScreen extends ConsumerStatefulWidget {
 
 class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
   late PagingController<int, MediaModel> _pagingController;
+  final _searchController = TextEditingController();
+  Timer? _searchDebounce;
+  String _lastSearchQuery = '';
 
   @override
   void initState() {
@@ -30,8 +38,23 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _pagingController.dispose();
+    _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      final query = value.trim();
+      if (query != _lastSearchQuery) {
+        _lastSearchQuery = query;
+        ref.read(discoverFilterProvider.notifier).setSearchQuery(
+              query.isEmpty ? null : query,
+            );
+      }
+    });
   }
 
   Future<void> _fetchPage(int pageKey) async {
@@ -75,10 +98,10 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
 
     final columns = _gridColumns(context.screenWidth);
     final screenWidth = context.screenWidth;
-    final gridPadding = 32.0;
-    final spacing = 8.0;
+    final gridPadding = Spacing.gridPadding(screenWidth);
+    final spacing = Spacing.gridSpacing(screenWidth);
     final cardWidth =
-        (screenWidth - gridPadding - (columns - 1) * spacing) / columns;
+        (screenWidth - gridPadding * 2 - (columns - 1) * spacing) / columns;
 
     return Scaffold(
       appBar: AppBar(
@@ -93,17 +116,33 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
       ),
       body: CustomScrollView(
         slivers: [
+          SliverToBoxAdapter(child: SizedBox(height: Spacing.sm)),
           SliverToBoxAdapter(
-            child: _buildTabBar(filters),
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(bottom: Spacing.md),
+              child: _buildTabBar(filters),
+            ),
           ),
           SliverToBoxAdapter(
-            child: _buildGenreChips(filters, genresAsync),
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(bottom: Spacing.md),
+              child: _buildSearchBar(),
+            ),
           ),
           SliverToBoxAdapter(
-            child: _buildActiveFilters(filters),
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(bottom: Spacing.md),
+              child: _buildGenreChips(filters, genresAsync),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(bottom: Spacing.md),
+              child: _buildActiveFilters(filters),
+            ),
           ),
           SliverPadding(
-            padding: EdgeInsetsDirectional.fromSTEB(16, 8, 16, 16),
+            padding: EdgeInsetsDirectional.fromSTEB(Spacing.lg, 0, Spacing.lg, Spacing.lg),
             sliver: PagedSliverGrid<int, MediaModel>(
               pagingController: _pagingController,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -116,9 +155,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                 itemBuilder: (context, item, index) => MediaCard(
                   id: item.id,
                   title: item.title,
-                  posterUrl: item.posterPath != null
-                      ? 'https://image.tmdb.org/t/p/w342${item.posterPath}'
-                      : null,
+                  posterUrl: AppConstants.mediaImageUrl(item.posterPath),
                   voteAverage: item.voteAverage,
                   mediaType: item.mediaType,
                   width: cardWidth,
@@ -130,20 +167,20 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                 firstPageProgressIndicatorBuilder: (_) =>
                     const Center(
                   child: Padding(
-                    padding: EdgeInsets.all(32),
+                    padding: EdgeInsets.all(Spacing.xxl),
                     child: CircularProgressIndicator(),
                   ),
                 ),
                 newPageProgressIndicatorBuilder: (_) =>
                     const Center(
                   child: Padding(
-                    padding: EdgeInsets.all(16),
+                    padding: EdgeInsets.all(Spacing.lg),
                     child: CircularProgressIndicator(),
                   ),
                 ),
                 noItemsFoundIndicatorBuilder: (_) => Center(
                   child: Padding(
-                    padding: EdgeInsetsDirectional.all(48),
+                    padding: EdgeInsetsDirectional.all(Spacing.section),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -152,12 +189,12 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                           size: 64,
                           color: context.colorScheme.onSurfaceVariant,
                         ),
-                        SizedBox(height: 16),
+                        SizedBox(height: Spacing.lg),
                         Text(
                           'No results found',
                           style: context.textTheme.titleMedium,
                         ),
-                        SizedBox(height: 8),
+                        SizedBox(height: Spacing.sm),
                         Text(
                           'Try adjusting your filters',
                           style: context.textTheme.bodyMedium?.copyWith(
@@ -176,9 +213,43 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     );
   }
 
+  Widget _buildSearchBar() {
+    final colorScheme = context.colorScheme;
+    return Padding(
+      padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+      child: TextField(
+        controller: _searchController,
+        onChanged: _onSearchChanged,
+        decoration: InputDecoration(
+          hintText: 'Search movies, TV shows, anime...',
+          hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+          prefixIcon: Icon(Icons.search_rounded, color: colorScheme.onSurfaceVariant),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: Icon(Icons.clear_rounded, color: colorScheme.onSurfaceVariant),
+                  onPressed: () {
+                    _searchController.clear();
+                    _lastSearchQuery = '';
+                    ref.read(discoverFilterProvider.notifier).setSearchQuery(null);
+                  },
+                )
+              : null,
+          filled: true,
+          fillColor: colorScheme.surfaceContainerHighest,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: EdgeInsetsDirectional.symmetric(vertical: Spacing.md),
+        ),
+        style: TextStyle(color: colorScheme.onSurface),
+      ),
+    );
+  }
+
   Widget _buildTabBar(DiscoverFilters filters) {
     return Padding(
-      padding: EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg, vertical: Spacing.sm),
       child: SegmentedButton<DiscoverMediaTab>(
         segments: const [
           ButtonSegment(value: DiscoverMediaTab.movies, label: Text('Movies')),
@@ -212,9 +283,9 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
           height: 48,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            padding: EdgeInsetsDirectional.only(start: 16, end: 16),
+            padding: EdgeInsetsDirectional.only(start: Spacing.lg, end: Spacing.lg),
             itemCount: genres.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            separatorBuilder: (_, __) => const SizedBox(width: Spacing.sm),
             itemBuilder: (context, index) {
               final genre = genres[index];
               return FilterChipWidget(
@@ -240,9 +311,9 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
         height: 48,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
-          padding: EdgeInsetsDirectional.only(start: 16, end: 16),
+          padding: EdgeInsetsDirectional.only(start: Spacing.lg, end: Spacing.lg),
           itemCount: 8,
-          separatorBuilder: (_, __) => const SizedBox(width: 8),
+          separatorBuilder: (_, __) => const SizedBox(width: Spacing.sm),
           itemBuilder: (_, __) => Container(
             width: 80,
             height: 36,
@@ -265,7 +336,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
         filters.ratingFrom != null ||
         filters.ratingTo != null;
 
-    if (!hasActiveFilters) return const SizedBox(height: 8);
+    if (!hasActiveFilters) return const SizedBox(height: Spacing.sm);
 
     final theme = Theme.of(context);
     final chips = <Widget>[];
@@ -290,7 +361,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     }
 
     return Padding(
-      padding: EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 4),
+      padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg, vertical: Spacing.xs),
       child: Row(
         children: [
           Expanded(
@@ -299,7 +370,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
               child: Row(children: chips),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: Spacing.sm),
           GestureDetector(
             onTap: () =>
                 ref.read(discoverFilterProvider.notifier).clearAll(),
@@ -312,7 +383,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
 
   Widget _buildActiveChip(String label, ThemeData theme) {
     return Padding(
-      padding: EdgeInsetsDirectional.only(end: 8),
+      padding: EdgeInsetsDirectional.only(end: Spacing.sm),
       child: Container(
         padding: EdgeInsetsDirectional.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
@@ -339,6 +410,6 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
   }
 
   void _navigateToDetail(MediaModel media) {
-    Navigator.of(context).pushNamed('/media/${media.id}');
+    context.push('/media/${media.mediaType.name}/${media.id}');
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../core/models/media_enums.dart';
+import '../constants/dimensions.dart';
+import 'horizontal_carousel.dart';
 import 'media_card.dart';
 import 'section_header.dart';
 
@@ -20,45 +22,40 @@ class MediaRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardWidth = featured ? 200.0 : 140.0;
-    final cardHeight = featured ? 300.0 : 210.0;
+    final cardWidth = featured ? Spacing.posterWidthLg : Spacing.posterWidth;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsetsDirectional.only(start: 16, end: 16, bottom: 12),
+          padding: EdgeInsetsDirectional.only(start: Spacing.lg, end: Spacing.lg, bottom: Spacing.md),
           child: SectionHeader(
             title: title,
             actionLabel: onSeeAll != null ? 'See All' : null,
             onAction: onSeeAll,
           ),
         ),
-        SizedBox(
-          height: cardHeight + 32,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsetsDirectional.only(start: 12, end: 12),
-            itemCount: items.length,
-            itemExtent: cardWidth + 8,
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return Padding(
-                padding: const EdgeInsetsDirectional.only(start: 4, end: 4),
-                child: MediaCard(
-                  id: item.id,
-                  title: item.title,
-                  posterUrl: item.posterUrl,
-                  voteAverage: item.voteAverage,
-                  mediaType: item.mediaType,
-                  onTap: item.onTap,
-                  width: cardWidth,
-                  height: cardHeight,
-                  heroTag: item.heroTag,
-                ),
-              );
-            },
-          ),
+        HorizontalCarousel(
+          height: cardWidth * 1.5 + Spacing.xxl,
+          padding: EdgeInsetsDirectional.only(start: Spacing.md, end: Spacing.md),
+          itemExtent: cardWidth + Spacing.sm,
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final item = items[index];
+            return Padding(
+              padding: EdgeInsetsDirectional.only(start: Spacing.xs, end: Spacing.xs),
+              child: MediaCard(
+                id: item.id,
+                title: item.title,
+                posterUrl: item.posterUrl,
+                voteAverage: item.voteAverage,
+                mediaType: item.mediaType,
+                onTap: item.onTap,
+                width: cardWidth,
+                heroTag: item.heroTag,
+              ),
+            );
+          },
         ),
       ],
     );

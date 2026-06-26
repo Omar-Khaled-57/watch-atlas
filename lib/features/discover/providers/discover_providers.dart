@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/providers/app_providers.dart';
 import '../../../core/services/anilist_service.dart';
 import '../../../core/services/tmdb_service.dart';
 import '../../../models/media_model.dart';
@@ -31,6 +30,7 @@ class DiscoverFilters {
   final int? yearTo;
   final double? ratingFrom;
   final double? ratingTo;
+  final String? searchQuery;
 
   const DiscoverFilters({
     this.tab = DiscoverMediaTab.movies,
@@ -40,6 +40,7 @@ class DiscoverFilters {
     this.yearTo,
     this.ratingFrom,
     this.ratingTo,
+    this.searchQuery,
   });
 
   DiscoverFilters copyWith({
@@ -50,6 +51,7 @@ class DiscoverFilters {
     Object? yearTo = _sentinel,
     Object? ratingFrom = _sentinel,
     Object? ratingTo = _sentinel,
+    Object? searchQuery = _sentinel,
   }) {
     return DiscoverFilters(
       tab: tab ?? this.tab,
@@ -59,6 +61,7 @@ class DiscoverFilters {
       yearTo: _unwrap<int>(yearTo, this.yearTo),
       ratingFrom: _unwrap<double>(ratingFrom, this.ratingFrom),
       ratingTo: _unwrap<double>(ratingTo, this.ratingTo),
+      searchQuery: _unwrap<String>(searchQuery, this.searchQuery),
     );
   }
 
@@ -82,7 +85,8 @@ class DiscoverFilters {
           yearFrom == other.yearFrom &&
           yearTo == other.yearTo &&
           ratingFrom == other.ratingFrom &&
-          ratingTo == other.ratingTo;
+          ratingTo == other.ratingTo &&
+          searchQuery == other.searchQuery;
 
   @override
   int get hashCode =>
@@ -92,7 +96,8 @@ class DiscoverFilters {
       yearFrom.hashCode ^
       yearTo.hashCode ^
       ratingFrom.hashCode ^
-      ratingTo.hashCode;
+      ratingTo.hashCode ^
+      searchQuery.hashCode;
 }
 
 class DiscoverFilterNotifier extends Notifier<DiscoverFilters> {
@@ -106,6 +111,7 @@ class DiscoverFilterNotifier extends Notifier<DiscoverFilters> {
       state = state.copyWith(yearFrom: from, yearTo: to);
   void setRatingRange(double? from, double? to) =>
       state = state.copyWith(ratingFrom: from, ratingTo: to);
+  void setSearchQuery(String? query) => state = state.copyWith(searchQuery: query);
   void clearAll() => state = state.clearAll();
 }
 
@@ -160,6 +166,15 @@ Future<List<MediaModel>> _fetchMoviePage(
   DiscoverFilters filters,
 ) async {
   final tmdb = TmdbService.instance;
+
+  if (filters.searchQuery != null && filters.searchQuery!.isNotEmpty) {
+    final json = await tmdb.searchMovie(filters.searchQuery!, page: page);
+    return _tmdbResultsToMediaModels(
+      json['results'] as List<dynamic>,
+      MediaType.movie,
+    );
+  }
+
   final params = <String, dynamic>{
     'page': page,
     'sort_by': 'popularity.desc',
@@ -196,6 +211,15 @@ Future<List<MediaModel>> _fetchTvPage(
   DiscoverFilters filters,
 ) async {
   final tmdb = TmdbService.instance;
+
+  if (filters.searchQuery != null && filters.searchQuery!.isNotEmpty) {
+    final json = await tmdb.searchTv(filters.searchQuery!, page: page);
+    return _tmdbResultsToMediaModels(
+      json['results'] as List<dynamic>,
+      MediaType.tv,
+    );
+  }
+
   final params = <String, dynamic>{
     'page': page,
     'sort_by': 'popularity.desc',
@@ -232,6 +256,11 @@ Future<List<MediaModel>> _fetchAnimePage(
   DiscoverFilters filters,
   AnilistService anilist,
 ) async {
+  if (filters.searchQuery != null && filters.searchQuery!.isNotEmpty) {
+    final mediaList = await anilist.searchAnime(filters.searchQuery!, page: page);
+    return mediaList.map((m) => _animeToMediaModel(m as Map<String, dynamic>)).toList();
+  }
+
   const gql = '''
     query (\$page: Int, \$perPage: Int, \$genre: String) {
       Page(page: \$page, perPage: \$perPage) {
@@ -264,31 +293,34 @@ Future<List<MediaModel>> _fetchAnimePage(
   final raw = await anilist.query(gql, variables: variables);
   final mediaList = raw['data']['Page']['media'] as List<dynamic>;
 
-  return mediaList.map((m) {
-    final map = m as Map<String, dynamic>;
-    final title = map['title'] as Map<String, dynamic>?;
-    final cover = map['coverImage'] as Map<String, dynamic>?;
+  return mediaList.map((m) => _animeToMediaModel(m as Map<String, dynamic>)).toList();
+}
 
-    return MediaModel(
-      id: map['id'] as int,
-      mediaType: MediaType.anime,
-      title: (title?['english'] ?? title?['romaji'] ?? '') as String,
-      romanizedTitle: title?['romaji'] as String?,
-      overview: map['description'] as String?,
-      posterPath: cover?['large'] as String?,
-      backdropPath: map['bannerImage'] as String?,
-      voteAverage: (map['averageScore'] as num?)?.toDouble(),
-      popularity: (map['popularity'] as num?)?.toDouble() ?? 0,
-      totalEpisodes: (map['episodes'] as num?)?.toInt() ?? 0,
-      releaseDate: map['seasonYear'] != null
-          ? DateTime.tryParse('${map['seasonYear']}-01-01')
-          : null,
-      genres: (map['genres'] as List<dynamic>?)
-          ?.map((e) => e.toString())
-          .toList(),
-      status: map['status'] as String?,
-    );
-  }).toList();
+MediaModel _animeToMediaModel(Map<String, dynamic> map) {
+  final title = map['title'] as Map<String, dynamic>?;
+  final cover = map['coverImage'] as Map<String, dynamic>?;
+
+  return MediaModel(
+    id: map['id'] as int,
+    mediaType: MediaType.anime,
+    title: (title?['english'] ?? title?['romaji'] ?? '') as String,
+    romanizedTitle: title?['romaji'] as String?,
+    overview: map['description'] as String?,
+    posterPath: cover?['large'] as String?,
+    backdropPath: map['bannerImage'] as String?,
+    voteAverage: (map['averageScore'] as num?)?.toDouble() != null
+        ? (map['averageScore'] as num).toDouble() / 10
+        : null,
+    popularity: (map['popularity'] as num?)?.toDouble() ?? 0,
+    totalEpisodes: (map['episodes'] as num?)?.toInt() ?? 0,
+    releaseDate: map['seasonYear'] != null
+        ? DateTime.tryParse('${map['seasonYear']}-01-01')
+        : null,
+    genres: (map['genres'] as List<dynamic>?)
+        ?.map((e) => e.toString())
+        .toList(),
+    status: map['status'] as String?,
+  );
 }
 
 String? _animeGenreById(int id) {

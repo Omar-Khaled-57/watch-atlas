@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/constants/dimensions.dart';
 import '../providers/discover_providers.dart';
 
 class FilterSheet extends ConsumerStatefulWidget {
@@ -55,7 +56,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
     final theme = Theme.of(context);
 
     return Container(
-      padding: EdgeInsetsDirectional.all(24),
+      padding: EdgeInsetsDirectional.all(Spacing.xl),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadiusDirectional.only(
@@ -84,20 +85,20 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 24),
+          SizedBox(height: Spacing.xl),
           Text(
             'Country',
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: Spacing.sm),
           DropdownButtonFormField<String>(
             value: _selectedCountry,
             decoration: InputDecoration(
               contentPadding: EdgeInsetsDirectional.symmetric(
-                horizontal: 16,
-                vertical: 12,
+                horizontal: Spacing.lg,
+                vertical: Spacing.md,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -124,7 +125,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: Spacing.sm),
           RangeSlider(
             values: _yearRange,
             min: 1970,
@@ -138,14 +139,14 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               setState(() => _yearRange = values);
             },
           ),
-          SizedBox(height: 4),
+          SizedBox(height: Spacing.xs),
           Text(
             'Rating Range',
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: Spacing.sm),
           RangeSlider(
             values: _ratingRange,
             min: 0,
@@ -159,7 +160,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               setState(() => _ratingRange = values);
             },
           ),
-          SizedBox(height: 24),
+          SizedBox(height: Spacing.xl),
           Row(
             children: [
               Expanded(
@@ -180,7 +181,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
                   child: Text('Reset'),
                 ),
               ),
-              SizedBox(width: 16),
+              SizedBox(width: Spacing.lg),
               Expanded(
                 child: FilledButton(
                   onPressed: _applyFilters,
@@ -195,7 +196,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               ),
             ],
           ),
-          SizedBox(height: 16),
+          SizedBox(height: Spacing.lg),
         ],
       ),
     );

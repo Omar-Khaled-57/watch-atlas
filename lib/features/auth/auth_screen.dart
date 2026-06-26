@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../core/constants/dimensions.dart';
+import '../../core/services/auth_service.dart';
 import 'providers/auth_providers.dart';
 import 'widgets/auth_text_field.dart';
+import 'widgets/google_account_picker.dart';
 import 'widgets/social_button.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
@@ -52,83 +54,22 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    ref.listen(authNotifierProvider, (prev, next) {
-      if (next.status == AuthStatus.authenticated) {
-        context.go('/');
-      }
-    });
-
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: FadeTransition(
             opacity: _fadeAnimation,
-            child: SingleChildScrollView(
-              padding: const EdgeInsetsDirectional.symmetric(
-                horizontal: 24,
-                vertical: 32,
-              ),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _buildHeader(colorScheme, textTheme),
-                    const SizedBox(height: 48),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      switchInCurve: Curves.easeInOut,
-                      switchOutCurve: Curves.easeInOut,
-                      transitionBuilder: (child, animation) {
-                        return FadeTransition(
-                          opacity: animation,
-                          child: SlideTransition(
-                            position: Tween<Offset>(
-                              begin: const Offset(0, 0.05),
-                              end: Offset.zero,
-                            ).animate(animation),
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: authState.showResetPassword
-                          ? _buildResetPasswordForm(
-                              authNotifier,
-                              colorScheme,
-                              textTheme,
-                            )
-                          : _buildAuthForm(
-                              authState,
-                              authNotifier,
-                              colorScheme,
-                            ),
-                    ),
-                    if (!authState.showResetPassword) ...[
-                      const SizedBox(height: 24),
-                      _buildDivider(colorScheme),
-                      const SizedBox(height: 24),
-                      SocialButton(
-                        type: SocialButtonType.google,
-                        onPressed: () => authNotifier.signInWithGoogle(),
-                        loading: authState.status == AuthStatus.loading,
-                      ),
-                      const SizedBox(height: 12),
-                      SocialButton(
-                        type: SocialButtonType.apple,
-                        onPressed: () => authNotifier.signInWithApple(),
-                        loading: authState.status == AuthStatus.loading,
-                      ),
-                      const SizedBox(height: 24),
-                      _buildToggleText(authState, authNotifier, colorScheme),
-                    ],
-                    if (authState.errorMessage != null) ...[
-                      const SizedBox(height: 16),
-                      _buildErrorBanner(authState.errorMessage!, colorScheme),
-                    ],
-                  ],
-                ),
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.maxWidth >= 680) {
+                  return _buildLandscape(
+                    authState, authNotifier, colorScheme, textTheme,
+                  );
+                }
+                return _buildPortrait(
+                  authState, authNotifier, colorScheme, textTheme,
+                );
+              },
             ),
           ),
         ),
@@ -136,37 +77,172 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
     );
   }
 
-  Widget _buildHeader(ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildPortrait(
+    AuthState authState,
+    AuthNotifier authNotifier,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
+    return SingleChildScrollView(
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: Spacing.xl, vertical: Spacing.xxl),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _buildHeader(colorScheme, textTheme),
+            const SizedBox(height: Spacing.section),
+            _buildFormSection(authState, authNotifier, colorScheme, textTheme),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLandscape(
+    AuthState authState,
+    AuthNotifier authNotifier,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
+    return SingleChildScrollView(
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: 40, vertical: 48),
+      child: Form(
+        key: _formKey,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: _buildHeader(colorScheme, textTheme, large: true),
+            ),
+            Container(
+              width: 1,
+              height: 320,
+              margin: const EdgeInsetsDirectional.symmetric(horizontal: 48),
+              color: colorScheme.brightness == Brightness.dark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.06),
+            ),
+            Expanded(
+              child: _buildFormSection(
+                authState, authNotifier, colorScheme, textTheme,
+                compact: true,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(ColorScheme colorScheme, TextTheme textTheme, {bool large = false}) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 88,
-          height: 88,
+          width: large ? 140 : 100,
+          height: large ? 140 : 100,
           decoration: BoxDecoration(
-            color: colorScheme.primaryContainer,
-            borderRadius: BorderRadiusDirectional.circular(22),
+            borderRadius: BorderRadiusDirectional.circular(large ? 34 : 25),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF8B5CF6).withValues(alpha: 0.3),
+                blurRadius: 24,
+                spreadRadius: 0,
+              ),
+            ],
           ),
-          child: Icon(
-            Icons.play_circle_fill_rounded,
-            size: 52,
-            color: colorScheme.primary,
+          clipBehavior: Clip.antiAlias,
+          child: Image.asset(
+            'assets/images/logo/logo.png',
+            fit: BoxFit.contain,
           ),
         ),
         const SizedBox(height: 20),
-        Text(
-          'WatchAtlas',
-          style: textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: colorScheme.onSurface,
+        ShaderMask(
+          shaderCallback: (bounds) => const LinearGradient(
+            colors: [Color(0xFF00D4FF), Color(0xFF8B5CF6)],
+            begin: Alignment(-0.5, -0.5),
+            end: Alignment(0.5, 0.5),
+          ).createShader(bounds),
+          child: Text(
+            'WatchAtlas',
+            style: (large ? textTheme.displaySmall : textTheme.headlineMedium)
+                ?.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ),
-        const SizedBox(height: 8),
+          const SizedBox(height: Spacing.sm),
         Text(
-          'Your personal media tracker',
-          style: textTheme.bodyLarge?.copyWith(
+          'Your global watch list',
+          style: (large ? textTheme.titleMedium : textTheme.bodyLarge)?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildFormSection(
+    AuthState authState,
+    AuthNotifier authNotifier,
+    ColorScheme colorScheme,
+    TextTheme textTheme, {
+    bool compact = false,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          switchInCurve: Curves.easeInOut,
+          switchOutCurve: Curves.easeInOut,
+          transitionBuilder: (child, animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.05),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              ),
+            );
+          },
+          child: authState.showResetPassword
+              ? _buildResetPasswordForm(authNotifier, colorScheme, textTheme)
+              : _buildAuthForm(authState, authNotifier, colorScheme),
+        ),
+        if (!authState.showResetPassword) ...[
+          SizedBox(height: compact ? 20 : 24),
+          _buildDivider(colorScheme),
+          SizedBox(height: compact ? 20 : 24),
+          SocialButton(
+            type: SocialButtonType.google,
+            onPressed: () async {
+              final accounts = await AuthService.instance.getSavedGoogleAccounts();
+              if (!mounted) return;
+              final picked = await showGoogleAccountPicker(
+                context: context,
+                accounts: accounts,
+              );
+              if (picked == null || !mounted) return;
+              authNotifier.signInWithGoogle(
+                loginHint: picked == '__other__' || picked == '__continue__'
+                    ? null
+                    : picked,
+              );
+            },
+            loading: authState.status == AuthStatus.loading,
+          ),
+          SizedBox(height: compact ? 20 : 24),
+          _buildToggleText(authState, authNotifier, colorScheme),
+        ],
+        if (authState.errorMessage != null) ...[
+          const SizedBox(height: Spacing.lg),
+          _buildErrorBanner(authState.errorMessage!, colorScheme),
+        ],
       ],
     );
   }
@@ -193,8 +269,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
             return null;
           },
         ),
-        const SizedBox(height: 16),
-        AuthTextField(
+            const SizedBox(height: Spacing.lg),
+            AuthTextField(
           controller: _passwordController,
           hintText: 'Password',
           icon: Icons.lock_outlined,
@@ -207,7 +283,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
           },
         ),
         if (authState.isSignUpMode) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: Spacing.lg),
           AuthTextField(
             controller: _confirmPasswordController,
             hintText: 'Confirm Password',
@@ -216,20 +292,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
             enabled: !isLoading,
             validator: (v) {
               if (v == null || v.isEmpty) return 'Please confirm your password';
-              if (v != _passwordController.text)
-                return 'Passwords do not match';
+              if (v != _passwordController.text) return 'Passwords do not match';
               return null;
             },
           ),
         ],
-        const SizedBox(height: 8),
+          const SizedBox(height: Spacing.sm),
         if (!authState.isSignUpMode)
           Align(
             alignment: AlignmentDirectional.centerEnd,
             child: TextButton(
-              onPressed: isLoading
-                  ? null
-                  : () => authNotifier.toggleResetPassword(),
+              onPressed: isLoading ? null : () => authNotifier.toggleResetPassword(),
               child: Text(
                 'Forgot Password?',
                 style: TextStyle(color: colorScheme.secondary),
@@ -262,19 +335,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadiusDirectional.circular(12),
               ),
-              textStyle: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             child: isLoading
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
                 : Text(authState.isSignUpMode ? 'Sign Up' : 'Sign In'),
           ),
@@ -288,8 +355,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
     ColorScheme colorScheme,
     TextTheme textTheme,
   ) {
-    final isLoading =
-        ref.watch(authNotifierProvider).status == AuthStatus.loading;
+    final isLoading = ref.watch(authNotifierProvider).status == AuthStatus.loading;
 
     return Column(
       key: const ValueKey('resetPassword'),
@@ -303,7 +369,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
             color: colorScheme.onSurface,
           ),
         ),
-        const SizedBox(height: 8),
+          const SizedBox(height: Spacing.sm),
         Text(
           'Enter your email to receive a password reset link',
           style: textTheme.bodyMedium?.copyWith(
@@ -311,7 +377,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 24),
+          const SizedBox(height: Spacing.xl),
         AuthTextField(
           controller: _emailController,
           hintText: 'Email',
@@ -340,32 +406,21 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadiusDirectional.circular(12),
               ),
-              textStyle: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             child: isLoading
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
                 : const Text('Send Reset Link'),
           ),
         ),
-        const SizedBox(height: 8),
+          const SizedBox(height: Spacing.sm),
         TextButton(
-          onPressed: isLoading
-              ? null
-              : () => authNotifier.toggleResetPassword(),
-          child: Text(
-            'Back to Sign In',
-            style: TextStyle(color: colorScheme.secondary),
-          ),
+          onPressed: isLoading ? null : () => authNotifier.toggleResetPassword(),
+          child: Text('Back to Sign In', style: TextStyle(color: colorScheme.secondary)),
         ),
       ],
     );
@@ -376,11 +431,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
       children: [
         Expanded(child: Divider(color: colorScheme.outlineVariant)),
         Padding(
-          padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
-          child: Text(
-            'or continue with',
-            style: TextStyle(color: colorScheme.onSurfaceVariant),
-          ),
+          padding: const EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+          child: Text('or continue with', style: TextStyle(color: colorScheme.onSurfaceVariant)),
         ),
         Expanded(child: Divider(color: colorScheme.outlineVariant)),
       ],
@@ -405,10 +457,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
           onPressed: () => authNotifier.toggleMode(),
           child: Text(
             authState.isSignUpMode ? 'Sign In' : 'Sign Up',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: colorScheme.primary,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w600, color: colorScheme.primary),
           ),
         ),
       ],
@@ -417,32 +466,21 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
 
   Widget _buildErrorBanner(String error, ColorScheme colorScheme) {
     return Container(
-      padding: const EdgeInsetsDirectional.all(12),
+      padding: const EdgeInsetsDirectional.all(Spacing.md),
       decoration: BoxDecoration(
         color: colorScheme.errorContainer,
         borderRadius: BorderRadiusDirectional.circular(12),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.error_outline,
-            color: colorScheme.onErrorContainer,
-            size: 20,
-          ),
-          const SizedBox(width: 8),
+          Icon(Icons.error_outline, color: colorScheme.onErrorContainer, size: 20),
+          const SizedBox(width: Spacing.sm),
           Expanded(
-            child: Text(
-              error,
-              style: TextStyle(color: colorScheme.onErrorContainer),
-            ),
+            child: Text(error, style: TextStyle(color: colorScheme.onErrorContainer)),
           ),
           GestureDetector(
             onTap: () => ref.read(authNotifierProvider.notifier).clearError(),
-            child: Icon(
-              Icons.close,
-              size: 18,
-              color: colorScheme.onErrorContainer,
-            ),
+            child: Icon(Icons.close, size: 18, color: colorScheme.onErrorContainer),
           ),
         ],
       ),

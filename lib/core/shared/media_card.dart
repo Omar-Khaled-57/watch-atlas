@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../core/models/media_enums.dart';
+import '../constants/dimensions.dart';
 
 class MediaCard extends StatelessWidget {
   final int id;
@@ -12,7 +13,6 @@ class MediaCard extends StatelessWidget {
   final MediaType? mediaType;
   final VoidCallback? onTap;
   final double width;
-  final double height;
   final String? heroTag;
 
   const MediaCard({
@@ -24,7 +24,6 @@ class MediaCard extends StatelessWidget {
     this.mediaType,
     this.onTap,
     this.width = 140,
-    this.height = 210,
     this.heroTag,
   });
 
@@ -40,33 +39,49 @@ class MediaCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadiusDirectional.all(Radius.circular(10)),
-              child: heroTag != null
-                  ? Hero(
-                      tag: heroTag!,
-                      child: _PosterImage(
-                        posterUrl: posterUrl,
-                        width: width,
-                        height: height,
-                        voteAverage: voteAverage,
-                        mediaType: mediaType,
-                        colorScheme: colorScheme,
-                        textTheme: textTheme,
-                      ),
-                    )
-                  : _PosterImage(
-                      posterUrl: posterUrl,
-                      width: width,
-                      height: height,
-                      voteAverage: voteAverage,
-                      mediaType: mediaType,
-                      colorScheme: colorScheme,
-                      textTheme: textTheme,
+            Expanded(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadiusDirectional.all(Radius.circular(Spacing.cardRadiusSm)),
+                  border: Border.all(
+                    color: colorScheme.brightness == Brightness.dark
+                        ? Colors.white.withValues(alpha: 0.06)
+                        : Colors.black.withValues(alpha: 0.04),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.transparent,
+                      blurRadius: 0,
                     ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadiusDirectional.all(Radius.circular(Spacing.cardRadiusSm - 1)),
+                  child: heroTag != null
+                      ? Hero(
+                          tag: heroTag!,
+                          child: _PosterImage(
+                            posterUrl: posterUrl,
+                            width: width,
+                            voteAverage: voteAverage,
+                            mediaType: mediaType,
+                            colorScheme: colorScheme,
+                            textTheme: textTheme,
+                          ),
+                        )
+                      : _PosterImage(
+                          posterUrl: posterUrl,
+                          width: width,
+                          voteAverage: voteAverage,
+                          mediaType: mediaType,
+                          colorScheme: colorScheme,
+                          textTheme: textTheme,
+                        ),
+                ),
+              ),
             ),
             Padding(
-              padding: const EdgeInsetsDirectional.only(top: 8),
+              padding: const EdgeInsetsDirectional.only(top: Spacing.sm),
               child: Text(
                 title,
                 style: textTheme.bodySmall?.copyWith(
@@ -87,7 +102,6 @@ class MediaCard extends StatelessWidget {
 class _PosterImage extends StatelessWidget {
   final String? posterUrl;
   final double width;
-  final double height;
   final double? voteAverage;
   final MediaType? mediaType;
   final ColorScheme colorScheme;
@@ -96,7 +110,6 @@ class _PosterImage extends StatelessWidget {
   const _PosterImage({
     required this.posterUrl,
     required this.width,
-    required this.height,
     required this.voteAverage,
     required this.mediaType,
     required this.colorScheme,
@@ -105,57 +118,47 @@ class _PosterImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        SizedBox(
-          width: width,
-          height: height,
-          child: posterUrl != null
-              ? CachedNetworkImage(
-                  imageUrl: posterUrl!,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => _ShimmerPlaceholder(width: width, height: height),
-                  errorWidget: (context, url, error) => _ErrorPlaceholder(
-                    width: width,
-                    height: height,
-                    colorScheme: colorScheme,
-                  ),
-                )
-              : _ErrorPlaceholder(
-                  width: width,
-                  height: height,
-                  colorScheme: colorScheme,
-                ),
-        ),
-        if (voteAverage != null && voteAverage! > 0)
-          PositionedDirectional(
-            top: 8,
-            start: 8,
-            child: _RatingBadge(
-              voteAverage: voteAverage!,
-              textTheme: textTheme,
+    return SizedBox(
+      width: width,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (posterUrl != null)
+            CachedNetworkImage(
+              imageUrl: posterUrl!,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => const _ShimmerPlaceholder(),
+              errorWidget: (context, url, error) => _ErrorPlaceholder(colorScheme: colorScheme),
+            )
+          else
+            _ErrorPlaceholder(colorScheme: colorScheme),
+          if (voteAverage != null && voteAverage! > 0)
+            PositionedDirectional(
+              top: 8,
+              start: 8,
+              child: _RatingBadge(
+                voteAverage: voteAverage!,
+                textTheme: textTheme,
+              ),
             ),
-          ),
-        if (mediaType != null && mediaType != MediaType.movie)
-          PositionedDirectional(
-            top: 8,
-            end: 8,
-            child: _TypeBadge(
-              mediaType: mediaType!,
-              colorScheme: colorScheme,
-              textTheme: textTheme,
+          if (mediaType != null && mediaType != MediaType.movie)
+            PositionedDirectional(
+              top: 8,
+              end: 8,
+              child: _TypeBadge(
+                mediaType: mediaType!,
+                colorScheme: colorScheme,
+                textTheme: textTheme,
+              ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }
 
 class _ShimmerPlaceholder extends StatelessWidget {
-  final double width;
-  final double height;
-
-  const _ShimmerPlaceholder({required this.width, required this.height});
+  const _ShimmerPlaceholder();
 
   @override
   Widget build(BuildContext context) {
@@ -163,9 +166,7 @@ class _ShimmerPlaceholder extends StatelessWidget {
     return Shimmer.fromColors(
       baseColor: isDark ? const Color(0xFF20242E) : const Color(0xFFE5E7EB),
       highlightColor: isDark ? const Color(0xFF2A2F3A) : const Color(0xFFF3F4F6),
-      child: Container(
-        width: width,
-        height: height,
+      child: ColoredBox(
         color: isDark ? const Color(0xFF20242E) : const Color(0xFFE5E7EB),
       ),
     );
@@ -173,21 +174,15 @@ class _ShimmerPlaceholder extends StatelessWidget {
 }
 
 class _ErrorPlaceholder extends StatelessWidget {
-  final double width;
-  final double height;
   final ColorScheme colorScheme;
 
   const _ErrorPlaceholder({
-    required this.width,
-    required this.height,
     required this.colorScheme,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
+    return ColoredBox(
       color: colorScheme.surfaceContainerHighest,
       child: Center(
         child: Icon(
