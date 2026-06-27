@@ -7,6 +7,7 @@ import '../../core/extensions/context_extensions.dart';
 import '../../core/extensions/string_extensions.dart';
 import '../../models/user_media_model.dart';
 import '../tracking/providers/tracking_providers.dart';
+import '../../l10n/l10n.dart';
 import 'providers/lists_providers.dart';
 
 enum _ViewMode { grid, list }
@@ -36,10 +37,10 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
     final isTablet = context.isTablet;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('All Collections')),
+      appBar: AppBar(title: Text(context.l10n.allCollections)),
       body: itemsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => Center(child: Text('Failed to load', style: textTheme.bodyMedium?.copyWith(color: colorScheme.error))),
+        error: (_, __) => Center(child: Text(context.l10n.failedToLoadItems, style: textTheme.bodyMedium?.copyWith(color: colorScheme.error))),
         data: (items) {
           final userMedia = userMediaAsync.valueOrNull ?? [];
           final lists = listsAsync.valueOrNull ?? [];
@@ -64,9 +65,9 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
   List<String> _extractCategories(List<Map<String, dynamic>> items) {
     final cats = items.map((i) => i['media_type'] as String? ?? 'unknown').toSet();
     final ordered = <String>[];
-    if (cats.contains('tv')) ordered.add('TV Shows');
-    if (cats.contains('movie')) ordered.add('Movies');
-    if (cats.contains('anime')) ordered.add('Anime');
+    if (cats.contains('tv')) ordered.add(context.l10n.tvShows);
+    if (cats.contains('movie')) ordered.add(context.l10n.movies);
+    if (cats.contains('anime')) ordered.add(context.l10n.anime);
     ordered.addAll(cats.where((c) => c != 'tv' && c != 'movie' && c != 'anime').map((c) => c[0].toUpperCase() + c.substring(1)));
     return ordered;
   }
@@ -96,14 +97,14 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'All Collections',
+                    context.l10n.allCollections,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: -0.5),
                   ),
                     const SizedBox(height: Spacing.xs),
                   Text(
-                    '$totalItems Title${totalItems == 1 ? '' : 's'}',
+                    '${totalItems == 1 ? '$totalItems ${context.l10n.item}' : '$totalItems ${context.l10n.items}'}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 14),
@@ -124,9 +125,9 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            _chip(Icons.collections_bookmark_rounded, 'Across $listCount list${listCount == 1 ? '' : 's'}', colorScheme, textTheme),
+            _chip(Icons.collections_bookmark_rounded, '${context.l10n.across} $listCount list${listCount == 1 ? '' : 's'}', colorScheme, textTheme),
             const SizedBox(width: 6),
-            _chip(Icons.movie_outlined, '$totalItems title${totalItems == 1 ? '' : 's'}', colorScheme, textTheme),
+            _chip(Icons.movie_outlined, '${totalItems == 1 ? '$totalItems ${context.l10n.item}' : '$totalItems ${context.l10n.items}'}', colorScheme, textTheme),
           ],
         ),
       ),
@@ -194,11 +195,11 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
       padding: const EdgeInsetsDirectional.fromSTEB(20, 10, 20, 0),
       child: Row(
         children: [
-          Text('$totalItems items', style: textTheme.labelMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
+          Text(context.l10n.itemCount(totalItems), style: textTheme.labelMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
           const Spacer(),
           IconButton(
             icon: Icon(_viewMode == _ViewMode.grid ? Icons.view_list_rounded : Icons.grid_view_rounded, size: 20),
-            tooltip: 'Toggle view',
+            tooltip: context.l10n.toggleView,
             onPressed: () => setState(() => _viewMode = _viewMode == _ViewMode.grid ? _ViewMode.list : _ViewMode.grid),
           ),
         ],
@@ -230,7 +231,7 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
             children: [
               Icon(Icons.search_off_rounded, size: 48, color: colorScheme.onSurfaceVariant),
                 const SizedBox(height: Spacing.md),
-              Text('No items match', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
+              Text(context.l10n.noItemsMatch, style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
             ],
           ),
         ),
@@ -292,9 +293,9 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
 
   bool _matchesCategory(Map<String, dynamic> item, String category) {
     final type = item['media_type'] as String?;
-    if (category == 'TV Shows') return type == 'tv';
-    if (category == 'Movies') return type == 'movie';
-    if (category == 'Anime') return type == 'anime';
+    if (category == context.l10n.tvShows) return type == 'tv';
+    if (category == context.l10n.movies) return type == 'movie';
+    if (category == context.l10n.anime) return type == 'anime';
     return true;
   }
 

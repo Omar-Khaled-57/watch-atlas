@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/dimensions.dart';
 import '../../../core/extensions/datetime_extensions.dart';
 import '../../../models/user_list_model.dart';
+import '../../../l10n/l10n.dart';
 import 'collage_cover.dart';
 
 class ListCard extends StatelessWidget {
@@ -77,7 +78,7 @@ class ListCard extends StatelessWidget {
                         ),
                         const SizedBox(height: Spacing.xs),
                         Text(
-                          '${listData.itemCount} ${listData.itemCount == 1 ? 'Title' : 'Titles'}',
+                          '${listData.itemCount} ${listData.itemCount == 1 ? context.l10n.title : context.l10n.items}',
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.8),
                             fontSize: 12,

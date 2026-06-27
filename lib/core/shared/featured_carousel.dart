@@ -3,6 +3,9 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../extensions/context_extensions.dart';
+import '../../l10n/l10n.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -153,7 +156,7 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
                         top: 0,
                         bottom: 0,
                         child: Semantics(
-                          label: 'Previous slide',
+                          label: context.l10n.previousSlide,
                           child: _NavButton(
                             icon: Icons.chevron_left_rounded,
                             onTap: _currentPage > 0
@@ -167,7 +170,7 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
                         top: 0,
                         bottom: 0,
                         child: Semantics(
-                          label: 'Next slide',
+                          label: context.l10n.nextSlide,
                           child: _NavButton(
                             icon: Icons.chevron_right_rounded,
                             onTap: _currentPage < widget.items.length - 1

@@ -10,6 +10,7 @@ import '../../core/shared/empty_state.dart';
 import '../../core/shared/loading_widget.dart';
 import '../../models/notification_model.dart';
 import '../../core/models/media_enums.dart';
+import '../../l10n/l10n.dart';
 import 'providers/notifications_providers.dart';
 
 class NotificationsScreen extends ConsumerStatefulWidget {
@@ -29,7 +30,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text(context.l10n.notifications),
         actions: [
           unreadAsync.when(
             data: (count) {
@@ -45,23 +46,23 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                   }
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'markRead',
                     child: Row(
                       children: [
-                        Icon(Icons.done_all_rounded, size: 20),
-                        SizedBox(width: Spacing.md),
-                        Text('Mark all as read'),
+                        const Icon(Icons.done_all_rounded, size: 20),
+                        const SizedBox(width: Spacing.md),
+                        Text(context.l10n.markAllRead),
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'clear',
                     child: Row(
                       children: [
-                        Icon(Icons.delete_sweep_rounded, size: 20),
-                        SizedBox(width: Spacing.md),
-                        Text('Clear all'),
+                        const Icon(Icons.delete_sweep_rounded, size: 20),
+                        const SizedBox(width: Spacing.md),
+                        Text(context.l10n.clearAll),
                       ],
                     ),
                   ),
@@ -76,14 +77,14 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       body: notificationsAsync.when(
         loading: () => const FullScreenLoader(),
         error: (error, stack) => ErrorWidgetView(
-          message: 'Failed to load notifications',
+          message: context.l10n.failedToLoadNotifications,
           onRetry: () => ref.invalidate(notificationsProvider),
         ),
         data: (notifications) {
           if (notifications.isEmpty) {
-            return const EmptyState(
-              title: 'No notifications',
-              subtitle: 'You\'re all caught up!',
+            return EmptyState(
+              title: context.l10n.noNotifications,
+              subtitle: context.l10n.youreAllCaughtUp,
             );
           }
 
@@ -280,21 +281,21 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear all notifications?'),
-        content: const Text(
-          'This action cannot be undone. All notifications will be permanently deleted.',
+        title: Text(context.l10n.clearAllNotificationsConfirm),
+        content: Text(
+          context.l10n.clearAllWarning,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
           FilledButton(
             onPressed: () {
               Navigator.pop(context);
               ref.read(clearAllNotificationsProvider);
             },
-            child: const Text('Clear All'),
+            child: Text(context.l10n.clearAll),
           ),
         ],
       ),
@@ -312,7 +313,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     for (final n in notifications) {
       String label;
       if (n.createdAt == null) {
-        label = 'Unknown';
+        label = context.l10n.unknown;
       } else {
         final date = DateTime(
           n.createdAt!.year,
@@ -320,9 +321,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           n.createdAt!.day,
         );
         if (date == today) {
-          label = 'Today';
+          label = context.l10n.today;
         } else if (date == yesterday) {
-          label = 'Yesterday';
+          label = context.l10n.yesterday;
         } else if (date.isAfter(today.subtract(const Duration(days: 7)))) {
           label = DateFormat('EEEE').format(n.createdAt!);
         } else {
@@ -338,7 +339,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   String _formatTime(DateTime dateTime) {
     final now = DateTime.now();
     final diff = now.difference(dateTime);
-    if (diff.inMinutes < 1) return 'Just now';
+    if (diff.inMinutes < 1) return context.l10n.justNow;
     if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
     if (diff.inHours < 24) return '${diff.inHours}h ago';
     if (diff.inDays < 7) return '${diff.inDays}d ago';

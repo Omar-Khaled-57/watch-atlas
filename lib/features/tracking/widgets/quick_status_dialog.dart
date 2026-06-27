@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../l10n/l10n.dart';
 import '../../../core/constants/dimensions.dart';
 import '../../../core/models/media_enums.dart';
 import '../../../models/user_media_model.dart';
@@ -23,7 +24,7 @@ class QuickStatusDialog extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Update Status',
+              context.l10n.updateStatus,
               style: textTheme.titleMedium?.copyWith(color: colorScheme.onSurface),
             ),
             const SizedBox(height: 20),
@@ -57,7 +58,7 @@ class QuickStatusDialog extends ConsumerWidget {
                         ),
                         const SizedBox(width: Spacing.md),
                         Text(
-                          _statusLabel(status),
+                          _statusLabel(context, status),
                           style: textTheme.bodyMedium?.copyWith(
                             color: isSelected ? colorScheme.primary : colorScheme.onSurface,
                             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
@@ -81,7 +82,7 @@ class QuickStatusDialog extends ConsumerWidget {
                   Navigator.of(context).pop();
                 },
                 child: Text(
-                  'Remove from list',
+                  context.l10n.removeFromTrackingList,
                   style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
                 ),
               ),
@@ -103,14 +104,15 @@ class QuickStatusDialog extends ConsumerWidget {
     }
   }
 
-  String _statusLabel(WatchStatus status) {
+  String _statusLabel(BuildContext context, WatchStatus status) {
+    final l10n = context.l10n;
     switch (status) {
-      case WatchStatus.watching: return 'Watching';
-      case WatchStatus.completed: return 'Completed';
-      case WatchStatus.onHold: return 'On Hold';
-      case WatchStatus.dropped: return 'Dropped';
-      case WatchStatus.planToWatch: return 'Plan to Watch';
-      case WatchStatus.rewatching: return 'Rewatching';
+      case WatchStatus.watching: return l10n.watching;
+      case WatchStatus.completed: return l10n.completed;
+      case WatchStatus.onHold: return l10n.onHold;
+      case WatchStatus.dropped: return l10n.dropped;
+      case WatchStatus.planToWatch: return l10n.planToWatch;
+      case WatchStatus.rewatching: return l10n.rewatching;
     }
   }
 }

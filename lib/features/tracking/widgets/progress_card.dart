@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/dimensions.dart';
 import '../../../core/models/media_enums.dart';
 import '../../../models/user_media_model.dart';
+import '../../../l10n/l10n.dart';
 
 class ProgressCard extends StatelessWidget {
   final UserMediaModel userMedia;
@@ -136,20 +137,20 @@ class _StatusBadge extends StatelessWidget {
         borderRadius: BorderRadiusDirectional.all(Radius.circular(4)),
       ),
       child: Text(
-        statusLabel(status),
+        statusLabel(status, context),
         style: textTheme.labelSmall?.copyWith(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w700),
       ),
     );
   }
 
-  String statusLabel(WatchStatus status) {
+  String statusLabel(WatchStatus status, BuildContext context) {
     switch (status) {
-      case WatchStatus.watching: return 'WATCHING';
-      case WatchStatus.completed: return 'DONE';
-      case WatchStatus.onHold: return 'HOLD';
-      case WatchStatus.dropped: return 'DROP';
-      case WatchStatus.planToWatch: return 'PLAN';
-      case WatchStatus.rewatching: return 'REWATCH';
+      case WatchStatus.watching: return context.l10n.watchingBadge;
+      case WatchStatus.completed: return context.l10n.completedBadge;
+      case WatchStatus.onHold: return context.l10n.onHoldBadge;
+      case WatchStatus.dropped: return context.l10n.droppedBadge;
+      case WatchStatus.planToWatch: return context.l10n.planToWatchBadge;
+      case WatchStatus.rewatching: return context.l10n.rewatchingBadge;
     }
   }
 }

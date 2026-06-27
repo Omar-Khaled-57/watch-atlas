@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../l10n/l10n.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
@@ -45,7 +46,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen>
     final crossAxisCount = isDesktop ? 5 : isTablet ? 4 : 3;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Tracking')),
+      appBar: AppBar(title: Text(context.l10n.tracking)),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(userMediaProvider);
@@ -68,7 +69,7 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen>
                 child: Padding(
                   padding: const EdgeInsetsDirectional.fromSTEB(Spacing.lg, Spacing.sm, Spacing.lg, Spacing.xs),
                   child: Text(
-                    'Recently Updated',
+                    context.l10n.recentlyUpdated,
                     style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant),
                   ),
                 ),
@@ -106,12 +107,12 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen>
                 indicatorColor: colorScheme.primary,
                 labelStyle: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
                 unselectedLabelStyle: textTheme.bodySmall,
-                tabs: const [
-                  Tab(text: 'Watching'),
-                  Tab(text: 'Completed'),
-                  Tab(text: 'On Hold'),
-                  Tab(text: 'Dropped'),
-                  Tab(text: 'Plan To Watch'),
+                tabs: [
+                  Tab(text: context.l10n.watching),
+                  Tab(text: context.l10n.completed),
+                  Tab(text: context.l10n.onHold),
+                  Tab(text: context.l10n.dropped),
+                  Tab(text: context.l10n.planToWatch),
                 ],
               ),
             ),
@@ -159,25 +160,26 @@ class _StatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Row(
       children: [
         _StatItem(
           value: stats['totalWatched'] ?? 0,
-          label: 'Completed',
+          label: l10n.completed,
           colorScheme: colorScheme,
           textTheme: textTheme,
         ),
         _StatDivider(colorScheme: colorScheme),
         _StatItem(
           value: stats['totalEpisodes'] ?? 0,
-          label: 'Episodes',
+          label: l10n.totalEpisodes,
           colorScheme: colorScheme,
           textTheme: textTheme,
         ),
         _StatDivider(colorScheme: colorScheme),
         _StatItem(
           value: stats['totalHours'] ?? 0,
-          label: 'Hours',
+          label: l10n.totalHours,
           colorScheme: colorScheme,
           textTheme: textTheme,
         ),
@@ -253,7 +255,7 @@ class _MediaGrid extends ConsumerWidget {
       error: (error, stack) => Center(
         child: Padding(
           padding: const EdgeInsetsDirectional.all(Spacing.xxl),
-          child: Text('Failed to load tracking data', style: textTheme.bodyMedium?.copyWith(color: colorScheme.error)),
+          child: Text(context.l10n.failedToLoadTracking, style: textTheme.bodyMedium?.copyWith(color: colorScheme.error)),
         ),
       ),
       data: (allMedia) {
@@ -268,7 +270,7 @@ class _MediaGrid extends ConsumerWidget {
                   Icon(Icons.inbox_rounded, size: 64, color: colorScheme.onSurfaceVariant),
                   const SizedBox(height: Spacing.lg),
                   Text(
-                    'No media in this list',
+                    context.l10n.noMediaInList,
                     style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
                   ),
                 ],

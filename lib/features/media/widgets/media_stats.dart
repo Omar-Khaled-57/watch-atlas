@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/dimensions.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/extensions/number_extensions.dart';
+import 'package:intl/intl.dart';
 
 class MediaStats extends StatelessWidget {
   final int? runtime;
@@ -29,13 +30,10 @@ class MediaStats extends StatelessWidget {
     }
 
     if (releaseDate != null) {
-      final months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-      ];
+      final locale = Localizations.localeOf(context).toString();
       items.add(_StatItem(
         icon: Icons.calendar_today_rounded,
-        label: '${months[releaseDate!.month - 1]} ${releaseDate!.day}, ${releaseDate!.year}',
+        label: DateFormat.yMMMd(locale).format(releaseDate!),
       ));
     }
 

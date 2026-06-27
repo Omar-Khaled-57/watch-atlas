@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../l10n/l10n.dart';
 
 class PrivacyScreen extends StatelessWidget {
   const PrivacyScreen({super.key});
@@ -7,9 +8,10 @@ class PrivacyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Privacy Policy'),
+        title: Text(l10n.privacyPolicy),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -20,40 +22,22 @@ class PrivacyScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Privacy Policy', style: theme.textTheme.headlineSmall),
+            Text(l10n.privacyPolicy, style: theme.textTheme.headlineSmall),
             SizedBox(height: 8),
             Text(
-              'Last updated: June 26, 2026',
+              l10n.lastUpdated,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
             SizedBox(height: 24),
-            _section(theme, '1. Information We Collect',
-                'When you sign in with Google OAuth, we collect your email address and display name. '
-                    'We also store media you track (movies, TV shows, anime) along with your watch status, '
-                    'ratings, and reviews. Profile avatars and display names are stored via Supabase storage.'),
-            _section(theme, '2. How We Use Your Information',
-                'Your information is used to provide and improve the service: personalize your experience, '
-                    'maintain your watch lists and reviews, generate analytics based on your tracked media, '
-                    'and communicate service updates if necessary.'),
-            _section(theme, '3. Data Storage & Security',
-                'Your data is stored securely on Supabase (PostgreSQL) and Google Cloud infrastructure. '
-                    'We use Row Level Security to ensure you can only access your own data. '
-                    'Passwords are never stored — authentication is handled entirely by Google OAuth.'),
-            _section(theme, '4. Third-Party Services',
-                'We use TMDB (The Movie Database) to fetch media metadata. '
-                    'Your searches and viewed media IDs are sent to TMDB\'s API. '
-                    'We also use AniList for anime metadata. '
-                    'Google OAuth is used for authentication.'),
-            _section(theme, '5. Data Retention',
-                'Your data is retained for as long as your account is active. '
-                    'You may delete your account and associated data at any time by contacting us.'),
-            _section(theme, '6. Your Rights',
-                'You may request a copy of your data, correction of inaccurate data, '
-                    'or deletion of your account and associated data. Contact us at the email below.'),
-            _section(theme, '7. Contact',
-                'For privacy-related inquiries, contact: privacy@watchatlas.app'),
+            _section(theme, l10n.informationWeCollect, l10n.informationWeCollectBody),
+            _section(theme, l10n.howWeUseInfo, l10n.howWeUseInfoBody),
+            _section(theme, l10n.dataStorage, l10n.dataStorageBody),
+            _section(theme, l10n.thirdPartyServices, l10n.thirdPartyServicesBody),
+            _section(theme, l10n.dataRetention, l10n.dataRetentionBody),
+            _section(theme, l10n.yourRights, l10n.yourRightsBody),
+            _section(theme, l10n.contactSection, l10n.contactPrivacy),
           ],
         ),
       ),

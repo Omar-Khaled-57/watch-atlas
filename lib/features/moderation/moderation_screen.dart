@@ -6,6 +6,7 @@ import '../../core/extensions/context_extensions.dart';
 import '../../core/models/media_enums.dart';
 import '../../core/shared/loading_widget.dart';
 import '../../models/user_model.dart';
+import '../../l10n/l10n.dart';
 import 'providers/moderation_providers.dart';
 
 class ModerationScreen extends ConsumerStatefulWidget {
@@ -37,7 +38,7 @@ class _ModerationScreenState extends ConsumerState<ModerationScreen>
 
     if (!isMod) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Moderation')),
+        appBar: AppBar(title: Text(context.l10n.moderation)),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -49,12 +50,12 @@ class _ModerationScreenState extends ConsumerState<ModerationScreen>
               ),
               const SizedBox(height: Spacing.lg),
               Text(
-                'Access Denied',
+                context.l10n.accessDenied,
                 style: context.textTheme.titleLarge,
               ),
               const SizedBox(height: Spacing.sm),
               Text(
-                'You do not have moderator permissions.',
+                context.l10n.noModeratorPermissions,
                 style: context.textTheme.bodyMedium?.copyWith(
                   color: context.colorScheme.onSurfaceVariant,
                 ),
@@ -67,12 +68,12 @@ class _ModerationScreenState extends ConsumerState<ModerationScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Moderation'),
+        title: Text(context.l10n.moderation),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Reports'),
-            Tab(text: 'Users'),
+          tabs: [
+            Tab(text: context.l10n.reports),
+            Tab(text: context.l10n.users),
           ],
         ),
       ),
@@ -97,7 +98,7 @@ class _ReportsTab extends ConsumerWidget {
     return reportsAsync.when(
       loading: () => const FullScreenLoader(),
       error: (e, _) => ErrorWidgetView(
-        message: 'Failed to load reports',
+        message: context.l10n.failedToLoadReports,
         detail: e.toString(),
         onRetry: () => ref.invalidate(reportsProvider),
       ),
@@ -109,9 +110,9 @@ class _ReportsTab extends ConsumerWidget {
               children: [
                 Icon(Icons.check_circle_outline_rounded, size: 64, color: cs.onSurfaceVariant),
                 const SizedBox(height: Spacing.lg),
-                Text('No pending reports', style: tt.titleMedium),
+                Text(context.l10n.noPendingReports, style: tt.titleMedium),
                 const SizedBox(height: Spacing.sm),
-                Text('All clear!', style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
+                Text(context.l10n.allClear, style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
               ],
             ),
           );
@@ -222,14 +223,14 @@ class _ReportCard extends ConsumerWidget {
             const SizedBox(height: Spacing.md),
           ],
           if (report.reportedUser != null) ...[
-            _buildDetailRow(context, 'Reported User', report.reportedUser?['username'] as String? ?? 'Unknown'),
+            _buildDetailRow(context, context.l10n.reportedUser, report.reportedUser?['username'] as String? ?? context.l10n.unknown),
             const SizedBox(height: Spacing.xs),
           ],
           if (report.mediaId != null) ...[
-            _buildDetailRow(context, 'Media ID', report.mediaId.toString()),
+            _buildDetailRow(context, context.l10n.mediaId, report.mediaId.toString()),
             const SizedBox(height: Spacing.xs),
           ],
-          _buildDetailRow(context, 'Reporter', report.reporter?['username'] as String? ?? 'Unknown'),
+          _buildDetailRow(context, context.l10n.reporter, report.reporter?['username'] as String? ?? context.l10n.unknown),
           const SizedBox(height: Spacing.lg),
           if (report.status == 'pending')
             Row(
@@ -238,7 +239,7 @@ class _ReportCard extends ConsumerWidget {
                   child: OutlinedButton.icon(
                     onPressed: () => _showActionDialog(context, ref),
                     icon: const Icon(Icons.gavel_rounded, size: 18),
-                    label: const Text('Take Action'),
+                    label: Text(context.l10n.takeAction),
                   ),
                 ),
               ],
@@ -314,7 +315,7 @@ class _ActionSheet extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Take Action', style: tt.titleLarge),
+          Text(context.l10n.takeAction, style: tt.titleLarge),
           const SizedBox(height: Spacing.xs),
           Text(
             '${report.reasonLabel} - ${report.mediaId != null ? "Content Report" : "User Report"}',
@@ -324,8 +325,8 @@ class _ActionSheet extends ConsumerWidget {
           _ActionButton(
             icon: Icons.warning_amber_rounded,
             color: Colors.orange,
-            label: 'Warn User',
-            description: 'Send a warning to the user',
+            label: context.l10n.warnUser,
+            description: context.l10n.sendWarningToUser,
             onTap: () async {
               if (report.reportedUserId != null) {
                 await ref.read(warnUserProvider(report.reportedUserId!).future);
@@ -338,8 +339,8 @@ class _ActionSheet extends ConsumerWidget {
           _ActionButton(
             icon: Icons.visibility_off_rounded,
             color: Colors.blue,
-            label: 'Hide Content',
-            description: 'Make content invisible to users',
+            label: context.l10n.hideContent,
+            description: context.l10n.makeContentInvisible,
             onTap: () async {
               if (report.mediaId != null) {
                 await ref.read(hideContentProvider(report.mediaId!).future);
@@ -352,22 +353,22 @@ class _ActionSheet extends ConsumerWidget {
           _ActionButton(
             icon: Icons.delete_forever_rounded,
             color: Colors.redAccent,
-            label: 'Delete Content',
-            description: 'Permanently remove this content',
+            label: context.l10n.deleteContent,
+            description: context.l10n.permanentlyRemoveContent,
             onTap: () async {
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  title: const Text('Confirm Deletion'),
-                  content: const Text('Are you sure you want to permanently delete this content?'),
+                  title: Text(context.l10n.confirmDeletion),
+                  content: Text(context.l10n.confirmDeleteContent),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(ctx).pop(false),
-                      child: const Text('Cancel'),
+                      child: Text(context.l10n.cancel),
                     ),
                     FilledButton(
                       onPressed: () => Navigator.of(ctx).pop(true),
-                      child: const Text('Delete'),
+                      child: Text(context.l10n.delete),
                     ),
                   ],
                 ),
@@ -383,23 +384,23 @@ class _ActionSheet extends ConsumerWidget {
           _ActionButton(
             icon: Icons.block_rounded,
             color: Colors.red,
-            label: 'Ban User',
-            description: 'Permanently ban this user from the platform',
+            label: context.l10n.banUser,
+            description: context.l10n.permanentlyBanUser,
             onTap: () async {
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  title: const Text('Confirm Ban'),
-                  content: const Text('Are you sure you want to permanently ban this user?'),
+                  title: Text(context.l10n.confirmBan),
+                  content: Text(context.l10n.confirmBanUser),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(ctx).pop(false),
-                      child: const Text('Cancel'),
+                      child: Text(context.l10n.cancel),
                     ),
                     FilledButton(
                       style: FilledButton.styleFrom(backgroundColor: Colors.red),
                       onPressed: () => Navigator.of(ctx).pop(true),
-                      child: const Text('Ban'),
+                      child: Text(context.l10n.ban),
                     ),
                   ],
                 ),
@@ -416,7 +417,7 @@ class _ActionSheet extends ConsumerWidget {
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: Text(context.l10n.cancel),
             ),
           ),
           const SizedBox(height: Spacing.sm),
@@ -499,7 +500,7 @@ class _UsersTab extends ConsumerWidget {
     return usersAsync.when(
       loading: () => const FullScreenLoader(),
       error: (e, _) => ErrorWidgetView(
-        message: 'Failed to load users',
+        message: context.l10n.failedToLoadUsers,
         detail: e.toString(),
         onRetry: () => ref.invalidate(reportedUsersProvider),
       ),
@@ -511,7 +512,7 @@ class _UsersTab extends ConsumerWidget {
               children: [
                 Icon(Icons.people_outline_rounded, size: 64, color: cs.onSurfaceVariant),
                 const SizedBox(height: Spacing.lg),
-                Text('No users found', style: tt.titleMedium),
+                Text(context.l10n.noUsersFound, style: tt.titleMedium),
               ],
             ),
           );
@@ -526,7 +527,7 @@ class _UsersTab extends ConsumerWidget {
             padding: const EdgeInsetsDirectional.all(Spacing.lg),
             children: [
               if (moderators.isNotEmpty) ...[
-                Text('Staff', style: tt.titleSmall?.copyWith(color: cs.onSurfaceVariant)),
+                Text(context.l10n.staff, style: tt.titleSmall?.copyWith(color: cs.onSurfaceVariant)),
                 const SizedBox(height: Spacing.sm),
                 ...moderators.map((user) => Padding(
                   padding: const EdgeInsetsDirectional.only(bottom: 8),
@@ -534,7 +535,7 @@ class _UsersTab extends ConsumerWidget {
                 )),
                 const SizedBox(height: Spacing.lg),
               ],
-              Text('Users', style: tt.titleSmall?.copyWith(color: cs.onSurfaceVariant)),
+              Text(context.l10n.users, style: tt.titleSmall?.copyWith(color: cs.onSurfaceVariant)),
               const SizedBox(height: Spacing.sm),
               ...regularUsers.map((user) => Padding(
                 padding: const EdgeInsetsDirectional.only(bottom: 8),
@@ -597,7 +598,11 @@ class _UserCard extends StatelessWidget {
             borderRadius: BorderRadiusDirectional.all(Radius.circular(6)),
           ),
           child: Text(
-            user.role.name.toUpperCase(),
+            switch (user.role) {
+              UserRole.user => context.l10n.roleUser,
+              UserRole.moderator => context.l10n.roleModerator,
+              UserRole.admin => context.l10n.roleAdmin,
+            },
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w700,

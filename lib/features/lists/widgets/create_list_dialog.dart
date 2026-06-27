@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/dimensions.dart';
 import '../../../core/models/media_enums.dart';
+import '../../../l10n/l10n.dart';
 import '../providers/lists_providers.dart';
 
 class CreateListDialog extends ConsumerStatefulWidget {
@@ -64,30 +65,30 @@ class _CreateListDialogState extends ConsumerState<CreateListDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.editId != null ? 'Edit List' : 'Create List',
+                widget.editId != null ? context.l10n.editProfile : context.l10n.createList,
                 style: textTheme.titleLarge?.copyWith(color: colorScheme.onSurface),
               ),
               const SizedBox(height: Spacing.xl),
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Title',
-                  hintText: 'Enter list name',
+                decoration: InputDecoration(
+                  labelText: context.l10n.title,
+                  hintText: context.l10n.enterListName,
                 ),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Title is required' : null,
+                validator: (v) => (v == null || v.trim().isEmpty) ? context.l10n.titleRequired : null,
               ),
               const SizedBox(height: Spacing.lg),
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description (optional)',
-                  hintText: 'Describe this list',
+                decoration: InputDecoration(
+                  labelText: context.l10n.descriptionOptional,
+                  hintText: context.l10n.describeList,
                 ),
                 maxLines: 3,
               ),
               const SizedBox(height: 20),
               Text(
-                'Visibility',
+                context.l10n.visibility,
                 style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: Spacing.sm),
@@ -124,7 +125,7 @@ class _CreateListDialogState extends ConsumerState<CreateListDialog> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  type.name[0].toUpperCase() + type.name.substring(1),
+                                  switch (type) { MediaListType.public => context.l10n.publicList, MediaListType.private => context.l10n.privateList, MediaListType.collaborative => context.l10n.collaborative },
                                   style: textTheme.bodyMedium?.copyWith(
                                     color: isSelected ? colorScheme.primary : colorScheme.onSurface,
                                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
@@ -151,14 +152,14 @@ class _CreateListDialogState extends ConsumerState<CreateListDialog> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
+                      child: Text(context.l10n.cancel),
                     ),
                   ),
                   const SizedBox(width: Spacing.md),
                   Expanded(
                     child: FilledButton(
                       onPressed: _submit,
-                      child: Text(widget.editId != null ? 'Save' : 'Create'),
+                      child: Text(widget.editId != null ? context.l10n.save : context.l10n.create),
                     ),
                   ),
                 ],
@@ -201,11 +202,11 @@ class _CreateListDialogState extends ConsumerState<CreateListDialog> {
   String _typeDescription(MediaListType type) {
     switch (type) {
       case MediaListType.public:
-        return 'Anyone can see this list';
+        return context.l10n.anyoneCanSee;
       case MediaListType.private:
-        return 'Only you can see this list';
+        return context.l10n.onlyYouCanSee;
       case MediaListType.collaborative:
-        return 'Others can add and remove items';
+        return context.l10n.othersCanAddRemove;
     }
   }
 }

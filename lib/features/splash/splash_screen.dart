@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/theme/app_theme.dart';
+import '../../l10n/l10n.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -68,7 +69,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ShaderMask(
                   shaderCallback: (bounds) => AppTheme.logoGradient.createShader(bounds),
                   child: Text(
-                    'WatchAtlas',
+                    context.l10n.appName,
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -79,7 +80,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
                 const SizedBox(height: Spacing.sm),
                 Text(
-                  'Your global watch list',
+                  context.l10n.splashSubtitle,
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w400,

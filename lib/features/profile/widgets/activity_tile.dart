@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/dimensions.dart';
+import '../../../l10n/l10n.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../providers/profile_providers.dart';
 
@@ -81,7 +82,7 @@ class ActivityTile extends StatelessWidget {
                   if (activity.createdAt != null) ...[
                     const SizedBox(height: Spacing.xs),
                     Text(
-                      _formatTime(activity.createdAt!),
+                      _formatTime(activity.createdAt!, context),
                       style: textTheme.labelSmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -134,10 +135,10 @@ class ActivityTile extends StatelessWidget {
     );
   }
 
-  String _formatTime(DateTime dateTime) {
+  String _formatTime(DateTime dateTime, BuildContext context) {
     final now = DateTime.now();
     final diff = now.difference(dateTime);
-    if (diff.inMinutes < 1) return 'Just now';
+    if (diff.inMinutes < 1) return context.l10n.justNow;
     if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
     if (diff.inHours < 24) return '${diff.inHours}h ago';
     if (diff.inDays < 7) return '${diff.inDays}d ago';

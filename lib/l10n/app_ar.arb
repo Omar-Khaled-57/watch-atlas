@@ -182,13 +182,42 @@
   "systemMode": "وضع النظام",
   "about": "حول",
   "appVersion": "إصدار التطبيق",
+  "termsOfServiceTitle": "شروط الخدمة",
+  "privacyPolicyTitle": "سياسة الخصوصية",
   "privacyPolicy": "سياسة الخصوصية",
+  "termsOfServiceBody": "باستخدامك لووتش أطلس، فإنك توافق على هذه الشروط. يرجى قراءتها بعناية.\n\n[توضع الشروط الكاملة هنا]",
+  "privacyPolicyBody": "خصوصيتك تهمنا.\n\n[توضع سياسة الخصوصية الكاملة هنا]",
   "termsOfService": "شروط الخدمة",
   "licenses": "التراخيص",
   "rateApp": "تقييم التطبيق",
   "shareApp": "مشاركة التطبيق",
   "logout": "تسجيل الخروج",
   "deleteAccount": "حذف الحساب",
+  "appearance": "المظهر",
+  "account": "الحساب",
+  "userProfile": "الملف الشخصي للمستخدم",
+  "failedToLoadProfile": "فشل تحميل الملف الشخصي",
+  "profileNotFound": "الملف الشخصي غير موجود",
+  "changePassword": "تغيير كلمة المرور",
+  "moderation": "الرقابة",
+  "recommendationsAndPrivacy": "التوصيات والخصوصية",
+  "personalizedRecommendations": "توصيات مخصصة",
+  "clearRecommendationHistory": "مسح سجل التوصيات",
+  "removeAllBehavioralData": "إزالة جميع البيانات السلوكية",
+  "chooseTheme": "اختر المظهر",
+  "chooseLanguage": "اختر اللغة",
+  "followSystem": "اتباع إعدادات النظام",
+  "displayName": "الاسم المعروض",
+  "username": "اسم المستخدم",
+  "age": "العمر",
+  "gender": "الجنس",
+  "male": "ذكر",
+  "female": "أنثى",
+  "ratherNotSay": "أفضل عدم الإفصاح",
+  "viewTracking": "عرض التتبع",
+  "viewAnalytics": "عرض التحليلات",
+  "signOutConfirmation": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
+  "sendResetLink": "إرسال رابط إعادة التعيين",
 
   "@_Analytics": {
     "description": "التحليلات والإحصائيات"
@@ -216,5 +245,339 @@
   "daysAgo": "منذ {days} ي",
   "weeksAgo": "منذ {weeks} أ",
   "monthsAgo": "منذ {months} ش",
-  "yearsAgo": "منذ {years} س"
+  "yearsAgo": "منذ {years} س",
+
+  "@_Legal": {
+    "description": "شاشات قانونية"
+  },
+  "termsOfServiceTitle": "شروط الخدمة",
+  "lastUpdated": "آخر تحديث: 26 يونيو 2026",
+  "acceptanceOfTerms": "1. قبول الشروط",
+  "acceptanceOfTermsBody": "باستخدامك واتش أطلس، فإنك توافق على الالتزام بشروط الخدمة هذه. إذا كنت لا توافق، فلا تستخدم الخدمة.",
+  "descriptionOfService": "2. وصف الخدمة",
+  "descriptionOfServiceBody": "واتش أطلس هو تطبيق لتتبع الوسائط يسمح للمستخدمين باكتشاف وتتبع وتنظيم الأفلام والمسلسلات والأنمي. يمكن للمستخدمين التقييم والمراجعة والحفاظ على قوائم المشاهدة.",
+  "userAccounts": "3. حسابات المستخدمين",
+  "userAccountsBody": "يجب تسجيل الدخول عبر Google OAuth لاستخدام الخدمة. أنت مسؤول عن الحفاظ على سرية حسابك. يجب أن يكون عمرك 13 عامًا على الأقل لاستخدام هذه الخدمة.",
+  "userConduct": "4. سلوك المستخدم",
+  "userConductBody": "توافق على عدم: نشر محتوى مسيء أو مضايق أو غير لائق؛ انتحال شخصية الآخرين؛ محاولة التحايل على إجراءات الأمان؛ استخدام الخدمة لأي غرض غير قانوني.",
+  "intellectualProperty": "5. الملكية الفكرية",
+  "intellectualPropertyBody": "يتم توفير بيانات الوسائط والصور بواسطة TMDB وAniList بموجب تراخيص كل منهما. تطبيق واتش أطلس والكود مملوك. المحتوى الذي ينشئه المستخدم يظل ملكًا لك، مع ترخيص لواتش أطلس لعرضه داخل الخدمة.",
+  "limitationOfLiability": "6. تحديد المسؤولية",
+  "limitationOfLiabilityBody": "يتم توفير واتش أطلس كما هو دون أي ضمانات. لسنا مسؤولين عن دقة بيانات الوسائط من الأطراف الثالثة. نحتفظ بالحق في تعديل الخدمة أو إيقافها في أي وقت.",
+  "termination": "7. إنهاء الخدمة",
+  "terminationBody": "نحتفظ بالحق في تعليق أو إنهاء الحسابات التي تنتهك هذه الشروط. يمكنك حذف حسابك في أي وقت.",
+  "changesToTerms": "8. التغييرات على الشروط",
+  "changesToTermsBody": "قد نقوم بتحديث هذه الشروط في أي وقت. الاستمرار في الاستخدام بعد التغييرات يعتبر قبولًا. سيتم إخطار المستخدمين بالتغييرات الجوهرية عبر البريد الإلكتروني أو الإشعار داخل التطبيق.",
+  "contactSection": "9. الاتصال",
+  "contactLegal": "للاستفسارات حول هذه الشروط، اتصل: legal@watchatlas.app",
+  "contactPrivacy": "للاستفسارات المتعلقة بالخصوصية، اتصل: privacy@watchatlas.app",
+  "informationWeCollect": "1. المعلومات التي نجمعها",
+  "informationWeCollectBody": "عند تسجيل الدخول عبر Google OAuth، نجمع عنوان بريدك الإلكتروني واسم العرض. نقوم أيضًا بتخزين الوسائط التي تتابعها مع حالة المشاهدة والتقييمات والمراجعات.",
+  "howWeUseInfo": "2. كيف نستخدم معلوماتك",
+  "howWeUseInfoBody": "تُستخدم معلوماتك لتقديم الخدمة وتحسينها: تخصيص تجربتك، والحفاظ على قوائم المشاهدة والمراجعات، وإنشاء تحليلات بناءً على الوسائط المتتبعة، وإبلاغك بتحديثات الخدمة.",
+  "dataStorage": "3. تخزين البيانات والأمان",
+  "dataStorageBody": "يتم تخزين بياناتك بشكل آمن على Supabase وGoogle Cloud. نستخدم أمان مستوى الصف لضمان وصولك إلى بياناتك فقط. لا يتم تخزين كلمات المرور مطلقًا.",
+  "thirdPartyServices": "4. خدمات الطرف الثالث",
+  "thirdPartyServicesBody": "نستخدم TMDB لجلب بيانات الوسائط. يتم إرسال عمليات البحث ومعرفات الوسائط التي تعرضتها إلى API الخاص بـ TMDB. نستخدم أيضًا AniList لبيانات الأنمي. Google OAuth يُستخدم للمصادقة.",
+  "dataRetention": "5. الاحتفاظ بالبيانات",
+  "dataRetentionBody": "يتم الاحتفاظ ببياناتك طالما أن حسابك نشط. يمكنك حذف حسابك والبيانات المرتبطة به في أي وقت عن طريق الاتصال بنا.",
+  "yourRights": "6. حقوقك",
+  "yourRightsBody": "يحق لك طلب نسخة من بياناتك، أو تصحيح البيانات غير الدقيقة، أو حذف حسابك والبيانات المرتبطة به. اتصل بنا على البريد الإلكتروني أدناه.",
+
+  "@_AuthExtra": {
+    "description": "سلاسل إضافية للمصادقة"
+  },
+  "confirmPassword": "تأكيد كلمة المرور",
+  "passwordsDoNotMatch": "كلمات المرور غير متطابقة",
+  "pleaseEnterPassword": "الرجاء إدخال كلمة المرور",
+  "passwordMinLength": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+  "pleaseEnterEmail": "الرجاء إدخال البريد الإلكتروني",
+  "pleaseConfirmPassword": "الرجاء تأكيد كلمة المرور",
+  "enterEmailForReset": "أدخل بريدك الإلكتروني لتلقي رابط إعادة تعيين كلمة المرور",
+  "backToSignIn": "العودة إلى تسجيل الدخول",
+  "orContinueWith": "أو المتابعة عبر",
+  "setUpProfile": "إعداد ملفك الشخصي",
+  "chooseAvatar": "اختر صورة رمزية",
+  "uploadPhoto": "رفع صورة",
+  "orPickDefault": "أو اختر واحدة من الصور الافتراضية أدناه",
+  "notSpecified": "غير محدد",
+  "selectDateOfBirth": "اختر تاريخ الميلاد",
+  "completeSetup": "إكمال الإعداد",
+  "camera": "الكاميرا",
+  "gallery": "معرض الصور",
+  "mustBe13": "يجب أن يكون عمرك 13 عامًا على الأقل لاستخدام هذا التطبيق",
+  "failedToSaveProfile": "فشل حفظ الملف الشخصي",
+  "invalidEmailOrPassword": "بريد إلكتروني أو كلمة مرور غير صحيحة",
+  "pleaseConfirmEmail": "الرجاء تأكيد بريدك الإلكتروني",
+  "accountAlreadyExists": "يوجد حساب بهذا البريد الإلكتروني بالفعل",
+  "chooseAccount": "اختر حسابًا",
+  "continueWithGoogle": "المتابعة عبر Google",
+  "signInToGoogle": "تسجيل الدخول إلى حساب Google",
+  "previouslyUsed": "مستخدم سابقًا",
+  "signInTo": "تسجيل الدخول إلى",
+  "tryAnotherAccount": "جرب حسابًا آخر",
+  "useDifferentGoogleAccount": "استخدام حساب Google مختلف",
+
+  "@_HomeExtra": {
+    "description": "سلاسل إضافية للشاشة الرئيسية"
+  },
+  "couldNotLoadContinueWatching": "تعذر تحميل متابعة المشاهدة",
+  "noContentInProgress": "لا يوجد محتوى قيد المشاهدة",
+  "searchMoviesTv": "ابحث عن أفلام، مسلسلات...",
+  "searchFailed": "فشل البحث",
+
+  "@_Discover": {
+    "description": "سلاسل شاشة الاكتشاف"
+  },
+  "discover": "اكتشف",
+  "tryAdjustingFilters": "حاول تعديل عوامل التصفية",
+  "searchMoviesTvAnime": "ابحث عن أفلام، مسلسلات، أنمي...",
+  "advancedFilters": "عوامل تصفية متقدمة",
+  "allCountries": "جميع الدول",
+  "yearRange": "نطاق السنة",
+  "ratingRange": "نطاق التقييم",
+  "reset": "إعادة تعيين",
+  "applyFilters": "تطبيق عوامل التصفية",
+
+  "@_MediaExtra": {
+    "description": "سلاسل إضافية لتفاصيل الوسائط"
+  },
+  "failedToLoadDetails": "فشل تحميل التفاصيل",
+  "writeReview": "كتابة مراجعة",
+  "noReviewsYet": "لا توجد مراجعات بعد. كن أول من يراجع!",
+  "failedToLoadReviews": "فشل تحميل المراجعات",
+  "noRecentActivity": "لا نشاط حديث",
+  "createNewList": "إنشاء قائمة جديدة",
+  "addedTo": "تمت الإضافة إلى",
+  "addedToTitle": "تمت الإضافة إلى \"{title}\"",
+  "listCreated": "تم إنشاء القائمة",
+  "removeFromTrackingList": "إزالة من هذه القائمة",
+
+  "@_TrackingExtra": {
+    "description": "سلاسل إضافية للتتبع"
+  },
+  "tracking": "التتبع",
+  "recentlyUpdated": "تم التحديث مؤخرًا",
+  "noMediaInList": "لا توجد وسائط في هذه القائمة",
+  "failedToLoadTracking": "فشل تحميل بيانات التتبع",
+
+  "@_ListsExtra": {
+    "description": "سلاسل إضافية للقوائم"
+  },
+  "myCollections": "مجموعاتي",
+  "allCollections": "جميع المجموعات",
+  "selectList": "اختر قائمة",
+  "chooseListFromSidebar": "اختر قائمة من الشريط الجانبي لعرض محتوياتها",
+  "yourCollections": "مجموعاتك",
+  "allItems": "جميع العناصر",
+  "noItemsInList": "لا توجد عناصر في هذه القائمة",
+  "addMediaFromDetails": "أضف وسائط من صفحة التفاصيل",
+  "noOtherListsToMoveTo": "لا توجد قوائم أخرى للنقل إليها",
+  "noOtherListsToCopyTo": "لا توجد قوائم أخرى للنسخ إليها",
+  "moveTo": "نقل إلى...",
+  "copyTo": "نسخ إلى...",
+  "movedTo": "تم النقل إلى",
+  "copiedTo": "تم النسخ إلى",
+  "removedFromList": "تمت الإزالة من القائمة",
+  "toggleView": "تبديل العرض",
+  "searchItems": "ابحث عن عناصر...",
+  "failedToLoadList": "فشل تحميل القائمة",
+  "listNotFound": "القائمة غير موجودة",
+  "listCouldNotBeFound": "لم يتم العثور على هذه القائمة",
+  "checkOutMyList": "تحقق من قائمتي: {title} على WatchAtlas",
+  "failedToLoadItems": "فشل تحميل العناصر",
+  "enterListName": "أدخل اسم القائمة",
+  "titleRequired": "العنوان مطلوب",
+  "descriptionOptional": "الوصف (اختياري)",
+  "describeList": "صف هذه القائمة",
+  "anyoneCanSee": "يمكن لأي شخص رؤية هذه القائمة",
+  "onlyYouCanSee": "أنت فقط من يمكنه رؤية هذه القائمة",
+  "othersCanAddRemove": "يمكن للآخرين إضافة وإزالة العناصر",
+  "noItemsMatch": "لا توجد عناصر مطابقة",
+  "across": "عبر",
+  "deleteListConfirm": "حذف \"{title}\"?",
+  "deleteListWarning": "سيؤدي هذا إلى إزالة القائمة وجميع إدخالات الوسائط بشكل دائم. لا يمكن التراجع عن هذا الإجراء.",
+  "listDeleted": "تم الحذف",
+
+  "@_SocialExtra": {
+    "description": "سلاسل إضافية اجتماعية"
+  },
+  "community": "المجتمع",
+  "failedToLoadFollowing": "فشل تحميل المتابَعين",
+  "notFollowingAnyone": "لا تتابع أحدًا",
+  "findFriendsToFollow": "ابحث عن أصدقاء لمتابعتهم ورؤية نشاطهم.",
+  "failedToLoadFollowers": "فشل تحميل المتابعين",
+  "noFollowersYet": "لا يوجد متابعون بعد",
+  "whenSomeoneFollowsYou": "عندما يتابعك شخص ما، سيظهر هنا.",
+  "failedToLoadActivity": "فشل تحميل النشاط",
+  "noFriendActivity": "لا يوجد نشاط للأصدقاء",
+  "activityFromPeopleYouFollow": "سيظهر نشاط الأشخاص الذين تتابعهم هنا.",
+  "searchByUsername": "ابحث باسم المستخدم...",
+
+  "@_NotificationsExtra": {
+    "description": "سلاسل إضافية للإشعارات"
+  },
+  "failedToLoadNotifications": "فشل تحميل الإشعارات",
+  "youreAllCaughtUp": "كل شيء محدث!",
+  "clearAllNotificationsConfirm": "مسح جميع الإشعارات؟",
+  "clearAllWarning": "لا يمكن التراجع عن هذا الإجراء. سيتم حذف جميع الإشعارات بشكل دائم.",
+  "unknown": "غير معروف",
+  "today": "اليوم",
+  "yesterday": "أمس",
+
+  "@_Moderation": {
+    "description": "سلاسل شاشة الرقابة"
+  },
+  "accessDenied": "تم رفض الوصول",
+  "noModeratorPermissions": "ليس لديك صلاحيات المشرف.",
+  "reports": "التقارير",
+  "failedToLoadReports": "فشل تحميل التقارير",
+  "noPendingReports": "لا توجد تقارير معلقة",
+  "allClear": "كل شيء على ما يرام!",
+  "reportedUser": "المستخدم المُبلغ عنه",
+  "mediaId": "معرف الوسائط",
+  "reporter": "المُبلغ",
+  "takeAction": "اتخاذ إجراء",
+  "warnUser": "تحذير المستخدم",
+  "sendWarningToUser": "إرسال تحذير إلى المستخدم",
+  "hideContent": "إخفاء المحتوى",
+  "makeContentInvisible": "جعل المحتوى غير مرئي للمستخدمين",
+  "deleteContent": "حذف المحتوى",
+  "permanentlyRemoveContent": "إزالة هذا المحتوى بشكل دائم",
+  "confirmDeletion": "تأكيد الحذف",
+  "confirmDeleteContent": "هل أنت متأكد أنك تريد حذف هذا المحتوى بشكل دائم؟",
+  "banUser": "حظر المستخدم",
+  "permanentlyBanUser": "حظر هذا المستخدم بشكل دائم من المنصة",
+  "confirmBan": "تأكيد الحظر",
+  "confirmBanUser": "هل أنت متأكد أنك تريد حظر هذا المستخدم نهائيًا؟",
+  "ban": "حظر",
+  "users": "المستخدمون",
+  "failedToLoadUsers": "فشل تحميل المستخدمين",
+  "noUsersFound": "لم يتم العثور على مستخدمين",
+  "staff": "الموظفون",
+  "roleUser": "مستخدم",
+  "roleModerator": "مشرف",
+  "roleAdmin": "مدير",
+
+  "@_AnalyticsExtra": {
+    "description": "سلاسل إضافية للتحليلات"
+  },
+  "failedToLoadStats": "فشل تحميل الإحصائيات",
+  "yearlyActivity": "النشاط السنوي",
+  "countryDistribution": "توزيع الدول",
+  "ratingDistribution": "توزيع التقييمات",
+  "avgRating": "متوسط التقييم",
+  "mostWatchedDecade": "العقد الأكثر مشاهدة",
+  "noDataAvailable": "لا توجد بيانات متاحة بعد",
+  "other": "أخرى",
+  "totalItems": "إجمالي العناصر",
+
+  "@_Splash": {
+    "description": "سلاسل شاشة البداية"
+  },
+  "splashSubtitle": "قائمة مشاهدتك العالمية",
+
+  "@_EditProfile": {
+    "description": "سلاسل شاشة تعديل الملف الشخصي"
+  },
+  "profileUpdatedSuccessfully": "تم تحديث الملف الشخصي بنجاح",
+  "enterDisplayName": "أدخل اسم العرض",
+  "displayNameMax50": "يجب ألا يتجاوز اسم العرض 50 حرفًا",
+  "tellOthersAboutYourself": "أخبر الآخرين عن نفسك",
+  "bioMax500": "يجب ألا تتجاوز السيرة الذاتية 500 حرف",
+  "saveChanges": "حفظ التغييرات",
+
+  "@_ExtraCommon": {
+    "description": "سلاسل شائعة إضافية"
+  },
+  "confirm": "تأكيد",
+  "continueAction": "متابعة",
+  "remove": "إزالة",
+  "rename": "إعادة تسمية",
+  "move": "نقل",
+  "copy": "نسخ",
+  "create": "إنشاء",
+  "name": "الاسم",
+  "title": "العنوان",
+  "description": "الوصف",
+  "visibility": "الرؤية",
+  "type": "النوع",
+  "tryAgain": "حاول مرة أخرى",
+  "items": "عناصر",
+  "item": "عنصر",
+  "noResultsForSearch": "لا توجد نتائج",
+  "tryDifferentSearchTerm": "جرب مصطلح بحث مختلف",
+
+  "@_Badges": {
+    "description": "تسميات شارات الحالة"
+  },
+  "watchingBadge": "مشاهدة",
+  "completedBadge": "مكتمل",
+  "onHoldBadge": "معلق",
+  "droppedBadge": "ملغي",
+  "planToWatchBadge": "مخطط",
+  "rewatchingBadge": "إعادة مشاهدة",
+
+  "@_NewAdditions": {
+    "description": "نصوص تمت إضافتها مؤخرًا بدلاً من النصوص الثابتة"
+  },
+  "removeListTitle": "إزالة \"{title}\"؟",
+  "@removeListTitle": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "removeFromListWarning": "سيؤدي هذا إلى إزالة العنصر من هذه القائمة.",
+  "clearActivityWarning": "سيؤدي هذا إلى إزالة جميع بيانات نشاطك المستخدمة للتوصيات. هل ترغب في المتابعة؟",
+  "englishLanguage": "English",
+  "arabicLanguage": "العربية",
+  "deleteAccountWarning": "هذا الإجراء دائم ولا يمكن التراجع عنه. سيتم حذف جميع بياناتك.",
+  "aboutAppDescription": "منصة حديثة لتتبع الوسائط لاكتشاف وتتبع ومشاركة أفلامك، مسلسلاتك المفضلة، والمزيد.",
+  "dateOfBirth": "تاريخ الميلاد",
+  "inYourList": "في قائمتك",
+  "inYourLibrary": "في مكتبتك",
+  "addedLabel": "أُضيف",
+  "updatedLabel": "مُحدث",
+  "notTracked": "غير متتبع",
+  "detailsLabel": "التفاصيل",
+  "recommendationReason": "سبب التوصية: {reason}",
+  "@recommendationReason": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+  "likeLabel": "إعجاب",
+  "previousSlide": "الشريحة السابقة",
+  "nextSlide": "الشريحة التالية",
+  "errorWithDetails": "خطأ: {error}",
+  "@errorWithDetails": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "reviewsScreen": "شاشة المراجعات",
+  "itemCount": "{count, plural, =0{0 عناصر} =1{عنصر واحد} =2{عنصران} few{{count} عناصر} many{{count} عنصرًا} other{{count} عنصر}}",
+  "@itemCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "movedToTitle": "تم النقل إلى \"{title}\"",
+  "@movedToTitle": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "copiedToTitle": "تم النسخ إلى \"{title}\"",
+  "@copiedToTitle": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "ratedStars": "مُقيم بـ {stars} نجوم",
+  "@ratedStars": {
+    "placeholders": {
+      "stars": { "type": "double" }
+    }
+  }
 }

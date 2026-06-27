@@ -189,6 +189,31 @@
   "shareApp": "Share App",
   "logout": "Log Out",
   "deleteAccount": "Delete Account",
+  "appearance": "Appearance",
+  "account": "Account",
+  "userProfile": "User Profile",
+  "failedToLoadProfile": "Failed to load profile",
+  "profileNotFound": "Profile not found",
+  "changePassword": "Change Password",
+  "moderation": "Moderation",
+  "recommendationsAndPrivacy": "Recommendations & Privacy",
+  "personalizedRecommendations": "Personalized Recommendations",
+  "clearRecommendationHistory": "Clear Recommendation History",
+  "removeAllBehavioralData": "Remove all behavioral data",
+  "chooseTheme": "Choose Theme",
+  "chooseLanguage": "Choose Language",
+  "followSystem": "Follow system settings",
+  "displayName": "Display Name",
+  "username": "Username",
+  "age": "Age",
+  "gender": "Gender",
+  "male": "Male",
+  "female": "Female",
+  "ratherNotSay": "Rather not say",
+  "viewTracking": "View Tracking",
+  "viewAnalytics": "View Analytics",
+  "signOutConfirmation": "Are you sure you want to sign out?",
+  "sendResetLink": "Send Reset Link",
 
   "@_Analytics": {
     "description": "Analytics and statistics"
@@ -216,5 +241,349 @@
   "daysAgo": "{days}d ago",
   "weeksAgo": "{weeks}w ago",
   "monthsAgo": "{months}mo ago",
-  "yearsAgo": "{years}y ago"
+  "yearsAgo": "{years}y ago",
+
+  "@_Legal": {
+    "description": "Legal screens"
+  },
+  "termsOfServiceTitle": "Terms of Service",
+  "privacyPolicyTitle": "Privacy Policy",
+  "termsOfServiceBody": "By using WatchAtlas, you agree to these terms. Please read them carefully.\n\n[Full terms would go here]",
+  "privacyPolicyBody": "Your privacy matters to us.\n\n[Full privacy policy would go here]",
+  "lastUpdated": "Last updated: June 26, 2026",
+  "acceptanceOfTerms": "1. Acceptance of Terms",
+  "acceptanceOfTermsBody": "By accessing or using Watch Atlas, you agree to be bound by these Terms of Service. If you do not agree, do not use the service.",
+  "descriptionOfService": "2. Description of Service",
+  "descriptionOfServiceBody": "Watch Atlas is a media tracking application that allows users to discover, track, and organize movies, TV shows, and anime. Users can rate, review, and maintain watch lists.",
+  "userAccounts": "3. User Accounts",
+  "userAccountsBody": "You must sign in via Google OAuth to use the service. You are responsible for maintaining the confidentiality of your account. You must be at least 13 years old to use this service.",
+  "userConduct": "4. User Conduct",
+  "userConductBody": "You agree not to: post abusive, harassing, or inappropriate content; impersonate others; attempt to circumvent security measures; use the service for any illegal purpose.",
+  "intellectualProperty": "5. Intellectual Property",
+  "intellectualPropertyBody": "Media metadata and images are provided by TMDB and AniList under their respective licenses. The Watch Atlas application and code are proprietary. User-generated content (reviews, ratings) remains owned by you, with a license granted to Watch Atlas to display it within the service.",
+  "limitationOfLiability": "6. Limitation of Liability",
+  "limitationOfLiabilityBody": "Watch Atlas is provided as is without warranties of any kind. We are not responsible for the accuracy of third-party metadata. We reserve the right to modify or discontinue the service at any time.",
+  "termination": "7. Termination",
+  "terminationBody": "We reserve the right to suspend or terminate accounts that violate these terms. You may delete your account at any time.",
+  "changesToTerms": "8. Changes to Terms",
+  "changesToTermsBody": "We may update these terms at any time. Continued use after changes constitutes acceptance. Users will be notified of material changes via email or in-app notification.",
+  "contactSection": "9. Contact",
+  "contactLegal": "For questions about these terms, contact: legal@watchatlas.app",
+  "contactPrivacy": "For privacy-related inquiries, contact: privacy@watchatlas.app",
+  "informationWeCollect": "1. Information We Collect",
+  "informationWeCollectBody": "When you sign in with Google OAuth, we collect your email address and display name. We also store media you track (movies, TV shows, anime) along with your watch status, ratings, and reviews. Profile avatars and display names are stored via Supabase storage.",
+  "howWeUseInfo": "2. How We Use Your Information",
+  "howWeUseInfoBody": "Your information is used to provide and improve the service: personalize your experience, maintain your watch lists and reviews, generate analytics based on your tracked media, and communicate service updates if necessary.",
+  "dataStorage": "3. Data Storage & Security",
+  "dataStorageBody": "Your data is stored securely on Supabase (PostgreSQL) and Google Cloud infrastructure. We use Row Level Security to ensure you can only access your own data. Passwords are never stored — authentication is handled entirely by Google OAuth.",
+  "thirdPartyServices": "4. Third-Party Services",
+  "thirdPartyServicesBody": "We use TMDB (The Movie Database) to fetch media metadata. Your searches and viewed media IDs are sent to TMDB's API. We also use AniList for anime metadata. Google OAuth is used for authentication.",
+  "dataRetention": "5. Data Retention",
+  "dataRetentionBody": "Your data is retained for as long as your account is active. You may delete your account and associated data at any time by contacting us.",
+  "yourRights": "6. Your Rights",
+  "yourRightsBody": "You may request a copy of your data, correction of inaccurate data, or deletion of your account and associated data. Contact us at the email below.",
+
+  "@_AuthExtra": {
+    "description": "Additional authentication strings"
+  },
+  "confirmPassword": "Confirm Password",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "pleaseEnterPassword": "Please enter your password",
+  "passwordMinLength": "Password must be at least 6 characters",
+  "pleaseEnterEmail": "Please enter your email",
+  "pleaseConfirmPassword": "Please confirm your password",
+  "enterEmailForReset": "Enter your email to receive a password reset link",
+  "backToSignIn": "Back to Sign In",
+  "orContinueWith": "or continue with",
+  "setUpProfile": "Set up your profile",
+  "chooseAvatar": "Choose an avatar",
+  "uploadPhoto": "Upload a photo",
+  "orPickDefault": "Or pick one of the defaults below",
+  "notSpecified": "Not specified",
+  "selectDateOfBirth": "Select your date of birth",
+  "completeSetup": "Complete Setup",
+  "camera": "Camera",
+  "gallery": "Gallery",
+  "mustBe13": "You must be at least 13 years old to use this app",
+  "failedToSaveProfile": "Failed to save profile",
+  "invalidEmailOrPassword": "Invalid email or password",
+  "pleaseConfirmEmail": "Please confirm your email address",
+  "accountAlreadyExists": "An account with this email already exists",
+  "chooseAccount": "Choose an account",
+  "continueWithGoogle": "Continue with Google",
+  "signInToGoogle": "Sign in to a Google account",
+  "previouslyUsed": "Previously used",
+  "signInTo": "Sign in to",
+  "tryAnotherAccount": "Try another account",
+  "useDifferentGoogleAccount": "Use a different Google account",
+
+  "@_HomeExtra": {
+    "description": "Additional home screen strings"
+  },
+  "couldNotLoadContinueWatching": "Could not load continue watching",
+  "noContentInProgress": "No content in progress",
+  "searchMoviesTv": "Search movies, TV shows...",
+  "searchFailed": "Search failed",
+
+  "@_Discover": {
+    "description": "Discover screen strings"
+  },
+  "discover": "Discover",
+  "tryAdjustingFilters": "Try adjusting your filters",
+  "searchMoviesTvAnime": "Search movies, TV shows, anime...",
+  "advancedFilters": "Advanced Filters",
+  "allCountries": "All Countries",
+  "yearRange": "Year Range",
+  "ratingRange": "Rating Range",
+  "reset": "Reset",
+  "applyFilters": "Apply Filters",
+
+  "@_MediaExtra": {
+    "description": "Additional media detail strings"
+  },
+  "failedToLoadDetails": "Failed to load details",
+  "writeReview": "Write Review",
+  "noReviewsYet": "No reviews yet. Be the first to review!",
+  "failedToLoadReviews": "Failed to load reviews",
+  "noRecentActivity": "No recent activity",
+  "createNewList": "Create New List",
+  "addedTo": "Added to",
+  "addedToTitle": "Added to \"{title}\"",
+  "@addedToTitle": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "listCreated": "List created",
+  "removeFromTrackingList": "Remove from this list",
+
+  "@_TrackingExtra": {
+    "description": "Additional tracking strings"
+  },
+  "tracking": "Tracking",
+  "recentlyUpdated": "Recently Updated",
+  "noMediaInList": "No media in this list",
+  "failedToLoadTracking": "Failed to load tracking data",
+  "updateStatus": "Update Status",
+
+  "@_ListsExtra": {
+    "description": "Additional list strings"
+  },
+  "myCollections": "My Collections",
+  "allCollections": "All Collections",
+  "selectList": "Select a list",
+  "chooseListFromSidebar": "Choose a list from the sidebar to view its contents",
+  "yourCollections": "Your Collections",
+  "allItems": "All Items",
+  "noItemsInList": "No items in this list",
+  "addMediaFromDetails": "Add media from the details page",
+  "noOtherListsToMoveTo": "No other lists to move to",
+  "noOtherListsToCopyTo": "No other lists to copy to",
+  "moveTo": "Move to...",
+  "copyTo": "Copy to...",
+  "movedTo": "Moved to",
+  "copiedTo": "Copied to",
+  "removedFromList": "Removed from list",
+  "toggleView": "Toggle view",
+  "searchItems": "Search items...",
+  "failedToLoadList": "Failed to load list",
+  "listNotFound": "List not found",
+  "listCouldNotBeFound": "This list could not be found",
+  "checkOutMyList": "Check out my list: {title} on WatchAtlas",
+  "failedToLoadItems": "Failed to load items",
+  "enterListName": "Enter list name",
+  "titleRequired": "Title is required",
+  "descriptionOptional": "Description (optional)",
+  "describeList": "Describe this list",
+  "anyoneCanSee": "Anyone can see this list",
+  "onlyYouCanSee": "Only you can see this list",
+  "othersCanAddRemove": "Others can add and remove items",
+  "noItemsMatch": "No items match",
+  "across": "Across",
+  "deleteListConfirm": "Delete \"{title}\"?",
+  "deleteListWarning": "This will permanently remove the list and all media entries it contains. This action cannot be undone.",
+  "listDeleted": "deleted",
+
+  "@_SocialExtra": {
+    "description": "Additional social strings"
+  },
+  "community": "Community",
+  "failedToLoadFollowing": "Failed to load following",
+  "notFollowingAnyone": "Not following anyone",
+  "findFriendsToFollow": "Find friends to follow and see their activity.",
+  "failedToLoadFollowers": "Failed to load followers",
+  "noFollowersYet": "No followers yet",
+  "whenSomeoneFollowsYou": "When someone follows you, they will appear here.",
+  "failedToLoadActivity": "Failed to load activity",
+  "noFriendActivity": "No friend activity",
+  "activityFromPeopleYouFollow": "Activity from people you follow will appear here.",
+  "searchByUsername": "Search by username...",
+
+  "@_NotificationsExtra": {
+    "description": "Additional notification strings"
+  },
+  "failedToLoadNotifications": "Failed to load notifications",
+  "youreAllCaughtUp": "You're all caught up!",
+  "clearAllNotificationsConfirm": "Clear all notifications?",
+  "clearAllWarning": "This action cannot be undone. All notifications will be permanently deleted.",
+  "unknown": "Unknown",
+  "today": "Today",
+  "yesterday": "Yesterday",
+
+  "@_Moderation": {
+    "description": "Moderation screen strings"
+  },
+  "accessDenied": "Access Denied",
+  "noModeratorPermissions": "You do not have moderator permissions.",
+  "reports": "Reports",
+  "failedToLoadReports": "Failed to load reports",
+  "noPendingReports": "No pending reports",
+  "allClear": "All clear!",
+  "reportedUser": "Reported User",
+  "mediaId": "Media ID",
+  "reporter": "Reporter",
+  "takeAction": "Take Action",
+  "warnUser": "Warn User",
+  "sendWarningToUser": "Send a warning to the user",
+  "hideContent": "Hide Content",
+  "makeContentInvisible": "Make content invisible to users",
+  "deleteContent": "Delete Content",
+  "permanentlyRemoveContent": "Permanently remove this content",
+  "confirmDeletion": "Confirm Deletion",
+  "confirmDeleteContent": "Are you sure you want to permanently delete this content?",
+  "banUser": "Ban User",
+  "permanentlyBanUser": "Permanently ban this user from the platform",
+  "confirmBan": "Confirm Ban",
+  "confirmBanUser": "Are you sure you want to permanently ban this user?",
+  "ban": "Ban",
+  "users": "Users",
+  "failedToLoadUsers": "Failed to load users",
+  "noUsersFound": "No users found",
+  "staff": "Staff",
+  "roleUser": "USER",
+  "roleModerator": "MODERATOR",
+  "roleAdmin": "ADMIN",
+
+  "@_AnalyticsExtra": {
+    "description": "Additional analytics strings"
+  },
+  "failedToLoadStats": "Failed to load stats",
+  "yearlyActivity": "Yearly Activity",
+  "countryDistribution": "Country Distribution",
+  "ratingDistribution": "Rating Distribution",
+  "avgRating": "Avg Rating",
+  "mostWatchedDecade": "Most Watched Decade",
+  "noDataAvailable": "No data available yet",
+  "other": "Other",
+  "totalItems": "Total Items",
+
+  "@_Splash": {
+    "description": "Splash screen strings"
+  },
+  "splashSubtitle": "Your global watch list",
+
+  "@_EditProfile": {
+    "description": "Edit profile screen strings"
+  },
+  "profileUpdatedSuccessfully": "Profile updated successfully",
+  "enterDisplayName": "Enter your display name",
+  "displayNameMax50": "Display name must be 50 characters or less",
+  "tellOthersAboutYourself": "Tell others about yourself",
+  "bioMax500": "Bio must be 500 characters or less",
+  "saveChanges": "Save Changes",
+
+  "@_ExtraCommon": {
+    "description": "Extra common strings"
+  },
+  "confirm": "Confirm",
+  "continueAction": "Continue",
+  "remove": "Remove",
+  "rename": "Rename",
+  "move": "Move",
+  "copy": "Copy",
+  "create": "Create",
+  "name": "Name",
+  "title": "Title",
+  "description": "Description",
+  "visibility": "Visibility",
+  "type": "Type",
+  "tryAgain": "Try again",
+  "items": "items",
+  "item": "item",
+  "noResultsForSearch": "No results",
+  "tryDifferentSearchTerm": "Try a different search term",
+
+  "@_Badges": {
+    "description": "Status badge labels"
+  },
+  "watchingBadge": "WATCHING",
+  "completedBadge": "DONE",
+  "onHoldBadge": "HOLD",
+  "droppedBadge": "DROP",
+  "planToWatchBadge": "PLAN",
+  "rewatchingBadge": "REWATCH",
+  
+  "@_NewAdditions": {
+    "description": "Newly added strings replacing hardcoded text"
+  },
+  "removeListTitle": "Remove \"{title}\"?",
+  "@removeListTitle": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "removeFromListWarning": "This will remove the item from this list.",
+  "clearActivityWarning": "This will remove all your activity data used for recommendations. Continue?",
+  "englishLanguage": "English",
+  "arabicLanguage": "العربية",
+  "deleteAccountWarning": "This action is permanent and cannot be undone. All your data will be deleted.",
+  "aboutAppDescription": "A modern media tracking platform to discover, track, and share your favorite movies, TV shows, and more.",
+  "dateOfBirth": "Date of Birth",
+  "inYourList": "In Your List",
+  "inYourLibrary": "In Your Library",
+  "addedLabel": "Added",
+  "updatedLabel": "Updated",
+  "notTracked": "Not tracked",
+  "detailsLabel": "Details",
+  "recommendationReason": "Recommendation reason: {reason}",
+  "@recommendationReason": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+  "likeLabel": "Like",
+  "previousSlide": "Previous slide",
+  "nextSlide": "Next slide",
+  "errorWithDetails": "Error: {error}",
+  "@errorWithDetails": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "reviewsScreen": "Reviews Screen",
+  "itemCount": "{count, plural, =0{0 items} =1{1 item} other{{count} items}}",
+  "@itemCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "movedToTitle": "Moved to \"{title}\"",
+  "@movedToTitle": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "copiedToTitle": "Copied to \"{title}\"",
+  "@copiedToTitle": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "ratedStars": "Rated: {stars} stars",
+  "@ratedStars": {
+    "placeholders": {
+      "stars": { "type": "double" }
+    }
+  }
 }
+

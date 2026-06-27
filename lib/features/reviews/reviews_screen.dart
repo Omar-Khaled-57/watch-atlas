@@ -7,7 +7,7 @@ class ReviewsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: Text('Reviews Screen'),
+        child: Text(context.l10n.reviewsScreen),
       ),
     );
   }

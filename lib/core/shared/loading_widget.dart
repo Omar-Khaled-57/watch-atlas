@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../extensions/context_extensions.dart';
+import '../../l10n/l10n.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../constants/dimensions.dart';
@@ -242,7 +244,7 @@ class ErrorWidgetView extends StatelessWidget {
               FilledButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Retry'),
+                label: Text(context.l10n.retry),
               ),
             ],
           ],

@@ -10,6 +10,7 @@ import '../../core/extensions/context_extensions.dart';
 import '../../core/models/gender.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/supabase_service.dart';
+import '../../l10n/l10n.dart';
 import 'providers/auth_providers.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -44,7 +45,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Set up your profile'),
+        title: Text(context.l10n.setUpProfile),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsetsDirectional.all(Spacing.lg),
@@ -52,7 +53,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Choose an avatar',
+              context.l10n.chooseAvatar,
               style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: Spacing.md),
@@ -61,7 +62,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             _buildDefaultAvatarGrid(colorScheme),
             const SizedBox(height: Spacing.xxl),
             Text(
-              'Gender',
+              context.l10n.gender,
               style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: Spacing.md),
@@ -71,10 +72,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 prefixIcon: Icon(Icons.wc_rounded),
               ),
               items: [
-                DropdownMenuItem(value: null, child: Text('Not specified', style: textTheme.bodyMedium)),
-                DropdownMenuItem(value: Gender.male, child: const Text('Male')),
-                DropdownMenuItem(value: Gender.female, child: const Text('Female')),
-                DropdownMenuItem(value: Gender.ratherNotSay, child: const Text('Rather not say')),
+                DropdownMenuItem(value: null, child: Text(context.l10n.notSpecified, style: textTheme.bodyMedium)),
+                DropdownMenuItem(value: Gender.male, child: Text(context.l10n.male)),
+                DropdownMenuItem(value: Gender.female, child: Text(context.l10n.female)),
+                DropdownMenuItem(value: Gender.ratherNotSay, child: Text(context.l10n.ratherNotSay)),
               ],
               onChanged: (value) => setState(() => _gender = value),
             ),
@@ -94,7 +95,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 child: Text(
                   _dateOfBirth != null
                       ? '${_dateOfBirth!.month}/${_dateOfBirth!.day}/${_dateOfBirth!.year}'
-                      : 'Select your date of birth',
+                      : context.l10n.selectDateOfBirth,
                   style: textTheme.bodyLarge?.copyWith(
                     color: _dateOfBirth != null ? null : colorScheme.onSurfaceVariant,
                   ),
@@ -111,7 +112,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         width: 20, height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
-                    : const Text('Complete Setup'),
+                    : Text(context.l10n.completeSetup),
               ),
             ),
           ],
@@ -145,9 +146,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Upload a photo', style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
+              Text(context.l10n.uploadPhoto, style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
               const SizedBox(height: Spacing.xs),
-              Text('Or pick one of the defaults below', style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+              Text(context.l10n.orPickDefault, style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
             ],
           ),
         ),
@@ -210,12 +211,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.camera_alt_rounded),
-                title: const Text('Camera'),
+                title: Text(context.l10n.camera),
                 onTap: () => Navigator.pop(context, ImageSource.camera),
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library_rounded),
-                title: const Text('Gallery'),
+                title: Text(context.l10n.gallery),
                 onTap: () => Navigator.pop(context, ImageSource.gallery),
               ),
             ],
@@ -240,7 +241,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       initialDate: _dateOfBirth ?? DateTime(now.year - 18),
       firstDate: DateTime(now.year - 120),
       lastDate: now,
-      helpText: 'Select date of birth',
+      helpText: context.l10n.selectDateOfBirth,
     );
     if (picked != null) {
       setState(() => _dateOfBirth = picked);
@@ -256,7 +257,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     if (_dateOfBirth != null && age < 13) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must be at least 13 years old to use this app')),
+          SnackBar(content: Text(context.l10n.mustBe13)),
         );
       }
       return;
@@ -299,7 +300,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to save profile: $e'),
+            content: Text(context.l10n.errorWithDetails('${context.l10n.failedToSaveProfile}: $e')),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );

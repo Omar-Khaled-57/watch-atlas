@@ -119,7 +119,7 @@ class _StarRating extends StatelessWidget {
   void _onStarTap(BuildContext context, int stars) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Rated: $stars stars'),
+        content: Text(context.l10n.ratedStars(stars.toDouble())),
         duration: const Duration(seconds: 1),
       ),
     );

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../l10n/l10n.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
@@ -188,6 +189,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
   }
 
   Widget _buildError() {
+    final l10n = context.l10n;
     return Center(
       child: Padding(
         padding: EdgeInsetsDirectional.all(Spacing.xl),
@@ -196,12 +198,12 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
           children: [
             Icon(Icons.error_outline_rounded, size: 64, color: context.colorScheme.error),
             SizedBox(height: Spacing.lg),
-            Text('Failed to load details', style: context.textTheme.bodyLarge),
+            Text(l10n.failedToLoadDetails, style: context.textTheme.bodyLarge),
             SizedBox(height: Spacing.lg),
             FilledButton.tonalIcon(
               onPressed: () => ref.invalidate(mediaDetailsProvider),
               icon: Icon(Icons.refresh_rounded),
-              label: Text('Retry'),
+              label: Text(l10n.retry),
             ),
           ],
         ),
@@ -272,13 +274,13 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
                 ),
                 SizedBox(height: Spacing.xxl),
                 recommendationsAsync.when(
-                  data: (recs) => _MediaRowSection(title: 'Recommendations', items: recs),
+                  data: (recs) => _MediaRowSection(title: context.l10n.recommendations, items: recs),
                   loading: () => SizedBox.shrink(),
                   error: (_, _) => SizedBox.shrink(),
                 ),
                 SizedBox(height: Spacing.xxl),
                 similarAsync.when(
-                  data: (similar) => _MediaRowSection(title: 'Similar', items: similar),
+                  data: (similar) => _MediaRowSection(title: context.l10n.similar, items: similar),
                   loading: () => SizedBox.shrink(),
                   error: (_, _) => SizedBox.shrink(),
                 ),
@@ -423,13 +425,13 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
             ),
             SizedBox(height: Spacing.xl),
             recommendationsAsync.when(
-              data: (recs) => _MediaRowSection(title: 'Recommendations', items: recs),
+              data: (recs) => _MediaRowSection(title: context.l10n.recommendations, items: recs),
               loading: () => SizedBox.shrink(),
               error: (_, _) => SizedBox.shrink(),
             ),
             SizedBox(height: Spacing.xl),
             similarAsync.when(
-              data: (similar) => _MediaRowSection(title: 'Similar', items: similar),
+              data: (similar) => _MediaRowSection(title: context.l10n.similar, items: similar),
               loading: () => SizedBox.shrink(),
               error: (_, _) => SizedBox.shrink(),
             ),
@@ -517,13 +519,13 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
                       ),
                       SizedBox(height: Spacing.xxl),
                       recommendationsAsync.when(
-                        data: (recs) => _MediaRowSection(title: 'Recommendations', items: recs),
+                        data: (recs) => _MediaRowSection(title: context.l10n.recommendations, items: recs),
                         loading: () => SizedBox.shrink(),
                         error: (_, _) => SizedBox.shrink(),
                       ),
                       SizedBox(height: Spacing.xxl),
                       similarAsync.when(
-                        data: (similar) => _MediaRowSection(title: 'Similar', items: similar),
+                        data: (similar) => _MediaRowSection(title: context.l10n.similar, items: similar),
                         loading: () => SizedBox.shrink(),
                         error: (_, _) => SizedBox.shrink(),
                       ),
@@ -912,7 +914,7 @@ class _OverviewSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionHeader(title: 'Overview'),
+        _SectionHeader(title: context.l10n.overview),
         SizedBox(height: Spacing.sm),
         ExpandableText(
           text: media.overview!,
@@ -965,7 +967,7 @@ class _ActionButtons extends ConsumerWidget {
         OutlinedButton.icon(
           onPressed: () => _showAddToListSheet(context, ref, media),
           icon: Icon(Icons.playlist_add_rounded, size: 20),
-          label: Text('List'),
+          label: Text(context.l10n.navLists),
           style: OutlinedButton.styleFrom(
             padding: EdgeInsetsDirectional.symmetric(
               horizontal: Spacing.lg,
@@ -981,6 +983,7 @@ class _ActionButtons extends ConsumerWidget {
   }
 
   void _showAddToListSheet(BuildContext context, WidgetRef ref, MediaModel media) {
+    final l10n = context.l10n;
     final content = Consumer(builder: (context, ref, _) {
       final listsAsync = ref.watch(userListsProvider);
       return Column(
@@ -994,17 +997,17 @@ class _ActionButtons extends ConsumerWidget {
                 child: CircularProgressIndicator(),
               ),
             ),
-            error: (_, _) => const Center(
+            error: (_, _) => Center(
               child: Padding(
                 padding: EdgeInsets.all(Spacing.xl),
-                child: Text('Failed to load lists'),
+                child: Text(l10n.failedToLoadList),
               ),
             ),
             data: (lists) {
               if (lists.isEmpty) {
-                return const Padding(
+                return Padding(
                   padding: EdgeInsets.all(Spacing.xl),
-                  child: Center(child: Text('No lists yet.')),
+                  child: Center(child: Text(l10n.noListsYet)),
                 );
               }
               return ConstrainedBox(
@@ -1024,13 +1027,13 @@ class _ActionButtons extends ConsumerWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      subtitle: Text('${list.itemCount} items'),
+                      subtitle: Text(l10n.itemCount(list.itemCount)),
                       onTap: () {
                         ref.read(userListsProvider.notifier).addItemToList(list.id, media);
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Added to "${list.title}"'),
+                            content: Text(l10n.addedToTitle(list.title)),
                             duration: const Duration(seconds: 2),
                           ),
                         );
@@ -1044,7 +1047,7 @@ class _ActionButtons extends ConsumerWidget {
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.add_rounded),
-            title: const Text('Create New List'),
+            title: Text(l10n.createNewList),
             onTap: () async {
               final created = await showDialog<bool>(
                 context: context,
@@ -1059,7 +1062,7 @@ class _ActionButtons extends ConsumerWidget {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(newList != null ? 'Added to "${newList.title}"' : 'List created'),
+                    content: Text(newList != null ? l10n.addedToTitle(newList.title) : l10n.listCreated),
                     duration: const Duration(seconds: 2),
                   ),
                 );
@@ -1072,7 +1075,7 @@ class _ActionButtons extends ConsumerWidget {
 
     AppDialog.show(
       context: context,
-      title: 'Add to List',
+      title: l10n.addToList,
       content: content,
     );
   }
@@ -1109,6 +1112,7 @@ class _ListEntrySection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final userMediaList = ref.watch(userMediaProvider).valueOrNull ?? [];
     final entry = userMediaList.where((m) => m.mediaId == media.id).firstOrNull;
     if (entry == null) return SizedBox.shrink();
@@ -1133,7 +1137,7 @@ class _ListEntrySection extends ConsumerWidget {
               Icon(Icons.list_alt_rounded, size: 18, color: context.colorScheme.primary),
               SizedBox(width: Spacing.sm),
               Text(
-                'In Your List',
+                context.l10n.inYourLibrary,
                 style: context.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -1141,15 +1145,15 @@ class _ListEntrySection extends ConsumerWidget {
             ],
           ),
           SizedBox(height: Spacing.md),
-          _entryRow(context, 'Status', _statusLabel(entry.status)),
+          _entryRow(context, l10n.status, _statusLabel(context, entry.status)),
           if (entry.userRating != null)
-            _entryRow(context, 'Rating', '${entry.userRating!.toStringAsFixed(1)} / 10'),
+            _entryRow(context, l10n.ratings, '${entry.userRating!.toStringAsFixed(1)} / 10'),
           if (entry.episodeProgress > 0 && entry.totalEpisodes > 0)
-            _entryRow(context, 'Progress', '${entry.episodeProgress} / ${entry.totalEpisodes} episodes'),
+            _entryRow(context, l10n.progress, '${entry.episodeProgress} / ${entry.totalEpisodes} episodes'),
           if (entry.createdAt != null)
-            _entryRow(context, 'Added', '${months[entry.createdAt!.month - 1]} ${entry.createdAt!.day}, ${entry.createdAt!.year}'),
+            _entryRow(context, context.l10n.addedLabel, '${months[entry.createdAt!.month - 1]} ${entry.createdAt!.day}, ${entry.createdAt!.year}'),
           if (entry.updatedAt != null)
-            _entryRow(context, 'Updated', '${months[entry.updatedAt!.month - 1]} ${entry.updatedAt!.day}, ${entry.updatedAt!.year}'),
+            _entryRow(context, context.l10n.updatedLabel, '${months[entry.updatedAt!.month - 1]} ${entry.updatedAt!.day}, ${entry.updatedAt!.year}'),
         ],
       ),
     );
@@ -1183,20 +1187,21 @@ class _ListEntrySection extends ConsumerWidget {
     );
   }
 
-  String _statusLabel(WatchStatus status) {
+  String _statusLabel(BuildContext context, WatchStatus status) {
+    final l10n = context.l10n;
     switch (status) {
       case WatchStatus.watching:
-        return 'Watching';
+        return l10n.watching;
       case WatchStatus.completed:
-        return 'Completed';
+        return l10n.completed;
       case WatchStatus.onHold:
-        return 'On Hold';
+        return l10n.onHold;
       case WatchStatus.dropped:
-        return 'Dropped';
+        return l10n.dropped;
       case WatchStatus.planToWatch:
-        return 'Plan to Watch';
+        return l10n.planToWatch;
       case WatchStatus.rewatching:
-        return 'Rewatching';
+        return l10n.rewatching;
     }
   }
 }
@@ -1234,8 +1239,7 @@ class _LibraryCard extends ConsumerWidget {
                   Icon(Icons.bookmark_rounded, size: 18, color: context.colorScheme.primary),
                   SizedBox(width: Spacing.sm),
                   Text(
-                    'In Your Library',
-                    style: context.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                    context.l10n.inYourList, style: context.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -1282,7 +1286,7 @@ class _LibraryCard extends ConsumerWidget {
               Icon(Icons.circle, size: 6, color: context.colorScheme.onSurfaceVariant),
               SizedBox(width: Spacing.xs),
               Text(
-                trackingEntry != null ? _statusLabel(trackingEntry.status) : 'Not tracked',
+                trackingEntry != null ? _statusLabel(context, trackingEntry.status) : context.l10n.notTracked,
                 style: context.textTheme.bodySmall?.copyWith(color: context.colorScheme.onSurfaceVariant),
               ),
               if (addedLabel != null) ...[
@@ -1290,8 +1294,7 @@ class _LibraryCard extends ConsumerWidget {
                 Icon(Icons.circle, size: 6, color: context.colorScheme.onSurfaceVariant),
                 SizedBox(width: Spacing.xs),
                 Text(
-                  addedLabel,
-                  style: context.textTheme.bodySmall?.copyWith(color: context.colorScheme.onSurfaceVariant),
+                  '${context.l10n.updatedLabel}: $addedLabel', style: context.textTheme.labelSmall?.copyWith(color: context.colorScheme.onSurfaceVariant),
                 ),
               ],
             ],
@@ -1301,14 +1304,15 @@ class _LibraryCard extends ConsumerWidget {
     );
   }
 
-  String _statusLabel(WatchStatus status) {
+  String _statusLabel(BuildContext context, WatchStatus status) {
+    final l10n = context.l10n;
     switch (status) {
-      case WatchStatus.watching: return 'Watching';
-      case WatchStatus.completed: return 'Completed';
-      case WatchStatus.onHold: return 'On Hold';
-      case WatchStatus.dropped: return 'Dropped';
-      case WatchStatus.planToWatch: return 'Plan to Watch';
-      case WatchStatus.rewatching: return 'Rewatching';
+      case WatchStatus.watching: return l10n.watching;
+      case WatchStatus.completed: return l10n.completed;
+      case WatchStatus.onHold: return l10n.onHold;
+      case WatchStatus.dropped: return l10n.dropped;
+      case WatchStatus.planToWatch: return l10n.planToWatch;
+      case WatchStatus.rewatching: return l10n.rewatching;
     }
   }
 }
@@ -1352,7 +1356,7 @@ class _CastSection extends StatelessWidget {
       children: [
         Padding(
           padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
-          child: _SectionHeader(title: 'Cast'),
+          child: _SectionHeader(title: context.l10n.cast),
         ),
         SizedBox(height: Spacing.md),
         SizedBox(
@@ -1402,7 +1406,7 @@ class _CrewSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _SectionHeader(title: 'Crew'),
+          _SectionHeader(title: context.l10n.crew),
           SizedBox(height: Spacing.md),
           ...keyRoles.map((person) {
             return Padding(
@@ -1467,7 +1471,7 @@ class _TrailersSection extends StatelessWidget {
       children: [
         Padding(
           padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
-          child: _SectionHeader(title: 'Trailers'),
+          child: _SectionHeader(title: context.l10n.trailers),
         ),
         SizedBox(height: Spacing.md),
         SizedBox(
@@ -1624,12 +1628,12 @@ class _ReviewsSection extends ConsumerWidget {
       children: [
         Row(
           children: [
-            _SectionHeader(title: 'Reviews'),
+            _SectionHeader(title: context.l10n.reviews),
             Spacer(),
             TextButton.icon(
               onPressed: () {},
               icon: Icon(Icons.edit_rounded, size: 18),
-              label: Text('Write Review'),
+              label: Text(context.l10n.writeReview),
             ),
           ],
         ),
@@ -1653,7 +1657,7 @@ class _ReviewsSection extends ConsumerWidget {
                     ),
                     SizedBox(height: Spacing.md),
                     Text(
-                      'No reviews yet. Be the first to review!',
+                      context.l10n.noReviewsYet,
                       textAlign: TextAlign.center,
                       style: context.textTheme.bodyMedium?.copyWith(
                         color: context.colorScheme.onSurfaceVariant,
@@ -1683,7 +1687,7 @@ class _ReviewsSection extends ConsumerWidget {
             padding: EdgeInsetsDirectional.all(Spacing.xl),
             child: Center(
               child: Text(
-                'Failed to load reviews',
+                context.l10n.failedToLoadReviews,
                 style: context.textTheme.bodyMedium?.copyWith(
                   color: context.colorScheme.error,
                 ),
@@ -1706,7 +1710,7 @@ class _ActivitySection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionHeader(title: 'Activity'),
+        _SectionHeader(title: context.l10n.activity),
         SizedBox(height: Spacing.md),
         Container(
           width: double.infinity,
@@ -1724,7 +1728,7 @@ class _ActivitySection extends StatelessWidget {
               ),
               SizedBox(height: Spacing.sm),
               Text(
-                'No recent activity',
+                context.l10n.noRecentActivity,
                 style: context.textTheme.bodyMedium?.copyWith(
                   color: context.colorScheme.onSurfaceVariant,
                 ),
@@ -1780,7 +1784,7 @@ class _SidePanel extends ConsumerWidget {
           OutlinedButton.icon(
             onPressed: () => _showAddToListSheet(context, ref, media),
             icon: Icon(Icons.playlist_add_rounded),
-            label: Text('Add to List'),
+            label: Text(context.l10n.addToList),
             style: OutlinedButton.styleFrom(
               padding: EdgeInsetsDirectional.symmetric(vertical: Spacing.md),
               shape: RoundedRectangleBorder(
@@ -1798,8 +1802,10 @@ class _SidePanel extends ConsumerWidget {
   }
 
   void _showAddToListSheet(BuildContext context, WidgetRef ref, MediaModel media) {
+    final l10n = context.l10n;
     final content = Consumer(builder: (context, ref, _) {
       final listsAsync = ref.watch(userListsProvider);
+      final l10n = context.l10n;
       return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1811,17 +1817,17 @@ class _SidePanel extends ConsumerWidget {
                 child: CircularProgressIndicator(),
               ),
             ),
-            error: (_, _) => const Center(
+            error: (_, _) => Center(
               child: Padding(
                 padding: EdgeInsets.all(Spacing.xl),
-                child: Text('Failed to load lists'),
+                child: Text(l10n.failedToLoadList),
               ),
             ),
             data: (lists) {
               if (lists.isEmpty) {
-                return const Padding(
+                return Padding(
                   padding: EdgeInsets.all(Spacing.xl),
-                  child: Center(child: Text('No lists yet.')),
+                  child: Center(child: Text(l10n.noListsYet)),
                 );
               }
               return ConstrainedBox(
@@ -1841,13 +1847,13 @@ class _SidePanel extends ConsumerWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      subtitle: Text('${list.itemCount} items'),
+                      subtitle: Text(l10n.itemCount(list.itemCount)),
                       onTap: () {
                         ref.read(userListsProvider.notifier).addItemToList(list.id, media);
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Added to "${list.title}"'),
+                            content: Text(l10n.addedToTitle(list.title)),
                             duration: const Duration(seconds: 2),
                           ),
                         );
@@ -1861,7 +1867,7 @@ class _SidePanel extends ConsumerWidget {
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.add_rounded),
-            title: const Text('Create New List'),
+            title: Text(l10n.createNewList),
             onTap: () async {
               final created = await showDialog<bool>(
                 context: context,
@@ -1876,7 +1882,7 @@ class _SidePanel extends ConsumerWidget {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(newList != null ? 'Added to "${newList.title}"' : 'List created'),
+                    content: Text(newList != null ? l10n.addedToTitle(newList.title) : l10n.listCreated),
                     duration: const Duration(seconds: 2),
                   ),
                 );
@@ -1889,7 +1895,7 @@ class _SidePanel extends ConsumerWidget {
 
     AppDialog.show(
       context: context,
-      title: 'Add to List',
+      title: l10n.addToList,
       content: content,
     );
   }
@@ -1906,25 +1912,26 @@ class _SidePanelStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final stats = <Map<String, String>>[];
 
     if (media.runtime != null) {
-      stats.add({'label': 'Runtime', 'value': media.runtime!.toRuntimeString()});
+      stats.add({'label': l10n.runtime, 'value': media.runtime!.toRuntimeString()});
     }
     if (media.releaseDate != null) {
       stats.add({
-        'label': 'Release Date',
+        'label': l10n.releaseDate,
         'value': '${media.releaseDate!.year}-${media.releaseDate!.month.toString().padLeft(2, '0')}-${media.releaseDate!.day.toString().padLeft(2, '0')}',
       });
     }
     if (media.countries != null && media.countries!.isNotEmpty) {
-      stats.add({'label': 'Country', 'value': media.countries!.join(', ')});
+      stats.add({'label': l10n.country, 'value': media.countries!.join(', ')});
     }
     if (media.language != null) {
-      stats.add({'label': 'Language', 'value': media.language!});
+      stats.add({'label': l10n.language, 'value': media.language!});
     }
     if (media.status != null) {
-      stats.add({'label': 'Status', 'value': media.status!});
+      stats.add({'label': l10n.status, 'value': media.status!});
     }
 
     if (stats.isEmpty) return SizedBox.shrink();
@@ -1933,7 +1940,7 @@ class _SidePanelStats extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Details',
+          context.l10n.detailsLabel,
           style: context.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
           ),

@@ -13,6 +13,7 @@ import '../../features/tracking/providers/tracking_providers.dart';
 import 'providers/lists_providers.dart';
 import 'widgets/list_card.dart';
 import 'widgets/create_list_dialog.dart';
+import '../../l10n/l10n.dart';
 import 'all_items_screen.dart';
 
 class ListsScreen extends ConsumerStatefulWidget {
@@ -36,7 +37,7 @@ class _ListsScreenState extends ConsumerState<ListsScreen> {
     final lists = listsAsync.valueOrNull ?? [];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Collections')),
+      appBar: AppBar(title: Text(context.l10n.myCollections)),
       body: _isWide ? _buildWideLayout(lists, listsAsync, totalTitles, colorScheme, textTheme) : _buildNarrowLayout(listsAsync, totalTitles, colorScheme, textTheme),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showCreateDialog(),
@@ -58,16 +59,16 @@ class _ListsScreenState extends ConsumerState<ListsScreen> {
           listsAsync.when(
             loading: () => const SliverFillRemaining(child: FullScreenLoader()),
             error: (error, _) => SliverFillRemaining(
-              child: Center(child: Text('Failed to load lists', style: textTheme.bodyMedium?.copyWith(color: colorScheme.error))),
+              child: Center(child: Text(context.l10n.failedToLoadList, style: textTheme.bodyMedium?.copyWith(color: colorScheme.error))),
             ),
             data: (lists) {
               if (lists.isEmpty) {
                 return SliverFillRemaining(
                   hasScrollBody: false,
                   child: EmptyState(
-                    title: 'No lists yet',
-                    subtitle: 'Create your first collection to start organizing your media',
-                    actionLabel: 'Create List',
+                    title: context.l10n.noListsYet,
+                    subtitle: context.l10n.createFirstList,
+                    actionLabel: context.l10n.createList,
                     onAction: () => _showCreateDialog(),
                   ),
                 );
@@ -112,12 +113,12 @@ class _ListsScreenState extends ConsumerState<ListsScreen> {
           width: 320,
           child: listsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, __) => Center(child: Text('Error', style: textTheme.bodyMedium?.copyWith(color: colorScheme.error))),
+            error: (_, __) => Center(child: Text(context.l10n.error, style: textTheme.bodyMedium?.copyWith(color: colorScheme.error))),
             data: (data) {
               if (data.isEmpty) {
                 return EmptyState(
-                  title: 'No lists yet',
-                  actionLabel: 'Create List',
+                  title: context.l10n.noListsYet,
+                  actionLabel: context.l10n.createList,
                   onAction: () => _showCreateDialog(),
                 );
               }
@@ -128,7 +129,7 @@ class _ListsScreenState extends ConsumerState<ListsScreen> {
                   children: [
                     Padding(
                       padding: const EdgeInsetsDirectional.only(bottom: 16),
-                      child: Text('Your Collections', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+                      child: Text(context.l10n.yourCollections, style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
                     ),
                     _AllCollectionListTile(
                       totalTitles: totalTitles,
@@ -163,9 +164,9 @@ class _ListsScreenState extends ConsumerState<ListsScreen> {
         children: [
           Icon(Icons.collections_bookmark_rounded, size: 64, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.3)),
           const SizedBox(height: Spacing.lg),
-          Text('Select a list', style: textTheme.titleMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
+          Text(context.l10n.selectList, style: textTheme.titleMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
           const SizedBox(height: Spacing.xs),
-          Text('Choose a list from the sidebar to view its contents', style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+          Text(context.l10n.chooseListFromSidebar, style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
         ],
       ),
     );
@@ -178,12 +179,12 @@ class _ListsScreenState extends ConsumerState<ListsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Your Collections',
+            context.l10n.yourCollections,
             style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.5),
           ),
           const SizedBox(height: 6),
           Text(
-            '$totalTitles Title${totalTitles == 1 ? '' : 's'} \u2022 $listCount List${listCount == 1 ? '' : 's'}',
+            '${totalTitles == 1 ? '$totalTitles ${context.l10n.item}' : '$totalTitles ${context.l10n.items}'} \u2022 $listCount List${listCount == 1 ? '' : 's'}',
             style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
           ),
         ],
@@ -214,19 +215,19 @@ class _ListsScreenState extends ConsumerState<ListsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Delete "${list.title}"?'),
-        content: const Text('This will permanently remove the list and all media entries it contains.\nThis action cannot be undone.'),
+        title: Text(context.l10n.deleteListConfirm(list.title)),
+        content: Text(context.l10n.deleteListWarning),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(context.l10n.cancel)),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             onPressed: () {
               ref.read(userListsProvider.notifier).deleteList(list);
               if (_selectedListId == list.id) setState(() => _selectedListId = null);
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('"${list.title}" deleted')));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${context.l10n.listDeleted}: ${list.title}')));
             },
-            child: const Text('Delete'),
+            child: Text(context.l10n.delete),
           ),
         ],
       ),
@@ -274,8 +275,8 @@ class _ListCardWithMenu extends StatelessWidget {
       context: context,
       position: RelativeRect.fromLTRB(details.globalPosition.dx, details.globalPosition.dy, details.globalPosition.dx, details.globalPosition.dy),
       items: [
-        const PopupMenuItem(value: 'rename', child: ListTile(leading: Icon(Icons.edit_rounded), title: Text('Rename'), dense: true)),
-        const PopupMenuItem(value: 'delete', child: ListTile(leading: Icon(Icons.delete_rounded), title: Text('Delete'), dense: true)),
+        PopupMenuItem(value: 'rename', child: ListTile(leading: Icon(Icons.edit_rounded), title: Text(context.l10n.rename), dense: true)),
+        PopupMenuItem(value: 'delete', child: ListTile(leading: Icon(Icons.delete_rounded), title: Text(context.l10n.delete), dense: true)),
       ],
     ).then((value) {
       if (value == 'rename') onRename();
@@ -313,7 +314,7 @@ class _CompactListTile extends StatelessWidget {
       child: ListTile(
         leading: Icon(isSelected ? Icons.folder_open_rounded : Icons.folder_rounded, size: 20),
         title: Text(listData.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400)),
-        subtitle: Text('${listData.itemCount} items'),
+        subtitle: Text(context.l10n.itemCount(listData.itemCount)),
         trailing: PopupMenuButton<String>(
           icon: Icon(Icons.more_vert_rounded, size: 18),
           onSelected: (value) {
@@ -321,8 +322,8 @@ class _CompactListTile extends StatelessWidget {
             if (value == 'delete') onDelete();
           },
           itemBuilder: (_) => [
-            const PopupMenuItem(value: 'rename', child: ListTile(leading: Icon(Icons.edit_rounded), title: Text('Rename'), dense: true)),
-            const PopupMenuItem(value: 'delete', child: ListTile(leading: Icon(Icons.delete_rounded), title: Text('Delete'), dense: true)),
+            PopupMenuItem(value: 'rename', child: ListTile(leading: Icon(Icons.edit_rounded), title: Text(context.l10n.rename), dense: true)),
+            PopupMenuItem(value: 'delete', child: ListTile(leading: Icon(Icons.delete_rounded), title: Text(context.l10n.delete), dense: true)),
           ],
         ),
         onTap: onTap,
@@ -351,8 +352,8 @@ class _AllCollectionListTile extends StatelessWidget {
       ),
       child: ListTile(
         leading: Icon(Icons.collections_bookmark_rounded, size: 20, color: isSelected ? colorScheme.onSecondaryContainer : null),
-        title: Text('All Collections', style: TextStyle(fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400)),
-        subtitle: Text('$totalTitles titles'),
+        title: Text(context.l10n.allCollections, style: TextStyle(fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400)),
+        subtitle: Text(context.l10n.itemCount(totalTitles)),
         onTap: onTap,
       ),
     );
@@ -397,13 +398,13 @@ class _ListDetailPanelState extends ConsumerState<_ListDetailPanel> {
                   children: [
                     Text(list.title, style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 2),
-                    Text('$itemCount ${itemCount == 1 ? 'title' : 'titles'}', style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+                    Text(context.l10n.itemCount(itemCount), style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
                   ],
                 ),
               ),
               IconButton(
                 icon: Icon(_viewMode == MasterDetailViewMode.grid ? Icons.view_list_rounded : Icons.grid_view_rounded, size: 20),
-                tooltip: 'Toggle view',
+                tooltip: context.l10n.toggleView,
                 onPressed: () => setState(() {
                   _viewMode = _viewMode == MasterDetailViewMode.grid ? MasterDetailViewMode.list : MasterDetailViewMode.grid;
                 }),
@@ -436,12 +437,12 @@ class _ListDetailItems extends ConsumerWidget {
 
     return itemsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => Center(child: Text('Failed to load', style: textTheme.bodyMedium?.copyWith(color: colorScheme.error))),
+      error: (_, __) => Center(child: Text(context.l10n.failedToLoadItems, style: textTheme.bodyMedium?.copyWith(color: colorScheme.error))),
       data: (items) {
         if (items.isEmpty) {
           return EmptyState(
-            title: 'No items in this list',
-            subtitle: 'Add media from the details page',
+            title: context.l10n.noItemsInList,
+            subtitle: context.l10n.addMediaFromDetails,
           );
         }
         final userMedia = userMediaAsync.valueOrNull ?? [];
@@ -558,9 +559,9 @@ class _ListDetailItems extends ConsumerWidget {
                           if (value == 'copy') _showMoveCopyDialog(context, ref, item, move: false);
                         },
                         itemBuilder: (_) => [
-                          const PopupMenuItem(value: 'remove', child: ListTile(leading: Icon(Icons.remove_circle_outline_rounded), title: Text('Remove'), dense: true)),
-                          const PopupMenuItem(value: 'move', child: ListTile(leading: Icon(Icons.drive_file_move_rounded), title: Text('Move'), dense: true)),
-                          const PopupMenuItem(value: 'copy', child: ListTile(leading: Icon(Icons.copy_rounded), title: Text('Copy'), dense: true)),
+                          PopupMenuItem(value: 'remove', child: ListTile(leading: Icon(Icons.remove_circle_outline_rounded), title: Text(context.l10n.remove), dense: true)),
+                          PopupMenuItem(value: 'move', child: ListTile(leading: Icon(Icons.drive_file_move_rounded), title: Text(context.l10n.move), dense: true)),
+                          PopupMenuItem(value: 'copy', child: ListTile(leading: Icon(Icons.copy_rounded), title: Text(context.l10n.copy), dense: true)),
                         ],
                       ),
                     ],
@@ -592,18 +593,18 @@ class _ListDetailItems extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Remove "$title"?'),
-        content: const Text('This will remove the item from this list.'),
+        title: Text(context.l10n.removeListTitle(title)),
+        content: Text(context.l10n.removeFromListWarning),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(context.l10n.cancel)),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             onPressed: () {
               ref.read(userListsProvider.notifier).removeItemFromList(listId, mediaId);
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Removed from list')));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.removedFromList)));
             },
-            child: const Text('Remove'),
+            child: Text(context.l10n.remove),
           ),
         ],
       ),
@@ -617,7 +618,7 @@ class _ListDetailItems extends ConsumerWidget {
 
     if (otherLists.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(move ? 'No other lists to move to' : 'No other lists to copy to')),
+        SnackBar(content: Text(move ? context.l10n.noOtherListsToMoveTo : context.l10n.noOtherListsToCopyTo)),
       );
       return;
     }
@@ -625,7 +626,7 @@ class _ListDetailItems extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(move ? 'Move to...' : 'Copy to...'),
+        title: Text(move ? context.l10n.moveTo : context.l10n.copyTo),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView(
@@ -633,7 +634,7 @@ class _ListDetailItems extends ConsumerWidget {
             children: otherLists.map((list) => ListTile(
               leading: const Icon(Icons.folder_rounded),
               title: Text(list.title),
-              subtitle: Text('${list.itemCount} items'),
+              subtitle: Text(context.l10n.itemCount(list.itemCount)),
               onTap: () {
                 if (move) {
                   ref.read(userListsProvider.notifier).moveItemToList(listId, list.id, mediaId);
@@ -642,13 +643,13 @@ class _ListDetailItems extends ConsumerWidget {
                 }
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${move ? "Moved" : "Copied"} to "${list.title}"')),
+                  SnackBar(content: Text(move ? context.l10n.movedToTitle(list.title) : context.l10n.copiedToTitle(list.title))),
                 );
               },
             )).toList(),
           ),
         ),
-        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel'))],
+        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text(context.l10n.cancel))],
       ),
     );
   }
@@ -757,9 +758,9 @@ class _LandscapeGridTile extends StatelessWidget {
       context: context,
       position: RelativeRect.fromLTRB(details.globalPosition.dx, details.globalPosition.dy, details.globalPosition.dx, details.globalPosition.dy),
       items: [
-        const PopupMenuItem(value: 'remove', child: ListTile(leading: Icon(Icons.remove_circle_outline_rounded), title: Text('Remove'), dense: true)),
-        const PopupMenuItem(value: 'move', child: ListTile(leading: Icon(Icons.drive_file_move_rounded), title: Text('Move'), dense: true)),
-        const PopupMenuItem(value: 'copy', child: ListTile(leading: Icon(Icons.copy_rounded), title: Text('Copy'), dense: true)),
+        PopupMenuItem(value: 'remove', child: ListTile(leading: Icon(Icons.remove_circle_outline_rounded), title: Text(context.l10n.remove), dense: true)),
+        PopupMenuItem(value: 'move', child: ListTile(leading: Icon(Icons.drive_file_move_rounded), title: Text(context.l10n.move), dense: true)),
+        PopupMenuItem(value: 'copy', child: ListTile(leading: Icon(Icons.copy_rounded), title: Text(context.l10n.copy), dense: true)),
       ],
     ).then((value) {
       if (value == 'remove') onRemove();
@@ -817,8 +818,8 @@ class _AllCollectionCard extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsetsDirectional.fromSTEB(14, 10, 14, 4),
-              child: Text(
-                'All Collections',
+              child:               Text(
+                context.l10n.allCollections,
                 style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -827,7 +828,7 @@ class _AllCollectionCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsetsDirectional.fromSTEB(14, 0, 14, 4),
               child: Text(
-                '$totalTitles Title${totalTitles == 1 ? '' : 's'}',
+                '${totalTitles == 1 ? '$totalTitles ${context.l10n.item}' : '$totalTitles ${context.l10n.items}'}',
                 style: textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant),
               ),
             ),
@@ -840,7 +841,7 @@ class _AllCollectionCard extends StatelessWidget {
                   borderRadius: BorderRadiusDirectional.all(Radius.circular(6)),
                 ),
                 child: Text(
-                  'All Items',
+                  context.l10n.allItems,
                   style: textTheme.labelSmall?.copyWith(fontSize: 9, color: colorScheme.onPrimaryContainer),
                 ),
               ),

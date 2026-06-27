@@ -15,6 +15,7 @@ import '../../models/user_list_model.dart';
 import '../../models/user_media_model.dart';
 import '../../features/tracking/providers/tracking_providers.dart';
 import 'providers/lists_providers.dart';
+import '../../l10n/l10n.dart';
 import 'widgets/create_list_dialog.dart';
 
 enum DetailViewMode { grid, list }
@@ -57,14 +58,14 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
     return listsAsync.when(
       loading: () => const Scaffold(body: FullScreenLoader()),
       error: (_, __) => Scaffold(
-        body: Center(child: Text('Failed to load list', style: textTheme.bodyMedium?.copyWith(color: colorScheme.error))),
+        body: Center(child: Text(context.l10n.failedToLoadList, style: textTheme.bodyMedium?.copyWith(color: colorScheme.error))),
       ),
       data: (lists) {
         final listData = lists.where((l) => l.id == widget.listId).firstOrNull;
         if (listData == null) {
           return Scaffold(
-            appBar: AppBar(title: const Text('List not found')),
-            body: const Center(child: Text('This list could not be found')),
+            appBar: AppBar(title: Text(context.l10n.listNotFound)),
+            body: Center(child: Text(context.l10n.listCouldNotBeFound)),
           );
         }
 
@@ -74,25 +75,25 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.edit_rounded),
-                tooltip: 'Rename',
+                tooltip: context.l10n.rename,
                 onPressed: () => _showRenameDialog(listData),
               ),
               if (listData.listType == MediaListType.collaborative)
                 IconButton(
                   icon: const Icon(Icons.favorite_border_rounded),
-                  tooltip: 'Like',
+                  tooltip: context.l10n.likeLabel,
                   onPressed: () => ref.read(userListsProvider.notifier).likeList(widget.listId),
                 ),
               IconButton(
                 icon: const Icon(Icons.share_rounded),
-                tooltip: 'Share',
-                onPressed: () => Share.share('Check out my list: ${listData.title} on WatchAtlas'),
+                tooltip: context.l10n.share,
+                onPressed: () => Share.share(context.l10n.checkOutMyList(listData.title)),
               ),
             ],
           ),
           body: itemsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, __) => Center(child: Text('Failed to load items', style: textTheme.bodyMedium?.copyWith(color: colorScheme.error))),
+            error: (_, __) => Center(child: Text(context.l10n.failedToLoadItems, style: textTheme.bodyMedium?.copyWith(color: colorScheme.error))),
             data: (items) {
               return _buildContent(listData, items, categoriesAsync.valueOrNull ?? [], userMediaAsync.valueOrNull ?? [], isDesktop, isTablet, colorScheme, textTheme);
             },
@@ -160,7 +161,7 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
         controller: _searchController,
         onChanged: (v) => setState(() => _searchQuery = v),
         decoration: InputDecoration(
-          hintText: 'Search items...',
+          hintText: context.l10n.searchItems,
           hintStyle: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
           prefixIcon: Icon(Icons.search_rounded, size: 18, color: colorScheme.onSurfaceVariant),
           suffixIcon: _searchQuery.isNotEmpty
@@ -223,7 +224,7 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
                 ),
                 const SizedBox(height: Spacing.xs),
                 Text(
-                  '${listData.itemCount} ${listData.itemCount == 1 ? 'Title' : 'Titles'}',
+                  '${listData.itemCount} ${listData.itemCount == 1 ? context.l10n.title : context.l10n.items}',
                   style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 14),
                 ),
               ],
@@ -330,11 +331,11 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
       padding: const EdgeInsetsDirectional.fromSTEB(20, 10, 20, 0),
       child: Row(
         children: [
-          Text('${_itemCount} items', style: textTheme.labelMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
+          Text(context.l10n.itemCount(_itemCount), style: textTheme.labelMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
           const Spacer(),
           IconButton(
             icon: Icon(_viewMode == DetailViewMode.grid ? Icons.view_list_rounded : Icons.grid_view_rounded, size: 20),
-            tooltip: 'Toggle view',
+            tooltip: context.l10n.toggleView,
             onPressed: () => setState(() {
               _viewMode = _viewMode == DetailViewMode.grid ? DetailViewMode.list : DetailViewMode.grid;
             }),
@@ -362,8 +363,8 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
       return SliverFillRemaining(
         hasScrollBody: false,
         child: EmptyState(
-          title: _searchQuery.isNotEmpty ? 'No results' : 'No items in this list',
-          subtitle: _searchQuery.isNotEmpty ? 'Try a different search term' : 'Add media from the details page',
+          title: _searchQuery.isNotEmpty ? context.l10n.noResultsForSearch : context.l10n.noItemsInList,
+          subtitle: _searchQuery.isNotEmpty ? context.l10n.tryDifferentSearchTerm : context.l10n.addMediaFromDetails,
         ),
       );
     }
@@ -444,18 +445,20 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Remove "$title"?'),
-        content: const Text('This will remove the item from this list.'),
+        title: Text(context.l10n.removeListTitle(title)),
+        content: Text(context.l10n.removeFromListWarning),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(context.l10n.cancel)),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             onPressed: () {
               ref.read(userListsProvider.notifier).removeItemFromList(widget.listId, mediaId);
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Removed from list')));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(context.l10n.removedFromList)),
+              );
             },
-            child: const Text('Remove'),
+            child: Text(context.l10n.remove),
           ),
         ],
       ),
@@ -469,7 +472,7 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
 
     if (otherLists.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(move ? 'No other lists to move to' : 'No other lists to copy to')),
+        SnackBar(content: Text(move ? context.l10n.noOtherListsToMoveTo : context.l10n.noOtherListsToCopyTo)),
       );
       return;
     }
@@ -477,7 +480,7 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(move ? 'Move to...' : 'Copy to...'),
+        title: Text(move ? context.l10n.moveTo : context.l10n.copyTo),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView(
@@ -485,7 +488,7 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
             children: otherLists.map((list) => ListTile(
               leading: const Icon(Icons.folder_rounded),
               title: Text(list.title),
-              subtitle: Text('${list.itemCount} items'),
+              subtitle: Text(context.l10n.itemCount(list.itemCount)),
               onTap: () {
                 if (move) {
                   ref.read(userListsProvider.notifier).moveItemToList(widget.listId, list.id, mediaId);
@@ -494,13 +497,13 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
                 }
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${move ? "Moved" : "Copied"} to "${list.title}"')),
+                  SnackBar(content: Text(move ? context.l10n.movedToTitle(list.title) : context.l10n.copiedToTitle(list.title))),
                 );
               },
             )).toList(),
           ),
         ),
-        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel'))],
+        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text(context.l10n.cancel))],
       ),
     );
   }
@@ -522,7 +525,7 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
         children: [
           Divider(color: colorScheme.outline.withValues(alpha: 0.2)),
           const SizedBox(height: 14),
-          Text('$total Total Title${total == 1 ? '' : 's'}', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+          Text(context.l10n.itemCount(total), style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
           const SizedBox(height: 10),
           Wrap(
             spacing: 16,
@@ -574,9 +577,9 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
 
   bool _matchesCategory(Map<String, dynamic> item, String category) {
     final type = item['media_type'] as String?;
-    if (category == 'TV Shows') return type == 'tv';
-    if (category == 'Movies') return type == 'movie';
-    if (category == 'Anime') return type == 'anime';
+    if (category == context.l10n.tvShows) return type == 'tv';
+    if (category == context.l10n.movies) return type == 'movie';
+    if (category == context.l10n.anime) return type == 'anime';
     return true;
   }
 
@@ -846,9 +849,9 @@ class _GridTileWithMenu extends StatelessWidget {
       context: context,
       position: RelativeRect.fromLTRB(details.globalPosition.dx, details.globalPosition.dy, details.globalPosition.dx, details.globalPosition.dy),
       items: [
-        const PopupMenuItem(value: 'remove', child: ListTile(leading: Icon(Icons.remove_circle_outline_rounded), title: Text('Remove'), dense: true)),
-        const PopupMenuItem(value: 'move', child: ListTile(leading: Icon(Icons.drive_file_move_rounded), title: Text('Move'), dense: true)),
-        const PopupMenuItem(value: 'copy', child: ListTile(leading: Icon(Icons.copy_rounded), title: Text('Copy'), dense: true)),
+        PopupMenuItem(value: 'remove', child: ListTile(leading: Icon(Icons.remove_circle_outline_rounded), title: Text(context.l10n.remove), dense: true)),
+        PopupMenuItem(value: 'move', child: ListTile(leading: Icon(Icons.drive_file_move_rounded), title: Text(context.l10n.move), dense: true)),
+        PopupMenuItem(value: 'copy', child: ListTile(leading: Icon(Icons.copy_rounded), title: Text(context.l10n.copy), dense: true)),
       ],
     ).then((value) {
       if (value == 'remove') onRemove();
@@ -894,9 +897,9 @@ class _ListTileWithMenu extends StatelessWidget {
             if (value == 'copy') onCopy();
           },
           itemBuilder: (_) => [
-            const PopupMenuItem(value: 'remove', child: ListTile(leading: Icon(Icons.remove_circle_outline_rounded), title: Text('Remove'), dense: true)),
-            const PopupMenuItem(value: 'move', child: ListTile(leading: Icon(Icons.drive_file_move_rounded), title: Text('Move'), dense: true)),
-            const PopupMenuItem(value: 'copy', child: ListTile(leading: Icon(Icons.copy_rounded), title: Text('Copy'), dense: true)),
+            PopupMenuItem(value: 'remove', child: ListTile(leading: Icon(Icons.remove_circle_outline_rounded), title: Text(context.l10n.remove), dense: true)),
+            PopupMenuItem(value: 'move', child: ListTile(leading: Icon(Icons.drive_file_move_rounded), title: Text(context.l10n.move), dense: true)),
+            PopupMenuItem(value: 'copy', child: ListTile(leading: Icon(Icons.copy_rounded), title: Text(context.l10n.copy), dense: true)),
           ],
         ),
       ],

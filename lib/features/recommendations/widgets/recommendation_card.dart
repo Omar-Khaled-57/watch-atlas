@@ -46,7 +46,7 @@ class RecommendationCard extends ConsumerWidget {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Semantics(
-                      label: 'Recommendation reason: ${scoredMedia.reason}',
+                      label: context.l10n.recommendationReason(scoredMedia.reason),
                       child: Text(
                         scoredMedia.reason!,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(

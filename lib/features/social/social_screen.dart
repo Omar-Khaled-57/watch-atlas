@@ -9,6 +9,7 @@ import '../../core/shared/empty_state.dart';
 import '../../core/shared/loading_widget.dart';
 import '../../core/providers/app_providers.dart';
 import '../../models/user_model.dart';
+import '../../l10n/l10n.dart';
 import 'providers/social_providers.dart';
 
 class SocialScreen extends ConsumerStatefulWidget {
@@ -48,16 +49,16 @@ class _SocialScreenState extends ConsumerState<SocialScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Community'),
+        title: Text(context.l10n.community),
         bottom: TabBar(
           controller: _tabController,
           labelColor: colorScheme.onSurface,
           unselectedLabelColor: colorScheme.onSurfaceVariant,
           indicatorColor: colorScheme.primary,
-          tabs: const [
-            Tab(text: 'Following'),
-            Tab(text: 'Followers'),
-            Tab(text: 'Activity'),
+          tabs: [
+            Tab(text: context.l10n.following),
+            Tab(text: context.l10n.followers),
+            Tab(text: context.l10n.activity),
           ],
         ),
       ),
@@ -85,7 +86,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen>
       child: TextField(
         controller: _searchController,
         decoration: InputDecoration(
-          hintText: 'Search by username...',
+          hintText: context.l10n.searchByUsername,
           prefixIcon: const Icon(Icons.search_rounded),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
@@ -117,14 +118,14 @@ class _SocialScreenState extends ConsumerState<SocialScreen>
     return followingAsync.when(
       loading: () => const FullScreenLoader(),
       error: (error, stack) => ErrorWidgetView(
-        message: 'Failed to load following',
+        message: context.l10n.failedToLoadFollowing,
         onRetry: () => ref.invalidate(currentUserFollowingProvider),
       ),
       data: (users) {
         if (users.isEmpty) {
-          return const EmptyState(
-            title: 'Not following anyone',
-            subtitle: 'Find friends to follow and see their activity.',
+          return EmptyState(
+            title: context.l10n.notFollowingAnyone,
+            subtitle: context.l10n.findFriendsToFollow,
           );
         }
         return RefreshIndicator(
@@ -154,14 +155,14 @@ class _SocialScreenState extends ConsumerState<SocialScreen>
     return followersAsync.when(
       loading: () => const FullScreenLoader(),
       error: (error, stack) => ErrorWidgetView(
-        message: 'Failed to load followers',
+        message: context.l10n.failedToLoadFollowers,
         onRetry: () => ref.invalidate(currentUserFollowersProvider),
       ),
       data: (users) {
         if (users.isEmpty) {
-          return const EmptyState(
-            title: 'No followers yet',
-            subtitle: 'When someone follows you, they will appear here.',
+          return EmptyState(
+            title: context.l10n.noFollowersYet,
+            subtitle: context.l10n.whenSomeoneFollowsYou,
           );
         }
         return RefreshIndicator(
@@ -190,14 +191,14 @@ class _SocialScreenState extends ConsumerState<SocialScreen>
     return activityAsync.when(
       loading: () => const FullScreenLoader(),
       error: (error, stack) => ErrorWidgetView(
-        message: 'Failed to load activity',
+        message: context.l10n.failedToLoadActivity,
         onRetry: () => ref.invalidate(friendActivityProvider),
       ),
       data: (activities) {
         if (activities.isEmpty) {
-          return const EmptyState(
-            title: 'No friend activity',
-            subtitle: 'Activity from people you follow will appear here.',
+          return EmptyState(
+            title: context.l10n.noFriendActivity,
+            subtitle: context.l10n.activityFromPeopleYouFollow,
           );
         }
         return RefreshIndicator(
@@ -283,7 +284,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen>
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    child: const Text('Following'),
+                    child: Text(context.l10n.following),
                   );
                 }
                 return FilledButton(
@@ -296,7 +297,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen>
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: const Text('Follow'),
+                  child: Text(context.l10n.follow),
                 );
               },
               loading: () => const SizedBox(
@@ -315,7 +316,7 @@ class _SocialScreenState extends ConsumerState<SocialScreen>
     if (dateTime == null) return '';
     final now = DateTime.now();
     final diff = now.difference(dateTime);
-    if (diff.inMinutes < 1) return 'Just now';
+    if (diff.inMinutes < 1) return context.l10n.justNow;
     if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
     if (diff.inHours < 24) return '${diff.inHours}h ago';
     if (diff.inDays < 7) return '${diff.inDays}d ago';

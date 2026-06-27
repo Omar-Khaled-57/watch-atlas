@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/l10n.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/services/auth_service.dart';
 import 'providers/auth_providers.dart';
@@ -167,14 +168,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
             end: Alignment(0.5, 0.5),
           ).createShader(bounds),
           child: Text(
-            'WatchAtlas',
+            context.l10n.appName,
             style: (large ? textTheme.displaySmall : textTheme.headlineMedium)
                 ?.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ),
           const SizedBox(height: Spacing.sm),
         Text(
-          'Your global watch list',
+          context.l10n.splashSubtitle,
           style: (large ? textTheme.titleMedium : textTheme.bodyLarge)?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
@@ -259,26 +260,26 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
       children: [
         AuthTextField(
           controller: _emailController,
-          hintText: 'Email',
+          hintText: context.l10n.email,
           icon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
           enabled: !isLoading,
           validator: (v) {
-            if (v == null || v.trim().isEmpty) return 'Please enter your email';
-            if (!v.contains('@')) return 'Please enter a valid email';
+            if (v == null || v.trim().isEmpty) return context.l10n.pleaseEnterEmail;
+            if (!v.contains('@')) return context.l10n.pleaseEnterEmail;
             return null;
           },
         ),
             const SizedBox(height: Spacing.lg),
             AuthTextField(
           controller: _passwordController,
-          hintText: 'Password',
+          hintText: context.l10n.password,
           icon: Icons.lock_outlined,
           obscureText: true,
           enabled: !isLoading,
           validator: (v) {
-            if (v == null || v.isEmpty) return 'Please enter your password';
-            if (v.length < 6) return 'Password must be at least 6 characters';
+            if (v == null || v.isEmpty) return context.l10n.pleaseEnterPassword;
+            if (v.length < 6) return context.l10n.passwordMinLength;
             return null;
           },
         ),
@@ -286,13 +287,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
           const SizedBox(height: Spacing.lg),
           AuthTextField(
             controller: _confirmPasswordController,
-            hintText: 'Confirm Password',
+            hintText: context.l10n.confirmPassword,
             icon: Icons.lock_outlined,
             obscureText: true,
             enabled: !isLoading,
             validator: (v) {
-              if (v == null || v.isEmpty) return 'Please confirm your password';
-              if (v != _passwordController.text) return 'Passwords do not match';
+              if (v == null || v.isEmpty) return context.l10n.pleaseConfirmPassword;
+              if (v != _passwordController.text) return context.l10n.passwordsDoNotMatch;
               return null;
             },
           ),
@@ -304,7 +305,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
             child: TextButton(
               onPressed: isLoading ? null : () => authNotifier.toggleResetPassword(),
               child: Text(
-                'Forgot Password?',
+                context.l10n.forgotPassword,
                 style: TextStyle(color: colorScheme.secondary),
               ),
             ),
@@ -343,7 +344,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
-                : Text(authState.isSignUpMode ? 'Sign Up' : 'Sign In'),
+                : Text(authState.isSignUpMode ? context.l10n.signUp : context.l10n.signIn),
           ),
         ),
       ],
@@ -363,7 +364,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
         Icon(Icons.lock_reset_rounded, size: 48, color: colorScheme.primary),
         const SizedBox(height: 16),
         Text(
-          'Reset Password',
+          context.l10n.forgotPassword,
           style: textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: colorScheme.onSurface,
@@ -371,7 +372,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
         ),
           const SizedBox(height: Spacing.sm),
         Text(
-          'Enter your email to receive a password reset link',
+          context.l10n.enterEmailForReset,
           style: textTheme.bodyMedium?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
@@ -380,13 +381,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
           const SizedBox(height: Spacing.xl),
         AuthTextField(
           controller: _emailController,
-          hintText: 'Email',
+          hintText: context.l10n.email,
           icon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
           enabled: !isLoading,
           validator: (v) {
-            if (v == null || v.trim().isEmpty) return 'Please enter your email';
-            if (!v.contains('@')) return 'Please enter a valid email';
+            if (v == null || v.trim().isEmpty) return context.l10n.pleaseEnterEmail;
+            if (!v.contains('@')) return context.l10n.pleaseEnterEmail;
             return null;
           },
         ),
@@ -414,13 +415,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
-                : const Text('Send Reset Link'),
+                : Text(context.l10n.sendResetLink),
           ),
         ),
           const SizedBox(height: Spacing.sm),
         TextButton(
           onPressed: isLoading ? null : () => authNotifier.toggleResetPassword(),
-          child: Text('Back to Sign In', style: TextStyle(color: colorScheme.secondary)),
+          child: Text(context.l10n.backToSignIn, style: TextStyle(color: colorScheme.secondary)),
         ),
       ],
     );
@@ -432,7 +433,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
         Expanded(child: Divider(color: colorScheme.outlineVariant)),
         Padding(
           padding: const EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
-          child: Text('or continue with', style: TextStyle(color: colorScheme.onSurfaceVariant)),
+          child: Text(context.l10n.orContinueWith, style: TextStyle(color: colorScheme.onSurfaceVariant)),
         ),
         Expanded(child: Divider(color: colorScheme.outlineVariant)),
       ],
@@ -449,14 +450,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
       children: [
         Text(
           authState.isSignUpMode
-              ? 'Already have an account?'
-              : "Don't have an account?",
+              ? context.l10n.alreadyHaveAccount
+              : context.l10n.dontHaveAccount,
           style: TextStyle(color: colorScheme.onSurfaceVariant),
         ),
         TextButton(
           onPressed: () => authNotifier.toggleMode(),
           child: Text(
-            authState.isSignUpMode ? 'Sign In' : 'Sign Up',
+            authState.isSignUpMode ? context.l10n.signIn : context.l10n.signUp,
             style: TextStyle(fontWeight: FontWeight.w600, color: colorScheme.primary),
           ),
         ),

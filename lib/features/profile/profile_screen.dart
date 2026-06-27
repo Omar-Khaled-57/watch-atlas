@@ -255,7 +255,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   context: context,
                   builder: (ctx) => AlertDialog(
                     title: Text(l10n.clearHistory),
-                    content: const Text('This will remove all your activity data used for recommendations. Continue?'),
+                    content: Text(l10n.clearActivityWarning),
                     actions: [
                       TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
                       FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.delete)),
@@ -293,13 +293,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             icon: Icons.description_rounded,
             title: l10n.termsOfService,
             trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => _showTermsDialog(context),
+            onTap: () => _showTerms(context),
           ),
           _SettingsTile(
             icon: Icons.shield_rounded,
             title: l10n.privacyPolicy,
             trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => _showPrivacyDialog(context),
+            onTap: () => _showPrivacy(context),
           ),
           _SettingsTile(
             icon: Icons.code_rounded,
@@ -592,7 +592,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.language_rounded),
-                title: const Text('English'),
+                title: Text(l10n.englishLanguage),
                 trailing: current.languageCode == 'en'
                     ? Icon(Icons.check, color: Theme.of(ctx).colorScheme.primary)
                     : null,
@@ -603,7 +603,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.language_rounded),
-                title: const Text('العربية'),
+                title: Text(l10n.arabicLanguage),
                 trailing: current.languageCode == 'ar'
                     ? Icon(Icons.check, color: Theme.of(ctx).colorScheme.primary)
                     : null,
@@ -664,7 +664,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       context: parentContext,
       builder: (dialogContext) => AlertDialog(
         title: Text(l10n.deleteAccount),
-        content: const Text('This action is permanent and cannot be undone. All your data will be deleted.'),
+        content: Text(l10n.deleteAccountWarning),
         actions: [
           TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(l10n.cancel)),
           FilledButton(
@@ -681,7 +681,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 }
               } catch (e) {
                 if (parentContext.mounted) {
-                  ScaffoldMessenger.of(parentContext).showSnackBar(SnackBar(content: Text('$e')));
+                  ScaffoldMessenger.of(parentContext).showSnackBar(SnackBar(content: Text(l10n.errorWithDetails(e.toString()))));
                 }
               }
             },
@@ -703,7 +703,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Enter your email address to receive a password reset link.'),
+            Text(l10n.enterEmailForReset),
             const SizedBox(height: Spacing.lg),
             TextField(
               controller: emailController,
@@ -731,7 +731,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 }
               } catch (e) {
                 if (parentContext.mounted) {
-                  ScaffoldMessenger.of(parentContext).showSnackBar(SnackBar(content: Text('$e')));
+                  ScaffoldMessenger.of(parentContext).showSnackBar(SnackBar(content: Text(l10n.errorWithDetails(e.toString()))));
                 }
               }
             },
@@ -743,6 +743,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   void _showVersionDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showAboutDialog(
       context: context,
       applicationName: 'WatchAtlas',
@@ -750,50 +751,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       applicationLegalese: '© 2026 WatchAtlas',
       children: [
         const SizedBox(height: Spacing.lg),
-        const Text('A modern media tracking platform to discover, track, and share your favorite movies, TV shows, and more.'),
+        Text(l10n.aboutAppDescription),
       ],
     );
   }
 
-  void _showTermsDialog(BuildContext context) {
+  void _showTerms(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Terms of Service'),
-        content: const SingleChildScrollView(
-          child: Text(
-            'By using WatchAtlas, you agree to these terms. Please read them carefully.\n\n'
-            '1. You are responsible for your account and content.\n'
-            '2. We reserve the right to modify or terminate the service.\n'
-            '3. We do not claim ownership of your content.\n'
-            '4. You may not use the service for any illegal purpose.\n\n'
-            'Full terms will be available soon.',
-          ),
+        title: Text(l10n.termsOfServiceTitle),
+        content: SingleChildScrollView(
+          child: Text(l10n.termsOfServiceBody),
         ),
         actions: [
-          FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+          FilledButton(onPressed: () => Navigator.pop(context), child: Text(l10n.close)),
         ],
       ),
     );
   }
 
-  void _showPrivacyDialog(BuildContext context) {
+  void _showPrivacy(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Privacy Policy'),
-        content: const SingleChildScrollView(
-          child: Text(
-            'Your privacy matters to us.\n\n'
-            '1. We collect minimal data needed to provide the service.\n'
-            '2. Your data is stored securely.\n'
-            '3. We do not sell your personal information.\n'
-            '4. You can request data deletion at any time.\n\n'
-            'Full privacy policy will be available soon.',
-          ),
+        title: Text(l10n.privacyPolicy),
+        content: SingleChildScrollView(
+          child: Text(l10n.privacyPolicyBody),
         ),
         actions: [
-          FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+          FilledButton(onPressed: () => Navigator.pop(context), child: Text(l10n.close)),
         ],
       ),
     );

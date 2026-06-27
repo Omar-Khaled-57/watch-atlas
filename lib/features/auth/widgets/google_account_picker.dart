@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/dimensions.dart';
+import '../../../l10n/l10n.dart';
 
 Future<String?> showGoogleAccountPicker({
   required BuildContext context,
@@ -20,6 +21,7 @@ class _GoogleAccountPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return AlertDialog(
       backgroundColor: theme.colorScheme.surface,
@@ -34,7 +36,7 @@ class _GoogleAccountPicker extends StatelessWidget {
             width: 24, height: 24,
           ),
           const SizedBox(width: Spacing.md),
-          Text('Choose an account',
+          Text(l10n.chooseAccount,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -46,8 +48,8 @@ class _GoogleAccountPicker extends StatelessWidget {
         children: [
           _AccountTile(
             icon: Icons.logo_dev,
-            label: 'Continue with Google',
-            subtitle: 'Sign in to a Google account',
+            label: l10n.continueWithGoogle,
+            subtitle: l10n.signInToGoogle,
             onTap: () => Navigator.pop(context, '__continue__'),
           ),
           if (accounts.isNotEmpty) ...[
@@ -58,7 +60,7 @@ class _GoogleAccountPicker extends StatelessWidget {
                 children: [
                   Icon(Icons.history, size: 16, color: theme.colorScheme.onSurfaceVariant),
                   const SizedBox(width: 6),
-                  Text('Previously used',
+                  Text(l10n.previouslyUsed,
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -69,7 +71,7 @@ class _GoogleAccountPicker extends StatelessWidget {
             for (final email in accounts) ...[
               _AccountTile(
                 email: email,
-                label: 'Sign in to',
+                label: l10n.signInTo,
                 subtitle: email,
                 onTap: () => Navigator.pop(context, email),
               ),
@@ -80,8 +82,8 @@ class _GoogleAccountPicker extends StatelessWidget {
             padding: const EdgeInsetsDirectional.only(top: 4),
             child: _AccountTile(
               icon: Icons.person_add_outlined,
-              label: 'Try another account',
-              subtitle: 'Use a different Google account',
+              label: l10n.tryAnotherAccount,
+              subtitle: l10n.useDifferentGoogleAccount,
               onTap: () => Navigator.pop(context, '__other__'),
             ),
           ),
@@ -90,7 +92,7 @@ class _GoogleAccountPicker extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Cancel', style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
+          child: Text(l10n.cancel, style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
         ),
       ],
     );

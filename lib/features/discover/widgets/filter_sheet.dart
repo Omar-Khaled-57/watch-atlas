@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/dimensions.dart';
+import '../../../l10n/l10n.dart';
 import '../providers/discover_providers.dart';
 
 class FilterSheet extends ConsumerStatefulWidget {
@@ -80,14 +81,14 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
             ),
           ),
           Text(
-            'Advanced Filters',
+            context.l10n.advancedFilters,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           SizedBox(height: Spacing.xl),
           Text(
-            'Country',
+            context.l10n.country,
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -103,10 +104,10 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              hintText: 'All Countries',
+              hintText: context.l10n.allCountries,
             ),
             items: [
-              DropdownMenuItem(value: null, child: Text('All Countries')),
+              DropdownMenuItem(value: null, child: Text(context.l10n.allCountries)),
               ..._countries.entries.map(
                 (e) => DropdownMenuItem(
                   value: e.key,
@@ -120,7 +121,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
           ),
           SizedBox(height: 20),
           Text(
-            'Year Range',
+            context.l10n.yearRange,
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -141,7 +142,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
           ),
           SizedBox(height: Spacing.xs),
           Text(
-            'Rating Range',
+            context.l10n.ratingRange,
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -178,7 +179,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text('Reset'),
+                  child: Text(context.l10n.reset),
                 ),
               ),
               SizedBox(width: Spacing.lg),
@@ -191,7 +192,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text('Apply Filters'),
+                  child: Text(context.l10n.applyFilters),
                 ),
               ),
             ],

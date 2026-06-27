@@ -11,6 +11,7 @@ import '../../core/models/gender.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/supabase_service.dart';
+import '../../l10n/l10n.dart';
 import 'providers/profile_providers.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
@@ -70,12 +71,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.camera_alt_rounded),
-                title: const Text('Camera'),
+                title: Text(context.l10n.camera),
                 onTap: () => Navigator.pop(context, ImageSource.camera),
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library_rounded),
-                title: const Text('Gallery'),
+                title: Text(context.l10n.gallery),
                 onTap: () => Navigator.pop(context, ImageSource.gallery),
               ),
             ],
@@ -127,7 +128,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated successfully')),
+          SnackBar(content: Text(context.l10n.profileUpdatedSuccessfully)),
         );
         Navigator.pop(context);
       }
@@ -135,7 +136,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update profile: $e'),
+            content: Text(context.l10n.errorWithDetails('${context.l10n.failedToSaveProfile}: $e')),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -152,7 +153,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Profile'),
+        title: Text(context.l10n.editProfile),
         actions: [
           TextButton(
             onPressed: _isSaving ? null : _save,
@@ -162,7 +163,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Save'),
+                : Text(context.l10n.save),
           ),
         ],
       ),
@@ -221,30 +222,30 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   List<Widget> _buildFormFields(ColorScheme colorScheme) {
     final textTheme = Theme.of(context).textTheme;
     return [
-      Text('Display Name', style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+      Text(context.l10n.displayName, style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
       const SizedBox(height: Spacing.sm),
       TextFormField(
         controller: _displayNameController,
-        decoration: const InputDecoration(
-          hintText: 'Enter your display name',
-          prefixIcon: Icon(Icons.person_rounded),
+        decoration: InputDecoration(
+          hintText: context.l10n.enterDisplayName,
+          prefixIcon: const Icon(Icons.person_rounded),
         ),
         textCapitalization: TextCapitalization.words,
         maxLength: 50,
         validator: (value) {
           if (value != null && value.trim().length > 50) {
-            return 'Display name must be 50 characters or less';
+            return context.l10n.displayNameMax50;
           }
           return null;
         },
       ),
       const SizedBox(height: Spacing.xl),
-      Text('Bio', style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+      Text(context.l10n.bio, style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
       const SizedBox(height: Spacing.sm),
       TextFormField(
         controller: _bioController,
-        decoration: const InputDecoration(
-          hintText: 'Tell others about yourself',
+        decoration: InputDecoration(
+          hintText: context.l10n.tellOthersAboutYourself,
           alignLabelWithHint: true,
         ),
         maxLines: 5,
@@ -252,27 +253,27 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         textCapitalization: TextCapitalization.sentences,
         validator: (value) {
           if (value != null && value.trim().length > 500) {
-            return 'Bio must be 500 characters or less';
+            return context.l10n.bioMax500;
           }
           return null;
         },
       ),
       const SizedBox(height: Spacing.xl),
-      Text('Gender', style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+      Text(context.l10n.gender, style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
       const SizedBox(height: Spacing.sm),
       DropdownButtonFormField<Gender?>(
         value: _gender,
         decoration: const InputDecoration(prefixIcon: Icon(Icons.wc_rounded)),
         items: [
-          DropdownMenuItem(value: null, child: Text('Not specified', style: textTheme.bodyMedium)),
-          DropdownMenuItem(value: Gender.male, child: const Text('Male')),
-          DropdownMenuItem(value: Gender.female, child: const Text('Female')),
-          DropdownMenuItem(value: Gender.ratherNotSay, child: const Text('Rather not say')),
+          DropdownMenuItem(value: null, child: Text(context.l10n.notSpecified, style: textTheme.bodyMedium)),
+          DropdownMenuItem(value: Gender.male, child: Text(context.l10n.male)),
+          DropdownMenuItem(value: Gender.female, child: Text(context.l10n.female)),
+          DropdownMenuItem(value: Gender.ratherNotSay, child: Text(context.l10n.ratherNotSay)),
         ],
         onChanged: (value) => setState(() => _gender = value),
       ),
       const SizedBox(height: Spacing.xl),
-      Text('Date of Birth', style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+      Text(context.l10n.dateOfBirth, style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
       const SizedBox(height: Spacing.sm),
       InkWell(
         onTap: () async {
@@ -282,7 +283,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             initialDate: _dateOfBirth ?? DateTime(now.year - 18),
             firstDate: DateTime(now.year - 120),
             lastDate: now,
-            helpText: 'Select date of birth',
+            helpText: context.l10n.selectDateOfBirth,
           );
           if (picked != null) setState(() => _dateOfBirth = picked);
         },
@@ -294,7 +295,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           child: Text(
             _dateOfBirth != null
                 ? '${_dateOfBirth!.month}/${_dateOfBirth!.day}/${_dateOfBirth!.year}'
-                : 'Select your date of birth',
+                : context.l10n.selectDateOfBirth,
             style: textTheme.bodyLarge?.copyWith(
               color: _dateOfBirth != null ? null : colorScheme.onSurfaceVariant,
             ),
@@ -315,7 +316,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     color: Colors.white,
                   ),
                 )
-              : const Text('Save Changes'),
+              : Text(context.l10n.saveChanges),
         ),
       ),
     ];

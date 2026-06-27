@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../core/providers/app_providers.dart';
 import '../features/auth/auth_screen.dart';
 import '../features/auth/providers/auth_providers.dart';
+import '../l10n/l10n.dart';
 import '../features/splash/splash_screen.dart';
 import '../features/analytics/analytics_screen.dart';
 import '../features/discover/discover_screen.dart';
@@ -278,19 +279,15 @@ class ShellScaffold extends StatelessWidget {
 
   const ShellScaffold({super.key, required this.navigationShell});
 
-  static const _destinations = (
-    home: _NavDest(Icons.home_rounded, Icons.home_outlined, 'Home'),
-    discover: _NavDest(Icons.explore_rounded, Icons.explore_outlined, 'Discover'),
-    lists: _NavDest(Icons.folder_rounded, Icons.folder_outlined, 'Lists'),
-    profile: _NavDest(Icons.person_rounded, Icons.person_outlined, 'Profile'),
-  );
-
-  static final _navItems = [
-    _destinations.home,
-    _destinations.discover,
-    _destinations.lists,
-    _destinations.profile,
-  ];
+  static List<_NavDest> _navItems(BuildContext context) {
+    final l10n = context.l10n;
+    return [
+      _NavDest(Icons.home_rounded, Icons.home_outlined, l10n.navHome),
+      _NavDest(Icons.explore_rounded, Icons.explore_outlined, l10n.discover),
+      _NavDest(Icons.folder_rounded, Icons.folder_outlined, l10n.navLists),
+      _NavDest(Icons.person_rounded, Icons.person_outlined, l10n.navProfile),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -336,7 +333,7 @@ class _MobileShell extends StatelessWidget {
         animationDuration: const Duration(milliseconds: 300),
         height: 64,
         labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-        destinations: ShellScaffold._navItems.map((item) {
+        destinations: ShellScaffold._navItems(context).map((item) {
           return NavigationDestination(
             icon: Icon(item.inactiveIcon),
             selectedIcon: Icon(item.activeIcon),
@@ -396,7 +393,7 @@ class _DesktopShell extends StatelessWidget {
                 ],
               ),
             ),
-            destinations: ShellScaffold._navItems.map((item) {
+            destinations: ShellScaffold._navItems(context).map((item) {
               return NavigationRailDestination(
                 icon: Icon(item.inactiveIcon),
                 selectedIcon: Icon(item.activeIcon),

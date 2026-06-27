@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/l10n.dart';
 import '../../../core/constants/dimensions.dart';
 import '../../../core/models/media_enums.dart';
 
@@ -17,7 +18,7 @@ class StatusDropdown extends StatelessWidget {
     return DropdownButtonFormField<WatchStatus>(
       value: currentStatus,
       decoration: InputDecoration(
-        labelText: 'Watch Status',
+        labelText: context.l10n.status,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.all(
             Radius.circular(12),
@@ -39,7 +40,7 @@ class StatusDropdown extends StatelessWidget {
                 color: _statusColor(status, context),
               ),
               SizedBox(width: Spacing.md),
-              Text(_statusLabel(status)),
+              Text(_statusLabel(context, status)),
             ],
           ),
         );
@@ -84,20 +85,21 @@ class StatusDropdown extends StatelessWidget {
     }
   }
 
-  String _statusLabel(WatchStatus status) {
+  String _statusLabel(BuildContext context, WatchStatus status) {
+    final l10n = context.l10n;
     switch (status) {
       case WatchStatus.watching:
-        return 'Watching';
+        return l10n.watching;
       case WatchStatus.completed:
-        return 'Completed';
+        return l10n.completed;
       case WatchStatus.onHold:
-        return 'On Hold';
+        return l10n.onHold;
       case WatchStatus.dropped:
-        return 'Dropped';
+        return l10n.dropped;
       case WatchStatus.planToWatch:
-        return 'Plan to Watch';
+        return l10n.planToWatch;
       case WatchStatus.rewatching:
-        return 'Rewatching';
+        return l10n.rewatching;
     }
   }
 }

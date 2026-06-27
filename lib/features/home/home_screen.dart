@@ -14,6 +14,7 @@ import '../../core/shared/media_row.dart';
 import '../../core/shared/section_header.dart';
 import '../../models/media_model.dart';
 import '../tracking/widgets/progress_card.dart';
+import '../../l10n/l10n.dart';
 import 'providers/home_providers.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -58,6 +59,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final recentlyAdded = recentlyAddedAsync.asData?.value ?? [];
     final upcoming = upcomingAsync.asData?.value ?? [];
     final recommended = recommendedAsync.asData?.value ?? [];
+    final l10n = context.l10n;
 
     return Scaffold(
       body: RefreshIndicator(
@@ -90,7 +92,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               error: (err, _) => Padding(
                 padding: const EdgeInsetsDirectional.only(start: Spacing.lg, bottom: Spacing.md),
                 child: Text(
-                  'Could not load continue watching',
+                  l10n.couldNotLoadContinueWatching,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -101,7 +103,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   return Padding(
                     padding: const EdgeInsetsDirectional.only(start: Spacing.lg, bottom: Spacing.md),
                     child: Text(
-                      'No content in progress',
+                      l10n.noContentInProgress,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -113,7 +115,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   children: [
                     Padding(
                       padding: const EdgeInsetsDirectional.only(start: Spacing.lg, end: Spacing.lg, bottom: Spacing.md),
-                      child: SectionHeader(title: 'Continue Watching'),
+                      child: SectionHeader(title: l10n.continueWatching),
                     ),
                     HorizontalCarousel(
                       height: 200,
@@ -138,7 +140,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             if (popular.isNotEmpty) ...[
               SizedBox(height: Spacing.xl),
               MediaRow(
-                title: 'Popular This Week',
+                title: l10n.popularThisWeek,
                 items: popular.map((m) => MediaRowItem(
                   id: m.id,
                   title: m.title,
@@ -152,7 +154,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             if (recentlyAdded.isNotEmpty) ...[
               SizedBox(height: Spacing.xl),
               MediaRow(
-                title: 'Recently Added',
+                title: l10n.recentlyAdded,
                 items: recentlyAdded.map((m) => MediaRowItem(
                   id: m.id,
                   title: m.title,
@@ -166,7 +168,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             if (upcoming.isNotEmpty) ...[
               SizedBox(height: Spacing.xl),
               MediaRow(
-                title: 'Upcoming Releases',
+                title: l10n.upcomingReleases,
                 items: upcoming.map((m) => MediaRowItem(
                   id: m.id,
                   title: m.title,
@@ -180,7 +182,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             if (recommended.isNotEmpty) ...[
               SizedBox(height: Spacing.xl),
               MediaRow(
-                title: 'Recommended For You',
+                title: l10n.recommendedForYou,
                 items: recommended.map((m) => MediaRowItem(
                   id: m.id,
                   title: m.title,
@@ -212,7 +214,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           });
         },
         decoration: InputDecoration(
-          hintText: 'Search movies, TV shows...',
+          hintText: context.l10n.searchMoviesTv,
           hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
           prefixIcon: Icon(Icons.search_rounded, color: colorScheme.onSurfaceVariant),
           suffixIcon: _searchController.text.isNotEmpty
@@ -245,7 +247,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       Padding(
         padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg, vertical: Spacing.xs),
         child: Text(
-          'Search Results',
+          context.l10n.searchResults,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -264,7 +266,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       Icon(Icons.search_off_rounded, size: 64,
                         color: Theme.of(context).colorScheme.onSurfaceVariant),
                       SizedBox(height: Spacing.lg),
-                      Text('No results found',
+                      Text(context.l10n.noResults,
                         style: Theme.of(context).textTheme.titleMedium),
                     ],
                   ),
@@ -291,7 +293,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Center(
             child: Padding(
               padding: EdgeInsetsDirectional.all(Spacing.xxl),
-              child: Text('Search failed: $e'),
+              child: Text(context.l10n.errorWithDetails(e.toString())),
             ),
           ),
         ],
@@ -401,7 +403,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       children: [
         Padding(
           padding: const EdgeInsetsDirectional.only(start: 16, end: 16, bottom: 12),
-          child: SectionHeader(title: 'Continue Watching'),
+          child: SectionHeader(title: context.l10n.continueWatching),
         ),
         SizedBox(
           height: 200,

@@ -16,6 +16,7 @@ import '../../core/shared/media_card.dart';
 import '../../models/media_model.dart';
 import 'providers/discover_providers.dart';
 import 'widgets/filter_chip.dart';
+import '../../l10n/l10n.dart';
 // import 'widgets/filter_sheet.dart';
 
 class DiscoverScreen extends ConsumerStatefulWidget {
@@ -107,7 +108,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Discover'),
+        title: Text(context.l10n.discover),
         actions: [
           // IconButton(
           //   icon: const Icon(Icons.filter_list),
@@ -193,12 +194,12 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                         ),
                         SizedBox(height: Spacing.lg),
                         Text(
-                          'No results found',
+                          context.l10n.noResults,
                           style: context.textTheme.titleMedium,
                         ),
                         SizedBox(height: Spacing.sm),
                         Text(
-                          'Try adjusting your filters',
+                          context.l10n.tryAdjustingFilters,
                           style: context.textTheme.bodyMedium?.copyWith(
                             color: context.colorScheme.onSurfaceVariant,
                           ),
@@ -223,7 +224,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
         controller: _searchController,
         onChanged: _onSearchChanged,
         decoration: InputDecoration(
-          hintText: 'Search movies, TV shows, anime...',
+          hintText: context.l10n.searchMoviesTvAnime,
           hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
           prefixIcon: Icon(Icons.search_rounded, color: colorScheme.onSurfaceVariant),
           suffixIcon: _searchController.text.isNotEmpty
@@ -253,10 +254,10 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     return Padding(
       padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg, vertical: 2),
       child: SegmentedButton<DiscoverMediaTab>(
-        segments: const [
-          ButtonSegment(value: DiscoverMediaTab.movies, label: Text('Movies')),
-          ButtonSegment(value: DiscoverMediaTab.tv, label: Text('TV Shows')),
-          ButtonSegment(value: DiscoverMediaTab.anime, label: Text('Anime')),
+        segments: [
+          ButtonSegment(value: DiscoverMediaTab.movies, label: Text(context.l10n.movies)),
+          ButtonSegment(value: DiscoverMediaTab.tv, label: Text(context.l10n.tvShows)),
+          ButtonSegment(value: DiscoverMediaTab.anime, label: Text(context.l10n.anime)),
         ],
         selected: {filters.tab},
         onSelectionChanged: (selected) {
