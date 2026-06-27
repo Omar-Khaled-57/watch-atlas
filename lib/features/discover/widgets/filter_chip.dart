@@ -26,7 +26,7 @@ class FilterChipWidget extends StatelessWidget {
         duration: Duration(milliseconds: 250),
         padding: const EdgeInsetsDirectional.symmetric(
           horizontal: Spacing.md,
-          vertical: Spacing.xs,
+          vertical: 2,
         ),
         decoration: BoxDecoration(
           color: isSelected

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/providers/app_providers.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/models/gender.dart';
 import '../../core/services/behavior_service.dart';
 import '../../models/user_model.dart';
@@ -36,9 +37,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       isOwn ? currentUserProfileProvider : userProfileProvider(uid),
     );
 
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(isOwn ? 'Profile' : 'User Profile'),
+        title: Text(isOwn ? l10n.navProfile : l10n.userProfile),
       ),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -48,11 +51,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               Icon(Icons.error_outline_rounded, size: 48, color: colorScheme.error),
               const SizedBox(height: Spacing.sm),
-              Text('Failed to load profile', style: textTheme.bodyLarge),
+              Text(l10n.failedToLoadProfile, style: textTheme.bodyLarge),
               const SizedBox(height: Spacing.sm),
               TextButton(
                 onPressed: () => ref.invalidate(currentUserProfileProvider),
-                child: const Text('Retry'),
+                child: Text(l10n.retry),
               ),
             ],
           ),
@@ -65,7 +68,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 children: [
                   Icon(Icons.person_off_rounded, size: 48, color: colorScheme.onSurfaceVariant),
                   const SizedBox(height: Spacing.sm),
-                  Text('Profile not found', style: textTheme.bodyLarge),
+                  Text(l10n.profileNotFound, style: textTheme.bodyLarge),
                   const SizedBox(height: Spacing.md),
                   Text(
                     'Make sure the database grants have been applied.\n'
@@ -77,7 +80,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   TextButton.icon(
                     onPressed: () => ref.invalidate(currentUserProfileProvider),
                     icon: const Icon(Icons.refresh_rounded),
-                    label: const Text('Retry'),
+                    label: Text(l10n.retry),
                   ),
                 ],
               ),
@@ -151,25 +154,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     bool isModerator,
     WidgetRef ref,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final sections = <Widget>[];
 
     if (isOwn) {
       sections.addAll([
         const SizedBox(height: Spacing.md),
         _buildSection(
-          'Appearance',
+          l10n.appearance,
           [
             _SettingsTile(
               icon: Icons.palette_rounded,
-              title: 'Theme',
-              subtitle: 'Dark',
+              title: l10n.theme,
+              subtitle: switch (ref.watch(themeModeProvider)) {
+                ThemeMode.light => l10n.lightMode,
+                ThemeMode.dark => l10n.darkMode,
+                _ => l10n.systemMode,
+              },
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => _showThemePicker(context),
             ),
             _SettingsTile(
               icon: Icons.language_rounded,
-              title: 'Language',
-              subtitle: 'English',
+              title: l10n.language,
+              subtitle: switch (ref.watch(localeProvider).languageCode) {
+                'ar' => 'العربية',
+                _ => 'English',
+              },
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => _showLanguagePicker(context),
             ),
@@ -178,30 +189,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           textTheme,
         ),
         _buildSection(
-          'Account',
+          l10n.account,
           [
             _SettingsTile(
               icon: Icons.person_rounded,
-              title: 'Edit Profile',
+              title: l10n.editProfile,
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => context.pushNamed('editProfile'),
             ),
             _SettingsTile(
               icon: Icons.lock_rounded,
-              title: 'Change Password',
+              title: l10n.changePassword,
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => _showChangePasswordDialog(context, ref),
             ),
             if (isModerator)
               _SettingsTile(
                 icon: Icons.shield_rounded,
-                title: 'Moderation',
+                title: l10n.moderation,
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => context.push('/moderation'),
               ),
             _SettingsTile(
               icon: Icons.delete_forever_rounded,
-              title: 'Delete Account',
+              title: l10n.deleteAccount,
               titleColor: colorScheme.error,
               trailing: Icon(
                 Icons.chevron_right_rounded,
@@ -214,11 +225,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           textTheme,
         ),
         _buildSection(
-          'Recommendations & Privacy',
+          l10n.recommendationsAndPrivacy,
           [
             _SettingsTile(
               icon: Icons.auto_awesome_rounded,
-              title: 'Personalized Recommendations',
+              title: l10n.personalizedRecommendations,
               subtitle: 'Let your activity improve suggestions',
               trailing: Consumer(builder: (context, ref, _) {
                 return Switch(
@@ -236,17 +247,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             _SettingsTile(
               icon: Icons.delete_sweep_rounded,
-              title: 'Clear Recommendation History',
-              subtitle: 'Remove all behavioral data',
+              title: l10n.clearRecommendationHistory,
+              subtitle: l10n.removeAllBehavioralData,
               onTap: () async {
+                final l10n = AppLocalizations.of(context)!;
                 final confirmed = await showDialog<bool>(
                   context: context,
                   builder: (ctx) => AlertDialog(
-                    title: const Text('Clear History'),
+                    title: Text(l10n.clearHistory),
                     content: const Text('This will remove all your activity data used for recommendations. Continue?'),
                     actions: [
-                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                      FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Clear')),
+                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+                      FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.delete)),
                     ],
                   ),
                 );
@@ -254,7 +266,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   await BehaviorService.instance.clearAllEvents();
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Recommendation history cleared')),
+                      SnackBar(content: Text(l10n.clearHistory)),
                     );
                   }
                 }
@@ -269,34 +281,34 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     sections.addAll([
       _buildSection(
-        'About',
+        l10n.about,
         [
           _SettingsTile(
             icon: Icons.info_outline_rounded,
-            title: 'Version',
-            subtitle: '1.0.0',
+            title: l10n.appVersion,
+            subtitle: '0.7.3',
             onTap: () => _showVersionDialog(context),
           ),
           _SettingsTile(
             icon: Icons.description_rounded,
-            title: 'Terms of Service',
+            title: l10n.termsOfService,
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => _showTermsDialog(context),
           ),
           _SettingsTile(
             icon: Icons.shield_rounded,
-            title: 'Privacy Policy',
+            title: l10n.privacyPolicy,
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => _showPrivacyDialog(context),
           ),
           _SettingsTile(
             icon: Icons.code_rounded,
-            title: 'Open Source Licenses',
+            title: l10n.licenses,
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => showLicensePage(
               context: context,
               applicationName: 'WatchAtlas',
-              applicationVersion: '1.0.0',
+              applicationVersion: '0.7.3',
             ),
           ),
         ],
@@ -315,6 +327,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     ColorScheme colorScheme,
     TextTheme textTheme,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final initials = (profile.displayName ?? profile.username)[0].toUpperCase();
 
     return Column(
@@ -372,26 +385,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               _InfoRow(
                 icon: Icons.person_rounded,
-                label: 'Display Name',
+                label: l10n.displayName,
                 value: profile.displayName ?? profile.username,
               ),
               Divider(height: 1, indent: 56, color: colorScheme.outline.withValues(alpha: 0.2)),
               _InfoRow(
                 icon: Icons.alternate_email_rounded,
-                label: 'Username',
+                label: l10n.username,
                 value: profile.username,
               ),
               Divider(height: 1, indent: 56, color: colorScheme.outline.withValues(alpha: 0.2)),
               _InfoRow(
                 icon: Icons.email_rounded,
-                label: 'Email',
+                label: l10n.email,
                 value: profile.email,
               ),
               if (profile.bio != null && profile.bio!.isNotEmpty) ...[
                 Divider(height: 1, indent: 56, color: colorScheme.outline.withValues(alpha: 0.2)),
                 _InfoRow(
                   icon: Icons.info_outline_rounded,
-                  label: 'Bio',
+                  label: l10n.bio,
                   value: profile.bio!,
                 ),
               ],
@@ -399,11 +412,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Divider(height: 1, indent: 56, color: colorScheme.outline.withValues(alpha: 0.2)),
                 _InfoRow(
                   icon: Icons.wc_rounded,
-                  label: 'Gender',
+                  label: l10n.gender,
                   value: switch (profile.gender!) {
-                    Gender.male => 'Male',
-                    Gender.female => 'Female',
-                    Gender.ratherNotSay => 'Rather not say',
+                    Gender.male => l10n.male,
+                    Gender.female => l10n.female,
+                    Gender.ratherNotSay => l10n.ratherNotSay,
                   },
                 ),
               ],
@@ -411,7 +424,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Divider(height: 1, indent: 56, color: colorScheme.outline.withValues(alpha: 0.2)),
                 _InfoRow(
                   icon: Icons.cake_rounded,
-                  label: 'Age',
+                  label: l10n.age,
                   value: '${_calculateAge(profile.dateOfBirth!)} (${profile.dateOfBirth!.month}/${profile.dateOfBirth!.day}/${profile.dateOfBirth!.year})',
                 ),
               ],
@@ -427,7 +440,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 FilledButton.icon(
                   onPressed: () => context.pushNamed('editProfile'),
                   icon: const Icon(Icons.edit_rounded),
-                  label: const Text('Edit Profile'),
+                  label: Text(l10n.editProfile),
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(double.infinity, 48),
                   ),
@@ -436,7 +449,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 OutlinedButton.icon(
                   onPressed: () => context.push('/tracking'),
                   icon: const Icon(Icons.timeline_rounded),
-                  label: const Text('View Tracking'),
+                  label: Text(l10n.viewTracking),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 48),
                   ),
@@ -445,7 +458,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 OutlinedButton.icon(
                   onPressed: () => context.push('/analytics'),
                   icon: const Icon(Icons.analytics_rounded),
-                  label: const Text('View Analytics'),
+                  label: Text(l10n.viewAnalytics),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 48),
                   ),
@@ -501,12 +514,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   void _showThemePicker(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final current = ref.read(themeModeProvider);
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadiusDirectional.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => SafeArea(
+      builder: (ctx) => SafeArea(
         child: Padding(
           padding: const EdgeInsetsDirectional.symmetric(vertical: 8),
           child: Column(
@@ -514,23 +529,41 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               Padding(
                 padding: const EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 8),
-                child: Text('Choose Theme', style: Theme.of(context).textTheme.titleMedium),
+                child: Text(l10n.chooseTheme, style: Theme.of(ctx).textTheme.titleMedium),
               ),
               ListTile(
                 leading: const Icon(Icons.settings_suggest_rounded),
-                title: const Text('System'),
-                subtitle: const Text('Follow system settings'),
-                onTap: () => Navigator.pop(context),
+                title: Text(l10n.systemMode),
+                subtitle: Text(l10n.followSystem),
+                trailing: current == ThemeMode.system
+                    ? Icon(Icons.check, color: Theme.of(ctx).colorScheme.primary)
+                    : null,
+                onTap: () {
+                  ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.system);
+                  Navigator.pop(ctx);
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.light_mode_rounded),
-                title: const Text('Light'),
-                onTap: () => Navigator.pop(context),
+                title: Text(l10n.lightMode),
+                trailing: current == ThemeMode.light
+                    ? Icon(Icons.check, color: Theme.of(ctx).colorScheme.primary)
+                    : null,
+                onTap: () {
+                  ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.light);
+                  Navigator.pop(ctx);
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.dark_mode_rounded),
-                title: const Text('Dark'),
-                onTap: () => Navigator.pop(context),
+                title: Text(l10n.darkMode),
+                trailing: current == ThemeMode.dark
+                    ? Icon(Icons.check, color: Theme.of(ctx).colorScheme.primary)
+                    : null,
+                onTap: () {
+                  ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.dark);
+                  Navigator.pop(ctx);
+                },
               ),
             ],
           ),
@@ -540,12 +573,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   void _showLanguagePicker(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final current = ref.read(localeProvider);
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadiusDirectional.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => SafeArea(
+      builder: (ctx) => SafeArea(
         child: Padding(
           padding: const EdgeInsetsDirectional.symmetric(vertical: 8),
           child: Column(
@@ -553,17 +588,29 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               Padding(
                 padding: const EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 8),
-                child: Text('Choose Language', style: Theme.of(context).textTheme.titleMedium),
+                child: Text(l10n.chooseLanguage, style: Theme.of(ctx).textTheme.titleMedium),
               ),
               ListTile(
                 leading: const Icon(Icons.language_rounded),
                 title: const Text('English'),
-                onTap: () => Navigator.pop(context),
+                trailing: current.languageCode == 'en'
+                    ? Icon(Icons.check, color: Theme.of(ctx).colorScheme.primary)
+                    : null,
+                onTap: () {
+                  ref.read(localeProvider.notifier).setLocale(const Locale('en'));
+                  Navigator.pop(ctx);
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.language_rounded),
                 title: const Text('العربية'),
-                onTap: () => Navigator.pop(context),
+                trailing: current.languageCode == 'ar'
+                    ? Icon(Icons.check, color: Theme.of(ctx).colorScheme.primary)
+                    : null,
+                onTap: () {
+                  ref.read(localeProvider.notifier).setLocale(const Locale('ar'));
+                  Navigator.pop(ctx);
+                },
               ),
             ],
           ),
@@ -573,12 +620,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildSignOutButton(BuildContext context, WidgetRef ref, ColorScheme colorScheme) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
       child: OutlinedButton.icon(
         onPressed: () => _showSignOutDialog(context, ref),
         icon: const Icon(Icons.logout_rounded),
-        label: const Text('Sign Out'),
+        label: Text(l10n.signOut),
         style: OutlinedButton.styleFrom(
           foregroundColor: colorScheme.error,
           side: BorderSide(color: colorScheme.error.withValues(alpha: 0.5)),
@@ -589,20 +637,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   void _showSignOutDialog(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Sign Out'),
-        content: const Text('Are you sure you want to sign out?'),
+        title: Text(l10n.logout),
+        content: Text(l10n.signOutConfirmation),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(l10n.cancel)),
           FilledButton(
             onPressed: () async {
               Navigator.pop(dialogContext);
               await ref.read(authNotifierProvider.notifier).signOut();
               if (context.mounted) context.go('/auth');
             },
-            child: const Text('Sign Out'),
+            child: Text(l10n.signOut),
           ),
         ],
       ),
@@ -610,13 +659,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   void _showDeleteAccountDialog(BuildContext parentContext, WidgetRef ref) {
+    final l10n = AppLocalizations.of(parentContext)!;
     showDialog(
       context: parentContext,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Account'),
+        title: Text(l10n.deleteAccount),
         content: const Text('This action is permanent and cannot be undone. All your data will be deleted.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(l10n.cancel)),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Theme.of(dialogContext).colorScheme.error),
             onPressed: () async {
@@ -625,7 +675,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 await ref.read(authServiceProvider).deleteAccount();
                 if (parentContext.mounted) {
                   ScaffoldMessenger.of(parentContext).showSnackBar(
-                    const SnackBar(content: Text('Account deleted successfully')),
+                    SnackBar(content: Text(l10n.deleteAccount)),
                   );
                   ref.read(authNotifierProvider.notifier).signOut();
                 }
@@ -635,7 +685,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 }
               }
             },
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -643,11 +693,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   void _showChangePasswordDialog(BuildContext parentContext, WidgetRef ref) {
+    final l10n = AppLocalizations.of(parentContext)!;
     final emailController = TextEditingController();
     showDialog(
       context: parentContext,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Change Password'),
+        title: Text(l10n.changePassword),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -656,16 +707,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: Spacing.lg),
             TextField(
               controller: emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                prefixIcon: Icon(Icons.email_rounded),
+              decoration: InputDecoration(
+                labelText: l10n.email,
+                prefixIcon: const Icon(Icons.email_rounded),
               ),
               keyboardType: TextInputType.emailAddress,
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(l10n.cancel)),
           FilledButton(
             onPressed: () async {
               final email = emailController.text.trim();
@@ -675,7 +726,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 await ref.read(authNotifierProvider.notifier).resetPassword(email);
                 if (parentContext.mounted) {
                   ScaffoldMessenger.of(parentContext).showSnackBar(
-                    const SnackBar(content: Text('Password reset link sent to your email')),
+                    SnackBar(content: Text(l10n.sendResetLink)),
                   );
                 }
               } catch (e) {
@@ -684,7 +735,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 }
               }
             },
-            child: const Text('Send Reset Link'),
+            child: Text(l10n.sendResetLink),
           ),
         ],
       ),
@@ -695,7 +746,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     showAboutDialog(
       context: context,
       applicationName: 'WatchAtlas',
-      applicationVersion: '1.0.0',
+      applicationVersion: '0.7.3',
       applicationLegalese: '© 2026 WatchAtlas',
       children: [
         const SizedBox(height: Spacing.lg),

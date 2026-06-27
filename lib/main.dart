@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
 import 'core/services/supabase_service.dart';
+import 'core/providers/app_providers.dart';
 import 'router/app_router.dart';
 import 'l10n/app_localizations.dart';
 
@@ -20,31 +21,23 @@ class WatchAtlasApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
+    final themeMode = ref.watch(themeModeProvider);
+    final locale = ref.watch(localeProvider);
 
     return MaterialApp.router(
       routerConfig: router,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
+      locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('en'),
-        Locale('ar'),
-      ],
-      localeResolutionCallback: (locale, supportedLocales) {
-        for (final supported in supportedLocales) {
-          if (supported.languageCode == locale?.languageCode) {
-            return supported;
-          }
-        }
-        return supportedLocales.first;
-      },
+      supportedLocales: AppLocalizations.supportedLocales,
     );
   }
 }

@@ -39,40 +39,156 @@ INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', tru
 INSERT INTO storage.buckets (id, name, public) VALUES ('banners', 'banners', true)
   ON CONFLICT (id) DO NOTHING;
 
--- Allow authenticated users to upload their own avatars
-CREATE POLICY "Users can upload own avatars"
-  ON storage.objects FOR INSERT TO authenticated
-  WITH CHECK (
-    bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text
-  );
+DO $$
+BEGIN
+  DROP POLICY IF EXISTS "Users can upload own avatars" ON storage.objects;
+  CREATE POLICY "Users can upload own avatars"
+    ON storage.objects FOR INSERT TO authenticated
+    WITH CHECK (
+      bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text
+    );
+END $$;
 
--- Allow authenticated users to update their own avatars
-CREATE POLICY "Users can update own avatars"
-  ON storage.objects FOR UPDATE TO authenticated
-  USING (
-    bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text
-  );
+DO $$
+BEGIN
+  DROP POLICY IF EXISTS "Users can update own avatars" ON storage.objects;
+  CREATE POLICY "Users can update own avatars"
+    ON storage.objects FOR UPDATE TO authenticated
+    USING (
+      bucket_id = 'avatars' AND (storage.foldername(name))[1] = auth.uid()::text
+    );
+END $$;
 
--- Allow public read for avatars
-CREATE POLICY "Avatars are publicly readable"
-  ON storage.objects FOR SELECT TO public
-  USING (bucket_id = 'avatars');
+DO $$
+BEGIN
+  DROP POLICY IF EXISTS "Avatars are publicly readable" ON storage.objects;
+  CREATE POLICY "Avatars are publicly readable"
+    ON storage.objects FOR SELECT TO public
+    USING (bucket_id = 'avatars');
+END $$;
 
--- Allow authenticated users to upload their own banners
-CREATE POLICY "Users can upload own banners"
-  ON storage.objects FOR INSERT TO authenticated
-  WITH CHECK (
-    bucket_id = 'banners' AND (storage.foldername(name))[1] = auth.uid()::text
-  );
+DO $$
+BEGIN
+  DROP POLICY IF EXISTS "Users can upload own banners" ON storage.objects;
+  CREATE POLICY "Users can upload own banners"
+    ON storage.objects FOR INSERT TO authenticated
+    WITH CHECK (
+      bucket_id = 'banners' AND (storage.foldername(name))[1] = auth.uid()::text
+    );
+END $$;
 
--- Allow authenticated users to update their own banners
-CREATE POLICY "Users can update own banners"
-  ON storage.objects FOR UPDATE TO authenticated
-  USING (
-    bucket_id = 'banners' AND (storage.foldername(name))[1] = auth.uid()::text
-  );
+DO $$
+BEGIN
+  DROP POLICY IF EXISTS "Users can update own banners" ON storage.objects;
+  CREATE POLICY "Users can update own banners"
+    ON storage.objects FOR UPDATE TO authenticated
+    USING (
+      bucket_id = 'banners' AND (storage.foldername(name))[1] = auth.uid()::text
+    );
+END $$;
 
--- Allow public read for banners
-CREATE POLICY "Banners are publicly readable"
-  ON storage.objects FOR SELECT TO public
-  USING (bucket_id = 'banners');
+DO $$
+BEGIN
+  DROP POLICY IF EXISTS "Banners are publicly readable" ON storage.objects;
+  CREATE POLICY "Banners are publicly readable"
+    ON storage.objects FOR SELECT TO public
+    USING (bucket_id = 'banners');
+END $$;
+
+-- ============================================================
+-- Add missing columns
+-- ============================================================
+
+ALTER TABLE user_media ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ;
+ALTER TABLE user_media ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ;
+ALTER TABLE user_media ADD COLUMN IF NOT EXISTS rewatch_count INTEGER DEFAULT 0;
+
+-- ============================================================
+-- Change user_lists.id from UUID to TEXT to match Dart's composite key format (userId_timestamp)
+-- Drop dependent policies/constraints, then re-add
+-- ============================================================
+
+DROP POLICY IF EXISTS "List items readable with list" ON list_items;
+DROP POLICY IF EXISTS "Users manage own list items" ON list_items;
+ALTER TABLE list_items DROP CONSTRAINT IF EXISTS list_items_list_id_fkey;
+ALTER TABLE list_items ALTER COLUMN list_id TYPE TEXT;
+ALTER TABLE user_lists DROP CONSTRAINT IF EXISTS user_lists_pkey;
+ALTER TABLE user_lists ALTER COLUMN id TYPE TEXT;
+ALTER TABLE user_lists ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE user_lists ALTER COLUMN id SET NOT NULL;
+ALTER TABLE user_lists ADD PRIMARY KEY (id);
+ALTER TABLE list_items ADD CONSTRAINT list_items_list_id_fkey
+  FOREIGN KEY (list_id) REFERENCES user_lists(id) ON DELETE CASCADE;
+DO $$
+BEGIN
+  DROP POLICY IF EXISTS "List items readable with list" ON list_items;
+  CREATE POLICY "List items readable with list" ON list_items
+    FOR SELECT USING (
+      EXISTS (SELECT 1 FROM user_lists WHERE id = list_id AND (list_type = 'public' OR user_id = auth.uid()))
+    );
+END $$;
+
+DO $$
+BEGIN
+  DROP POLICY IF EXISTS "Users manage own list items" ON list_items;
+  CREATE POLICY "Users manage own list items" ON list_items
+    USING (
+      EXISTS (SELECT 1 FROM user_lists WHERE id = list_id AND user_id = auth.uid())
+    )
+    WITH CHECK (
+      EXISTS (SELECT 1 FROM user_lists WHERE id = list_id AND user_id = auth.uid())
+    );
+END $$;
+
+-- ============================================================
+-- Re-create user_lists policies with explicit operations
+-- (the old FOR ALL policy may not cover INSERT in all PG versions)
+-- ============================================================
+
+DO $$
+BEGIN
+  DROP POLICY IF EXISTS "Users manage own lists" ON user_lists;
+  DROP POLICY IF EXISTS "Users view own lists" ON user_lists;
+  DROP POLICY IF EXISTS "Users insert own lists" ON user_lists;
+  DROP POLICY IF EXISTS "Users update own lists" ON user_lists;
+  DROP POLICY IF EXISTS "Users delete own lists" ON user_lists;
+  CREATE POLICY "Users view own lists" ON user_lists
+    FOR SELECT USING (auth.uid() = user_id OR list_type = 'public');
+  CREATE POLICY "Users insert own lists" ON user_lists
+    FOR INSERT TO authenticated
+    WITH CHECK (auth.uid() = user_id);
+  CREATE POLICY "Users update own lists" ON user_lists
+    FOR UPDATE USING (auth.uid() = user_id)
+    WITH CHECK (auth.uid() = user_id);
+  CREATE POLICY "Users delete own lists" ON user_lists
+    FOR DELETE USING (auth.uid() = user_id);
+END $$;
+
+-- ============================================================
+-- Add INSERT/UPDATE RLS policy on media table
+-- (GRANT alone is not enough; an RLS policy must permit the operation)
+-- ============================================================
+
+DO $$
+BEGIN
+  DROP POLICY IF EXISTS "Authenticated users can insert media" ON media;
+  CREATE POLICY "Authenticated users can insert media"
+    ON media FOR INSERT TO authenticated
+    WITH CHECK (true);
+END $$;
+
+DO $$
+BEGIN
+  DROP POLICY IF EXISTS "Authenticated users can update media" ON media;
+  CREATE POLICY "Authenticated users can update media"
+    ON media FOR UPDATE TO authenticated
+    USING (true)
+    WITH CHECK (true);
+END $$;
+
+-- ============================================================
+-- Grant INSERT, UPDATE on media table for authenticated users
+-- (needed by addItemToList which upserts media before adding to list)
+-- ============================================================
+
+GRANT INSERT, UPDATE ON public.media TO authenticated;

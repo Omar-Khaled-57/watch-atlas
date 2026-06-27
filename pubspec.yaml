@@ -1,7 +1,7 @@
 name: watch_atlas
 description: "WatchAtlas - Modern media tracking platform"
 publish_to: 'none'
-version: 1.0.0+1
+version: 0.7.3+1
 
 environment:
   sdk: ^3.11.3
@@ -78,6 +78,7 @@ dependencies:
   share_plus: ^10.1.4
   image_picker: ^1.1.2
   flutter_cache_manager: ^3.4.1
+  postgrest: ^2.7.2
 
 dev_dependencies:
   flutter_test:
@@ -112,5 +113,3 @@ flutter:
     - assets/images/logo/
     - assets/images/icons/
     - assets/images/pfp/
-    - assets/fonts/
-    - assets/lottie/

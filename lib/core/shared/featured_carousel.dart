@@ -28,7 +28,9 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
   late PageController _pageController;
   Timer? _autoScrollTimer;
   int _currentPage = 0;
-  bool _navHovered = false;
+  bool _isDragging = false;
+  Offset? _dragStart;
+  bool _gotMoved = false;
 
   bool get _showNavButtons {
     if (kIsWeb) return true;
@@ -94,70 +96,87 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
               builder: (context, constraints) {
                 return Stack(
                   children: [
-                    PageView.builder(
-                      controller: _pageController,
-                      onPageChanged: _onPageChanged,
-                      itemCount: widget.items.length,
-                      itemBuilder: (context, index) {
-                        final item = widget.items[index];
-                        return AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          margin: EdgeInsetsDirectional.only(
-                            start: index == _currentPage ? 0 : Spacing.sm,
-                            end: index == _currentPage ? 0 : Spacing.sm,
-                            top: index == _currentPage ? 0 : Spacing.md,
-                            bottom: index == _currentPage ? 0 : Spacing.md,
-                          ),
-                          child: _FeaturedItem(
-                            item: item,
-                            colorScheme: colorScheme,
-                            textTheme: textTheme,
-                            onTap: item.onTap,
+                    MouseRegion(
+                      cursor: _isDragging ? SystemMouseCursors.grabbing : SystemMouseCursors.grab,
+                      child: Listener(
+                        onPointerDown: (e) {
+                          _dragStart = e.position;
+                          _gotMoved = false;
+                          setState(() => _isDragging = true);
+                        },
+                        onPointerMove: (e) {
+                          if (_dragStart != null) {
+                            final dx = (e.position - _dragStart!).dx.abs();
+                            if (dx > 10) _gotMoved = true;
+                          }
+                        },
+                        onPointerUp: (_) {
+                          setState(() => _isDragging = false);
+                          _dragStart = null;
+                        },
+                        onPointerCancel: (_) {
+                          setState(() => _isDragging = false);
+                          _dragStart = null;
+                        },
+                        child: PageView.builder(
+                          controller: _pageController,
+                          onPageChanged: _onPageChanged,
+                          itemCount: widget.items.length,
+                          itemBuilder: (context, index) {
+                            final item = widget.items[index];
+                            return Listener(
+                              onPointerUp: (_) {
+                                if (!_gotMoved) item.onTap?.call();
+                              },
+                              child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            margin: EdgeInsetsDirectional.only(
+                              start: index == _currentPage ? 0 : Spacing.sm,
+                              end: index == _currentPage ? 0 : Spacing.sm,
+                              top: index == _currentPage ? 0 : Spacing.md,
+                              bottom: index == _currentPage ? 0 : Spacing.md,
+                            ),
+                            child: _FeaturedItem(
+                              item: item,
+                              colorScheme: colorScheme,
+                              textTheme: textTheme,
+                            ),
                           ),
                         );
                       },
-                    ),
-                    if (_showNavButtons && widget.items.length > 1)
-                      MouseRegion(
-                        onEnter: (_) => setState(() => _navHovered = true),
-                        onExit: (_) => setState(() => _navHovered = false),
-                        child: AnimatedOpacity(
-                          duration: const Duration(milliseconds: 200),
-                          opacity: _navHovered ? 1.0 : 0.4,
-                          child: Stack(
-                            children: [
-                              PositionedDirectional(
-                                start: 8,
-                                top: 0,
-                                bottom: 0,
-                                child: Semantics(
-                                  label: 'Previous slide',
-                                  child: _NavButton(
-                                    icon: Icons.chevron_left_rounded,
-                                    onTap: _currentPage > 0
-                                        ? () => _goToPage(_currentPage - 1)
-                                        : null,
-                                  ),
-                                ),
-                              ),
-                              PositionedDirectional(
-                                end: 8,
-                                top: 0,
-                                bottom: 0,
-                                child: Semantics(
-                                  label: 'Next slide',
-                                  child: _NavButton(
-                                    icon: Icons.chevron_right_rounded,
-                                    onTap: _currentPage < widget.items.length - 1
-                                        ? () => _goToPage(_currentPage + 1)
-                                        : null,
-                                  ),
-                                ),
-                              ),
-                            ],
+                  ),
+                  ),
+                  ),
+                    if (_showNavButtons && widget.items.length > 1) ...[
+                      PositionedDirectional(
+                        start: 8,
+                        top: 0,
+                        bottom: 0,
+                        child: Semantics(
+                          label: 'Previous slide',
+                          child: _NavButton(
+                            icon: Icons.chevron_left_rounded,
+                            onTap: _currentPage > 0
+                                ? () => _goToPage(_currentPage - 1)
+                                : null,
                           ),
                         ),
                       ),
+                      PositionedDirectional(
+                        end: 8,
+                        top: 0,
+                        bottom: 0,
+                        child: Semantics(
+                          label: 'Next slide',
+                          child: _NavButton(
+                            icon: Icons.chevron_right_rounded,
+                            onTap: _currentPage < widget.items.length - 1
+                                ? () => _goToPage(_currentPage + 1)
+                                : null,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 );
               },
@@ -222,21 +241,19 @@ class _FeaturedItem extends StatelessWidget {
   final FeaturedCarouselItem item;
   final ColorScheme colorScheme;
   final TextTheme textTheme;
-  final VoidCallback? onTap;
 
   const _FeaturedItem({
     required this.item,
     required this.colorScheme,
     required this.textTheme,
-    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadiusDirectional.all(Radius.circular(Spacing.cardRadiusLg)),
-      child: GestureDetector(
-        onTap: onTap,
+      child: Material(
+        color: Colors.transparent,
         child: Stack(
           fit: StackFit.expand,
           children: [

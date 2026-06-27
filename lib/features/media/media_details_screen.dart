@@ -2,13 +2,17 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/extensions/number_extensions.dart';
 import '../../core/models/media_enums.dart';
+import '../../core/services/behavior_service.dart';
 import '../../core/shared/app_modal.dart';
 import '../../core/shared/expandable_text.dart';
+import '../../models/media_model.dart';
+import '../../models/review_model.dart';
 import '../lists/providers/lists_providers.dart';
 import '../lists/widgets/create_list_dialog.dart';
 import '../tracking/providers/tracking_providers.dart';
@@ -17,10 +21,6 @@ import 'widgets/cast_card.dart';
 import 'widgets/media_stats.dart';
 import 'widgets/review_card.dart';
 import 'widgets/status_dropdown.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../../core/services/behavior_service.dart';
-import '../../models/media_model.dart';
-import '../../models/review_model.dart';
 
 class MediaDetailsScreen extends ConsumerStatefulWidget {
   final String mediaId;
@@ -82,21 +82,62 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
           trailersAsync,
         ),
         loading: () => _buildLoading(),
-        error: (e, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.error_outline_rounded, size: 64, color: context.colorScheme.error),
-              SizedBox(height: Spacing.lg),
-              Text('Failed to load details', style: context.textTheme.bodyLarge),
-              SizedBox(height: Spacing.sm),
-              TextButton(onPressed: () => ref.invalidate(mediaDetailsProvider), child: Text('Retry')),
-            ],
-          ),
-        ),
+        error: (_, _) => _buildError(),
       ),
     );
   }
+
+  // ──────────────────────────────────────────────
+  // Layout Router
+  // ──────────────────────────────────────────────
+
+  Widget _buildContent(
+    BuildContext context,
+    MediaModel media,
+    AsyncValue<Map<String, dynamic>> creditsAsync,
+    AsyncValue<List> recommendationsAsync,
+    AsyncValue<List> similarAsync,
+    AsyncValue<List> reviewsAsync,
+    AsyncValue<List<Map<String, dynamic>>> trailersAsync,
+  ) {
+    final isDesktop = context.isDesktop;
+    final orientation = context.mediaQuery.orientation;
+
+    if (isDesktop) {
+      return _desktopLayout(
+        media: media,
+        creditsAsync: creditsAsync,
+        recommendationsAsync: recommendationsAsync,
+        similarAsync: similarAsync,
+        reviewsAsync: reviewsAsync,
+        trailersAsync: trailersAsync,
+      );
+    }
+
+    if (orientation == Orientation.landscape) {
+      return _landscapeLayout(
+        media: media,
+        creditsAsync: creditsAsync,
+        recommendationsAsync: recommendationsAsync,
+        similarAsync: similarAsync,
+        reviewsAsync: reviewsAsync,
+        trailersAsync: trailersAsync,
+      );
+    }
+
+      return _portraitLayout(
+      media: media,
+      creditsAsync: creditsAsync,
+      recommendationsAsync: recommendationsAsync,
+      similarAsync: similarAsync,
+      reviewsAsync: reviewsAsync,
+      trailersAsync: trailersAsync,
+    );
+  }
+
+  // ──────────────────────────────────────────────
+  // Loading & Error States
+  // ──────────────────────────────────────────────
 
   Widget _buildLoading() {
     return SingleChildScrollView(
@@ -115,35 +156,14 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Shimmer.fromColors(
-                  baseColor: context.colorScheme.surfaceContainerHighest,
-                  highlightColor: context.colorScheme.surface,
-                  child: Container(
-                    height: 24,
-                    width: 200,
-                    color: Colors.white,
-                  ),
-                ),
+                SizedBox(height: Spacing.xl),
+                _shimmerLine(width: 240, height: 24),
                 SizedBox(height: Spacing.lg),
-                Shimmer.fromColors(
-                  baseColor: context.colorScheme.surfaceContainerHighest,
-                  highlightColor: context.colorScheme.surface,
-                  child: Container(
-                    height: 16,
-                    width: double.infinity,
-                    color: Colors.white,
-                  ),
-                ),
+                _shimmerLine(width: double.infinity, height: 14),
                 SizedBox(height: Spacing.sm),
-                Shimmer.fromColors(
-                  baseColor: context.colorScheme.surfaceContainerHighest,
-                  highlightColor: context.colorScheme.surface,
-                  child: Container(
-                    height: 16,
-                    width: 300,
-                    color: Colors.white,
-                  ),
-                ),
+                _shimmerLine(width: 320, height: 14),
+                SizedBox(height: Spacing.xl),
+                _shimmerLine(width: double.infinity, height: 80),
               ],
             ),
           ),
@@ -152,55 +172,369 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
     );
   }
 
-  Widget _buildContent(
-    BuildContext context,
-    media,
-    AsyncValue<Map<String, dynamic>> creditsAsync,
-    AsyncValue<List> recommendationsAsync,
-    AsyncValue<List> similarAsync,
-    AsyncValue<List> reviewsAsync,
-    AsyncValue<List<Map<String, dynamic>>> trailersAsync,
-  ) {
-    final isDesktop = context.isDesktop;
-    final backdropUrl = AppConstants.mediaImageUrl(media.backdropPath, size: 'w1280');
-    final posterUrl = AppConstants.mediaImageUrl(media.posterPath, size: 'w500');
-
-    if (isDesktop) {
-      return _buildDesktopLayout(
-        context, media, backdropUrl, posterUrl,
-        creditsAsync, recommendationsAsync, similarAsync,
-        reviewsAsync, trailersAsync,
-      );
-    }
-
-    return _buildMobileLayout(
-      context, media, backdropUrl, posterUrl,
-      creditsAsync, recommendationsAsync, similarAsync,
-      reviewsAsync, trailersAsync,
+  Widget _shimmerLine({double? width, double? height}) {
+    return Shimmer.fromColors(
+      baseColor: context.colorScheme.surfaceContainerHighest,
+      highlightColor: context.colorScheme.surface,
+      child: Container(
+        height: height ?? 16,
+        width: width ?? double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadiusDirectional.all(Radius.circular(Spacing.cardRadiusSm)),
+        ),
+      ),
     );
   }
 
-  Widget _buildDesktopLayout(
-    BuildContext context,
-    media,
-    String? backdropUrl,
-    String? posterUrl,
-    AsyncValue<Map<String, dynamic>> creditsAsync,
-    AsyncValue<List> recommendationsAsync,
-    AsyncValue<List> similarAsync,
-    AsyncValue<List> reviewsAsync,
-    AsyncValue<List<Map<String, dynamic>>> trailersAsync,
-  ) {
+  Widget _buildError() {
+    return Center(
+      child: Padding(
+        padding: EdgeInsetsDirectional.all(Spacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline_rounded, size: 64, color: context.colorScheme.error),
+            SizedBox(height: Spacing.lg),
+            Text('Failed to load details', style: context.textTheme.bodyLarge),
+            SizedBox(height: Spacing.lg),
+            FilledButton.tonalIcon(
+              onPressed: () => ref.invalidate(mediaDetailsProvider),
+              icon: Icon(Icons.refresh_rounded),
+              label: Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ──────────────────────────────────────────────
+  // Portrait Layout
+  // ──────────────────────────────────────────────
+
+  Widget _portraitLayout({
+    required MediaModel media,
+    required AsyncValue<Map<String, dynamic>> creditsAsync,
+    required AsyncValue<List> recommendationsAsync,
+    required AsyncValue<List> similarAsync,
+    required AsyncValue<List> reviewsAsync,
+    required AsyncValue<List<Map<String, dynamic>>> trailersAsync,
+  }) {
+    final backdropUrl = AppConstants.mediaImageUrl(media.backdropPath, size: 'w1280');
+    final posterUrl = AppConstants.mediaImageUrl(media.posterPath, size: 'w342');
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _PortraitHero(
+            backdropUrl: backdropUrl,
+            posterUrl: posterUrl,
+          ),
+          Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(Spacing.lg, 0, Spacing.lg, Spacing.section),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _TitleBlock(media: media, hasPoster: media.posterPath != null),
+                SizedBox(height: Spacing.md),
+                _RatingRow(media: media),
+                if (media.genres != null && media.genres!.isNotEmpty) ...[
+                  SizedBox(height: Spacing.md),
+                  _GenreChips(genres: media.genres!),
+                ],
+                SizedBox(height: Spacing.lg),
+                _OverviewSection(media: media),
+                SizedBox(height: Spacing.xl),
+                _ActionButtons(media: media),
+                SizedBox(height: Spacing.xl),
+                _StatsCard(media: media),
+                SizedBox(height: Spacing.lg),
+                _ListEntrySection(media: media),
+                SizedBox(height: Spacing.xxl),
+                creditsAsync.when(
+                  data: (credits) => _CastSection(credits: credits),
+                  loading: () => SizedBox.shrink(),
+                  error: (_, _) => SizedBox.shrink(),
+                ),
+                SizedBox(height: Spacing.xxl),
+                creditsAsync.when(
+                  data: (credits) => _CrewSection(credits: credits),
+                  loading: () => SizedBox.shrink(),
+                  error: (_, _) => SizedBox.shrink(),
+                ),
+                SizedBox(height: Spacing.xxl),
+                trailersAsync.when(
+                  data: (trailers) => _TrailersSection(trailers: trailers),
+                  loading: () => SizedBox.shrink(),
+                  error: (_, _) => SizedBox.shrink(),
+                ),
+                SizedBox(height: Spacing.xxl),
+                recommendationsAsync.when(
+                  data: (recs) => _MediaRowSection(title: 'Recommendations', items: recs),
+                  loading: () => SizedBox.shrink(),
+                  error: (_, _) => SizedBox.shrink(),
+                ),
+                SizedBox(height: Spacing.xxl),
+                similarAsync.when(
+                  data: (similar) => _MediaRowSection(title: 'Similar', items: similar),
+                  loading: () => SizedBox.shrink(),
+                  error: (_, _) => SizedBox.shrink(),
+                ),
+                SizedBox(height: Spacing.xxl),
+                _ReviewsSection(reviewsAsync: reviewsAsync),
+                SizedBox(height: Spacing.xxl),
+                _ActivitySection(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ──────────────────────────────────────────────
+  // Landscape Layout
+  // ──────────────────────────────────────────────
+
+  Widget _landscapeLayout({
+    required MediaModel media,
+    required AsyncValue<Map<String, dynamic>> creditsAsync,
+    required AsyncValue<List> recommendationsAsync,
+    required AsyncValue<List> similarAsync,
+    required AsyncValue<List> reviewsAsync,
+    required AsyncValue<List<Map<String, dynamic>>> trailersAsync,
+  }) {
+    final screenWidth = context.screenWidth;
+    final isCompact = screenWidth < 600;
+    final posterUrl = AppConstants.mediaImageUrl(media.posterPath, size: 'w342');
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsetsDirectional.only(
+          top: context.mediaQuery.padding.top + Spacing.sm,
+          bottom: Spacing.section,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.sm),
+              child: IconButton(
+                icon: Icon(Icons.arrow_back_rounded),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (media.posterPath != null)
+                    ClipRRect(
+                      borderRadius: BorderRadiusDirectional.all(
+                        Radius.circular(Spacing.cardRadiusMd),
+                      ),
+                      child: CachedNetworkImage(
+                        imageUrl: posterUrl!,
+                        width: isCompact ? 90 : 120,
+                        height: isCompact ? 135 : 180,
+                        fit: BoxFit.cover,
+                        placeholder: (_, _) => _posterPlaceholder(isCompact ? 90 : 120, isCompact ? 135 : 180),
+                        errorWidget: (_, _, _) => _posterPlaceholder(isCompact ? 90 : 120, isCompact ? 135 : 180),
+                      ),
+                    ),
+                  SizedBox(width: Spacing.lg),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          media.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (media.originalTitle != null && media.originalTitle != media.title) ...[
+                          SizedBox(height: Spacing.xs),
+                          Text(
+                            media.originalTitle!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.textTheme.bodySmall?.copyWith(
+                              color: context.colorScheme.onSurfaceVariant,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                        SizedBox(height: Spacing.sm),
+                        _RatingRow(media: media),
+                        SizedBox(height: Spacing.sm),
+                        if (media.genres != null && media.genres!.isNotEmpty)
+                          _GenreChips(genres: media.genres!),
+                        SizedBox(height: Spacing.md),
+                        _ActionButtons(media: media),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: Spacing.lg),
+            Padding(
+              padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+              child: _LibraryCard(media: media),
+            ),
+            SizedBox(height: Spacing.lg),
+            Padding(
+              padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+              child: _OverviewSection(media: media),
+            ),
+            SizedBox(height: Spacing.lg),
+            Padding(
+              padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+              child: _StatsCard(media: media),
+            ),
+            SizedBox(height: Spacing.lg),
+            Padding(
+              padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+              child: _ListEntrySection(media: media),
+            ),
+            SizedBox(height: Spacing.xl),
+            creditsAsync.when(
+              data: (credits) => _CastSection(credits: credits),
+              loading: () => SizedBox.shrink(),
+              error: (_, _) => SizedBox.shrink(),
+            ),
+            SizedBox(height: Spacing.xl),
+            creditsAsync.when(
+              data: (credits) => _CrewSection(credits: credits),
+              loading: () => SizedBox.shrink(),
+              error: (_, _) => SizedBox.shrink(),
+            ),
+            SizedBox(height: Spacing.xl),
+            trailersAsync.when(
+              data: (trailers) => _TrailersSection(trailers: trailers),
+              loading: () => SizedBox.shrink(),
+              error: (_, _) => SizedBox.shrink(),
+            ),
+            SizedBox(height: Spacing.xl),
+            recommendationsAsync.when(
+              data: (recs) => _MediaRowSection(title: 'Recommendations', items: recs),
+              loading: () => SizedBox.shrink(),
+              error: (_, _) => SizedBox.shrink(),
+            ),
+            SizedBox(height: Spacing.xl),
+            similarAsync.when(
+              data: (similar) => _MediaRowSection(title: 'Similar', items: similar),
+              loading: () => SizedBox.shrink(),
+              error: (_, _) => SizedBox.shrink(),
+            ),
+            SizedBox(height: Spacing.xl),
+            Padding(
+              padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+              child: _ReviewsSection(reviewsAsync: reviewsAsync),
+            ),
+            SizedBox(height: Spacing.xl),
+            Padding(
+              padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+              child: _ActivitySection(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ──────────────────────────────────────────────
+  // Desktop Layout
+  // ──────────────────────────────────────────────
+
+  Widget _desktopLayout({
+    required MediaModel media,
+    required AsyncValue<Map<String, dynamic>> creditsAsync,
+    required AsyncValue<List> recommendationsAsync,
+    required AsyncValue<List> similarAsync,
+    required AsyncValue<List> reviewsAsync,
+    required AsyncValue<List<Map<String, dynamic>>> trailersAsync,
+  }) {
+    final backdropUrl = AppConstants.mediaImageUrl(media.backdropPath, size: 'w1280');
+    final posterUrl = AppConstants.mediaImageUrl(media.posterPath, size: 'w342');
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           flex: 3,
           child: SingleChildScrollView(
-            child: _buildMainContent(
-              context, media, backdropUrl, posterUrl,
-              creditsAsync, recommendationsAsync, similarAsync,
-              reviewsAsync, trailersAsync,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _DesktopHero(
+                  backdropUrl: backdropUrl,
+                  posterUrl: posterUrl,
+                ),
+                Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(Spacing.xxl, 0, Spacing.xxl, Spacing.section),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _TitleBlock(media: media, hasPoster: media.posterPath != null),
+                      SizedBox(height: Spacing.md),
+                      _RatingRow(media: media),
+                      if (media.genres != null && media.genres!.isNotEmpty) ...[
+                        SizedBox(height: Spacing.md),
+                        _GenreChips(genres: media.genres!),
+                      ],
+                SizedBox(height: Spacing.lg),
+                _ActionButtons(media: media),
+                SizedBox(height: Spacing.xl),
+                _LibraryCard(media: media),
+                SizedBox(height: Spacing.xl),
+                _StatsCard(media: media),
+                      SizedBox(height: Spacing.lg),
+                      _ListEntrySection(media: media),
+                      SizedBox(height: Spacing.xxl),
+                      creditsAsync.when(
+                        data: (credits) => _CastSection(credits: credits),
+                        loading: () => SizedBox.shrink(),
+                        error: (_, _) => SizedBox.shrink(),
+                      ),
+                      SizedBox(height: Spacing.xxl),
+                      creditsAsync.when(
+                        data: (credits) => _CrewSection(credits: credits),
+                        loading: () => SizedBox.shrink(),
+                        error: (_, _) => SizedBox.shrink(),
+                      ),
+                      SizedBox(height: Spacing.xxl),
+                      trailersAsync.when(
+                        data: (trailers) => _TrailersSection(trailers: trailers),
+                        loading: () => SizedBox.shrink(),
+                        error: (_, _) => SizedBox.shrink(),
+                      ),
+                      SizedBox(height: Spacing.xxl),
+                      recommendationsAsync.when(
+                        data: (recs) => _MediaRowSection(title: 'Recommendations', items: recs),
+                        loading: () => SizedBox.shrink(),
+                        error: (_, _) => SizedBox.shrink(),
+                      ),
+                      SizedBox(height: Spacing.xxl),
+                      similarAsync.when(
+                        data: (similar) => _MediaRowSection(title: 'Similar', items: similar),
+                        loading: () => SizedBox.shrink(),
+                        error: (_, _) => SizedBox.shrink(),
+                      ),
+                      SizedBox(height: Spacing.xxl),
+                      _ReviewsSection(reviewsAsync: reviewsAsync),
+                      SizedBox(height: Spacing.xxl),
+                      _ActivitySection(),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -210,194 +544,89 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
             padding: EdgeInsetsDirectional.only(
               top: Spacing.lg,
               bottom: Spacing.section,
-              start: 0,
-              end: 0,
             ),
-            child: _buildSidePanel(media),
+            child: _SidePanel(media: media),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildMobileLayout(
-    BuildContext context,
-    media,
-    String? backdropUrl,
-    String? posterUrl,
-    AsyncValue<Map<String, dynamic>> creditsAsync,
-    AsyncValue<List> recommendationsAsync,
-    AsyncValue<List> similarAsync,
-    AsyncValue<List> reviewsAsync,
-    AsyncValue<List<Map<String, dynamic>>> trailersAsync,
-  ) {
-    return SingleChildScrollView(
-      child: _buildMainContent(
-        context, media, backdropUrl, posterUrl,
-        creditsAsync, recommendationsAsync, similarAsync,
-        reviewsAsync, trailersAsync,
+  // ──────────────────────────────────────────────
+  // Shared UI Components
+  // ──────────────────────────────────────────────
+
+  Widget _posterPlaceholder(double width, double height) {
+    return Container(
+      width: width,
+      height: height,
+      color: context.colorScheme.surfaceContainerHighest,
+      child: Icon(
+        Icons.movie_outlined,
+        size: 32,
+        color: context.colorScheme.onSurfaceVariant,
       ),
     );
   }
+}
 
-  Widget _buildMainContent(
-    BuildContext context,
-    media,
-    String? backdropUrl,
-    String? posterUrl,
-    AsyncValue<Map<String, dynamic>> creditsAsync,
-    AsyncValue<List> recommendationsAsync,
-    AsyncValue<List> similarAsync,
-    AsyncValue<List> reviewsAsync,
-    AsyncValue<List<Map<String, dynamic>>> trailersAsync,
-  ) {
-    final isDesktop = context.isDesktop;
-    final mediaQuery = context.mediaQuery;
-    final horizontalPadding = isDesktop ? Spacing.xxl : Spacing.lg;
-    final bottomPadding = isDesktop
-        ? Spacing.section
-        : Spacing.section + mediaQuery.padding.bottom + kBottomNavigationBarHeight;
+// ──────────────────────────────────────────────
+// Hero Section (Portrait)
+// ──────────────────────────────────────────────
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildHeroSection(context, media, backdropUrl, posterUrl),
-        Padding(
-          padding: EdgeInsetsDirectional.only(
-            top: Spacing.lg,
-            bottom: bottomPadding,
-            start: horizontalPadding,
-            end: horizontalPadding,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTitleSection(context, media),
-              SizedBox(height: Spacing.md),
-              _buildRatingSection(context, media),
-              SizedBox(height: Spacing.md),
-              if (media.genres != null && media.genres!.isNotEmpty)
-                _buildGenreChips(context, media.genres!),
-              SizedBox(height: Spacing.lg),
-              _buildOverviewSection(context, media),
-              SizedBox(height: Spacing.xxl),
-              _buildStats(context, media),
-              SizedBox(height: Spacing.xxl),
-              creditsAsync.when(
-                data: (credits) => _buildCastSection(context, credits),
-                loading: () => SizedBox.shrink(),
-                error: (_, __) => SizedBox.shrink(),
-              ),
-              SizedBox(height: Spacing.xxl),
-              creditsAsync.when(
-                data: (credits) => _buildCrewSection(context, credits),
-                loading: () => SizedBox.shrink(),
-                error: (_, __) => SizedBox.shrink(),
-              ),
-              SizedBox(height: Spacing.xxl),
-              trailersAsync.when(
-                data: (trailers) => _buildTrailersSection(context, trailers),
-                loading: () => SizedBox.shrink(),
-                error: (_, __) => SizedBox.shrink(),
-              ),
-              SizedBox(height: Spacing.xxl),
-              recommendationsAsync.when(
-                data: (recs) => _buildMediaRow(context, 'Recommendations', recs),
-                loading: () => SizedBox.shrink(),
-                error: (_, __) => SizedBox.shrink(),
-              ),
-              SizedBox(height: Spacing.xxl),
-              similarAsync.when(
-                data: (similar) => _buildMediaRow(context, 'Similar', similar),
-                loading: () => SizedBox.shrink(),
-                error: (_, __) => SizedBox.shrink(),
-              ),
-              SizedBox(height: Spacing.xxl),
-              _buildReviewsSection(context, reviewsAsync),
-              SizedBox(height: Spacing.xxl),
-              _buildActivitySection(context),
-              SizedBox(height: Spacing.section),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+class _PortraitHero extends StatelessWidget {
+  final String? backdropUrl;
+  final String? posterUrl;
 
-  Widget _buildHeroSection(BuildContext context, MediaModel media, String? backdropUrl, String? posterUrl) {
+  const _PortraitHero({this.backdropUrl, this.posterUrl});
+
+  @override
+  Widget build(BuildContext context) {
     return Stack(
       children: [
         Container(
           height: AppConstants.backdropHeight,
           width: double.infinity,
-          child: backdropUrl != null
-              ? CachedNetworkImage(
-                  imageUrl: backdropUrl,
-                  fit: BoxFit.cover,
-                  placeholder: (_, __) => Container(
-                    color: context.colorScheme.surfaceContainerHighest,
-                  ),
-                  errorWidget: (_, __, ___) => Container(
-                    color: context.colorScheme.surfaceContainerHighest,
-                    child: Icon(
-                      Icons.movie_outlined,
-                      size: 64,
-                      color: context.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                )
-              : Container(
-                  color: context.colorScheme.surfaceContainerHighest,
-                  child: Icon(
-                    Icons.movie_outlined,
-                    size: 64,
-                    color: context.colorScheme.onSurfaceVariant,
-                  ),
-                ),
           foregroundDecoration: BoxDecoration(
             gradient: LinearGradient(
               begin: AlignmentDirectional.topCenter,
               end: AlignmentDirectional.bottomCenter,
               colors: [
                 Colors.transparent,
-                context.colorScheme.surface.withValues(alpha: 0.9),
+                context.colorScheme.surface.withValues(alpha: 0.95),
               ],
             ),
           ),
+          child: backdropUrl != null
+              ? CachedNetworkImage(
+                  imageUrl: backdropUrl!,
+                  fit: BoxFit.cover,
+                  placeholder: (_, _) => _backdropPlaceholder(context),
+                  errorWidget: (_, _, _) => _backdropPlaceholder(context),
+                )
+              : _backdropPlaceholder(context),
         ),
-        PositionedDirectional(
-          start: 16,
-          bottom: 0,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              if (posterUrl != null)
-                ClipRRect(
-                  borderRadius: BorderRadiusDirectional.all(
-                    Radius.circular(12),
-                  ),
-                  child: CachedNetworkImage(
-                    imageUrl: posterUrl,
-                    width: 100,
-                    height: 150,
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) => Shimmer.fromColors(
-                      baseColor: context.colorScheme.surfaceContainerHighest,
-                      highlightColor: context.colorScheme.surface,
-                      child: Container(color: Colors.white),
-                    ),
-                    errorWidget: (_, __, ___) => Container(
-                      color: context.colorScheme.surfaceContainerHighest,
-                      child: Icon(Icons.movie_outlined),
-                    ),
-                  ),
-                ),
-            ],
+        if (posterUrl != null)
+          PositionedDirectional(
+            start: Spacing.lg,
+            bottom: 0,
+            child: ClipRRect(
+              borderRadius: BorderRadiusDirectional.all(
+                Radius.circular(Spacing.cardRadiusMd),
+              ),
+              child: CachedNetworkImage(
+                imageUrl: posterUrl!,
+                width: 100,
+                height: 150,
+                fit: BoxFit.cover,
+                placeholder: (_, _) => _posterShimmer(context),
+                errorWidget: (_, _, _) => _posterError(context),
+              ),
+            ),
           ),
-        ),
         PositionedDirectional(
-          top: MediaQuery.of(context).padding.top + 8,
-          start: 8,
+          top: MediaQuery.of(context).padding.top + Spacing.xs,
+          start: Spacing.xs,
           child: IconButton(
             icon: Container(
               padding: EdgeInsetsDirectional.all(Spacing.xs),
@@ -417,9 +646,150 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
     );
   }
 
-  Widget _buildTitleSection(BuildContext context, MediaModel media) {
+  Widget _backdropPlaceholder(BuildContext context) {
+    return Container(
+      color: context.colorScheme.surfaceContainerHighest,
+      child: Icon(
+        Icons.movie_outlined,
+        size: 64,
+        color: context.colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
+
+  Widget _posterShimmer(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: context.colorScheme.surfaceContainerHighest,
+      highlightColor: context.colorScheme.surface,
+      child: Container(color: Colors.white),
+    );
+  }
+
+  Widget _posterError(BuildContext context) {
+    return Container(
+      color: context.colorScheme.surfaceContainerHighest,
+      child: Icon(Icons.movie_outlined, color: context.colorScheme.onSurfaceVariant),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// Hero Section (Desktop)
+// ──────────────────────────────────────────────
+
+class _DesktopHero extends StatelessWidget {
+  final String? backdropUrl;
+  final String? posterUrl;
+
+  const _DesktopHero({this.backdropUrl, this.posterUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Container(
+          height: AppConstants.backdropHeight + 40,
+          width: double.infinity,
+          foregroundDecoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: AlignmentDirectional.topCenter,
+              end: AlignmentDirectional.bottomCenter,
+              colors: [
+                Colors.transparent,
+                context.colorScheme.surface.withValues(alpha: 0.95),
+              ],
+            ),
+          ),
+          child: backdropUrl != null
+              ? CachedNetworkImage(
+                  imageUrl: backdropUrl!,
+                  fit: BoxFit.cover,
+                  placeholder: (_, _) => _backdropPlaceholder(context),
+                  errorWidget: (_, _, _) => _backdropPlaceholder(context),
+                )
+              : _backdropPlaceholder(context),
+        ),
+        if (posterUrl != null)
+          PositionedDirectional(
+            start: Spacing.xxl,
+            bottom: 0,
+            child: ClipRRect(
+              borderRadius: BorderRadiusDirectional.all(
+                Radius.circular(Spacing.cardRadiusMd),
+              ),
+              child: CachedNetworkImage(
+                imageUrl: posterUrl!,
+                width: 130,
+                height: 195,
+                fit: BoxFit.cover,
+                placeholder: (_, _) => _posterShimmer(context),
+                errorWidget: (_, _, _) => _posterError(context),
+              ),
+            ),
+          ),
+        PositionedDirectional(
+          top: MediaQuery.of(context).padding.top + Spacing.xs,
+          start: Spacing.sm,
+          child: IconButton(
+            icon: Container(
+              padding: EdgeInsetsDirectional.all(Spacing.xs),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.4),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.arrow_back_rounded,
+                color: Colors.white,
+              ),
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _backdropPlaceholder(BuildContext context) {
+    return Container(
+      color: context.colorScheme.surfaceContainerHighest,
+      child: Icon(
+        Icons.movie_outlined,
+        size: 64,
+        color: context.colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
+
+  Widget _posterShimmer(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: context.colorScheme.surfaceContainerHighest,
+      highlightColor: context.colorScheme.surface,
+      child: Container(color: Colors.white),
+    );
+  }
+
+  Widget _posterError(BuildContext context) {
+    return Container(
+      color: context.colorScheme.surfaceContainerHighest,
+      child: Icon(Icons.movie_outlined, color: context.colorScheme.onSurfaceVariant),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// Title Block
+// ──────────────────────────────────────────────
+
+class _TitleBlock extends StatelessWidget {
+  final MediaModel media;
+  final bool hasPoster;
+
+  const _TitleBlock({required this.media, required this.hasPoster});
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsDirectional.only(start: media.posterPath != null ? 116 : 0),
+      padding: EdgeInsetsDirectional.only(top: Spacing.lg, start: hasPoster ? 116 : 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -448,8 +818,19 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
       ),
     );
   }
+}
 
-  Widget _buildRatingSection(BuildContext context, MediaModel media) {
+// ──────────────────────────────────────────────
+// Rating Row
+// ──────────────────────────────────────────────
+
+class _RatingRow extends StatelessWidget {
+  final MediaModel media;
+
+  const _RatingRow({required this.media});
+
+  @override
+  Widget build(BuildContext context) {
     if (media.voteAverage == null) return SizedBox.shrink();
     final percentage = (media.voteAverage! / 10 * 100).toPercentage();
 
@@ -459,17 +840,21 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
           final filled = media.voteAverage! / 2 >= i + 1;
           final half = !filled && media.voteAverage! / 2 >= i + 0.5;
           return Icon(
-            filled ? Icons.star_rounded : half ? Icons.star_half_rounded : Icons.star_outline_rounded,
+            filled
+                ? Icons.star_rounded
+                : half
+                    ? Icons.star_half_rounded
+                    : Icons.star_outline_rounded,
             color: Colors.amber,
-            size: 24,
+            size: 22,
           );
         }),
         SizedBox(width: Spacing.sm),
         Container(
-          padding: EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 2),
+          padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.sm, vertical: 2),
           decoration: BoxDecoration(
             color: context.colorScheme.secondaryContainer,
-            borderRadius: BorderRadiusDirectional.all(Radius.circular(8)),
+            borderRadius: BorderRadiusDirectional.all(Radius.circular(Spacing.chipRadius)),
           ),
           child: Text(
             percentage,
@@ -482,35 +867,52 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
       ],
     );
   }
+}
 
-  Widget _buildGenreChips(BuildContext context, List<String> genres) {
+// ──────────────────────────────────────────────
+// Genre Chips
+// ──────────────────────────────────────────────
+
+class _GenreChips extends StatelessWidget {
+  final List<String> genres;
+
+  const _GenreChips({required this.genres});
+
+  @override
+  Widget build(BuildContext context) {
     return Wrap(
-      spacing: 8,
-      runSpacing: 4,
+      spacing: Spacing.sm,
+      runSpacing: Spacing.xs,
       children: genres.map((genre) {
         return Chip(
-          label: Text(genre),
-          labelStyle: context.textTheme.labelSmall,
+          label: Text(genre, style: context.textTheme.labelSmall),
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           visualDensity: VisualDensity.compact,
           padding: EdgeInsetsDirectional.zero,
+          labelPadding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.sm),
         );
       }).toList(),
     );
   }
+}
 
-  Widget _buildOverviewSection(BuildContext context, MediaModel media) {
+// ──────────────────────────────────────────────
+// Overview Section
+// ──────────────────────────────────────────────
+
+class _OverviewSection extends StatelessWidget {
+  final MediaModel media;
+
+  const _OverviewSection({required this.media});
+
+  @override
+  Widget build(BuildContext context) {
     if (media.overview == null || media.overview!.isEmpty) return SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Overview',
-          style: context.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        _SectionHeader(title: 'Overview'),
         SizedBox(height: Spacing.sm),
         ExpandableText(
           text: media.overview!,
@@ -519,405 +921,66 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
       ],
     );
   }
+}
 
-  Widget _buildStats(BuildContext context, MediaModel media) {
-    return MediaStats(
-      runtime: media.runtime,
-      releaseDate: media.releaseDate,
-      countries: media.countries,
-      language: media.language,
-    );
-  }
+// ──────────────────────────────────────────────
+// Action Buttons
+// ──────────────────────────────────────────────
 
-  Widget _buildCastSection(BuildContext context, Map<String, dynamic> credits) {
-    final cast = credits['cast'] as List<dynamic>? ?? [];
-    if (cast.isEmpty) return SizedBox.shrink();
+class _ActionButtons extends ConsumerWidget {
+  final MediaModel media;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Cast',
-          style: context.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        SizedBox(height: Spacing.md),
-        SizedBox(
-          height: 150,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsetsDirectional.zero,
-            itemCount: cast.length,
-            separatorBuilder: (_, __) => SizedBox(width: Spacing.md),
-            itemBuilder: (context, index) {
-              final person = cast[index] as Map<String, dynamic>;
-              return CastCard(
-                name: person['name'] as String? ?? '',
-                character: person['character'] as String?,
-                profilePath: person['profile_path'] as String?,
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
+  const _ActionButtons({required this.media});
 
-  Widget _buildCrewSection(BuildContext context, Map<String, dynamic> credits) {
-    final crew = credits['crew'] as List<dynamic>? ?? [];
-    if (crew.isEmpty) return SizedBox.shrink();
-
-    final keyRoles = crew
-        .where((c) => ['Director', 'Producer', 'Writer', 'Screenplay'].contains(c['job'] as String?))
-        .take(6)
-        .toList();
-    if (keyRoles.isEmpty) return SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Crew',
-          style: context.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        SizedBox(height: Spacing.sm),
-        ...keyRoles.map((person) {
-          return Padding(
-            padding: EdgeInsetsDirectional.only(bottom: Spacing.sm),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: context.colorScheme.surfaceContainerHighest,
-                  backgroundImage: person['profile_path'] != null
-                      ? CachedNetworkImageProvider(
-                          '${AppConstants.tmdbImageBaseUrl}/w185${person['profile_path']}',
-                        )
-                      : null,
-                  child: person['profile_path'] == null
-                      ? Icon(Icons.person_rounded, color: context.colorScheme.onSurfaceVariant)
-                      : null,
-                ),
-                SizedBox(width: Spacing.md),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      person['name'] as String? ?? '',
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      person['job'] as String? ?? '',
-                      style: context.textTheme.labelSmall?.copyWith(
-                        color: context.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        }),
-      ],
-    );
-  }
-
-  Widget _buildTrailersSection(BuildContext context, List<Map<String, dynamic>> trailers) {
-    if (trailers.isEmpty) return SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Trailers',
-          style: context.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        SizedBox(height: Spacing.md),
-        SizedBox(
-          height: 200,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsetsDirectional.zero,
-            itemCount: trailers.length,
-            separatorBuilder: (_, __) => SizedBox(width: Spacing.md),
-            itemBuilder: (context, index) {
-              final trailer = trailers[index];
-              final key = trailer['key'] as String? ?? '';
-              return GestureDetector(
-                onTap: () => launchUrl(Uri.parse('https://www.youtube.com/watch?v=$key')),
-                child: Container(
-                  width: 320,
-                  decoration: BoxDecoration(
-                    color: context.colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadiusDirectional.all(
-                      Radius.circular(12),
-                    ),
-                    image: DecorationImage(
-                      image: CachedNetworkImageProvider(
-                        'https://img.youtube.com/vi/$key/maxresdefault.jpg',
-                      ),
-                      fit: BoxFit.cover,
-                      onError: (_, __) {},
-                    ),
-                  ),
-                  child: Center(
-                    child: Container(
-                      padding: EdgeInsetsDirectional.all(Spacing.lg),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.5),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.play_arrow_rounded,
-                        size: 40,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMediaRow(BuildContext context, String title, List items) {
-    if (items.isEmpty) return SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            Spacer(),
-          ],
-        ),
-        SizedBox(height: Spacing.md),
-        SizedBox(
-          height: 200,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsetsDirectional.zero,
-            itemCount: items.length,
-            separatorBuilder: (_, __) => SizedBox(width: Spacing.sm),
-            itemBuilder: (context, index) {
-              final item = items[index] as MediaModel;
-              final mediaTypeStr = item.mediaType == MediaType.tv ? 'tv' : 'movie';
-              return SizedBox(
-                width: AppConstants.posterWidth,
-                child: GestureDetector(
-                  onTap: () => context.navigateToMedia(mediaTypeStr, item.id.toString()),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadiusDirectional.all(Radius.circular(8)),
-                          child: item.posterPath != null
-                              ? CachedNetworkImage(
-                                  imageUrl: '${AppConstants.tmdbImageBaseUrl}/w342${item.posterPath}',
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                )
-                              : Container(
-                                  color: context.colorScheme.surfaceContainerHighest,
-                                  child: Icon(Icons.movie_outlined, size: 32),
-                                ),
-                        ),
-                      ),
-                      SizedBox(height: Spacing.xs),
-                      Text(
-                        item.title ?? '',
-                        style: context.textTheme.bodySmall,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildReviewsSection(BuildContext context, AsyncValue<List> reviewsAsync) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              'Reviews',
-              style: context.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            Spacer(),
-            TextButton.icon(
-              onPressed: () {},
-              icon: Icon(Icons.edit_rounded, size: 18),
-              label: Text('Write Review'),
-            ),
-          ],
-        ),
-        SizedBox(height: Spacing.md),
-        reviewsAsync.when(
-          data: (reviews) {
-            if (reviews.isEmpty) {
-              return Container(
-                width: double.infinity,
-                padding: EdgeInsetsDirectional.all(Spacing.xxl),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.rate_review_outlined,
-                      size: 48,
-                      color: context.colorScheme.onSurfaceVariant,
-                    ),
-                    SizedBox(height: Spacing.md),
-                    Text(
-                      'No reviews yet. Be the first to review!',
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: context.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-            return ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: reviews.length,
-              itemBuilder: (context, index) {
-                final rev = reviews[index] as ReviewModel;
-                return ReviewCard(
-                  review: rev,
-                  authorName: rev.userId,
-                );
-              },
-            );
-          },
-          loading: () => Center(child: CircularProgressIndicator()),
-          error: (_, __) => Text('Failed to load reviews'),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActivitySection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Activity',
-          style: context.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        SizedBox(height: Spacing.md),
-        Container(
-          width: double.infinity,
-          padding: EdgeInsetsDirectional.all(Spacing.xl),
-          decoration: BoxDecoration(
-            color: context.colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadiusDirectional.all(Radius.circular(12)),
-          ),
-          child: Column(
-            children: [
-              Icon(
-                Icons.timeline_rounded,
-                size: 36,
-                color: context.colorScheme.onSurfaceVariant,
-              ),
-              SizedBox(height: Spacing.sm),
-              Text(
-                'No recent activity',
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: context.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSidePanel(MediaModel media) {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final userMediaList = ref.watch(userMediaProvider).valueOrNull ?? [];
     final currentUserMedia = userMediaList.where((m) => m.mediaId == media.id).firstOrNull;
-    final currentStatus = currentUserMedia?.status;
+    final currentStatus = currentUserMedia?.status ?? WatchStatus.planToWatch;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Row(
       children: [
-        StatusDropdown(
-          currentStatus: currentStatus,
-          onChanged: (status) {
-            final notifier = ref.read(userMediaProvider.notifier);
-            if (status == null) {
+        Expanded(
+          child: StatusDropdown(
+            currentStatus: currentStatus,
+            onChanged: (status) {
+              final notifier = ref.read(userMediaProvider.notifier);
               if (currentUserMedia != null) {
-                notifier.removeMedia(currentUserMedia);
-                BehaviorService.instance.trackMediaUnsave(media.id);
+                notifier.updateStatus(currentUserMedia, status);
+              } else {
+                notifier.addMedia(
+                  mediaId: media.id,
+                  mediaType: media.mediaType,
+                  status: status,
+                );
+                BehaviorService.instance.trackMediaSave(media.id);
               }
-            } else if (currentUserMedia != null) {
-              notifier.updateStatus(currentUserMedia, status);
               if (status == WatchStatus.completed) {
                 BehaviorService.instance.trackMediaComplete(media.id);
               }
-            } else {
-              notifier.addMedia(
-                mediaId: media.id,
-                mediaType: media.mediaType,
-                status: status,
-              );
-              BehaviorService.instance.trackMediaSave(media.id);
-              if (status == WatchStatus.completed) {
-                BehaviorService.instance.trackMediaComplete(media.id);
-              }
-            }
-          },
+            },
+          ),
         ),
-        SizedBox(height: Spacing.lg),
+        SizedBox(width: Spacing.md),
         OutlinedButton.icon(
-          onPressed: () => _showAddToListSheet(media),
-          icon: Icon(Icons.playlist_add_rounded),
-          label: Text('Add to List'),
+          onPressed: () => _showAddToListSheet(context, ref, media),
+          icon: Icon(Icons.playlist_add_rounded, size: 20),
+          label: Text('List'),
           style: OutlinedButton.styleFrom(
-            padding: EdgeInsetsDirectional.symmetric(vertical: Spacing.md),
+            padding: EdgeInsetsDirectional.symmetric(
+              horizontal: Spacing.lg,
+              vertical: 14,
+            ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadiusDirectional.all(Radius.circular(12)),
+              borderRadius: BorderRadiusDirectional.all(Radius.circular(Spacing.cardRadiusMd)),
             ),
           ),
         ),
-        SizedBox(height: Spacing.xl),
-        _buildSidePanelStats(media),
       ],
     );
   }
 
-  void _showAddToListSheet(MediaModel media) {
+  void _showAddToListSheet(BuildContext context, WidgetRef ref, MediaModel media) {
     final content = Consumer(builder: (context, ref, _) {
       final listsAsync = ref.watch(userListsProvider);
       return Column(
@@ -931,7 +994,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
                 child: CircularProgressIndicator(),
               ),
             ),
-            error: (e, _) => const Center(
+            error: (_, _) => const Center(
               child: Padding(
                 padding: EdgeInsets.all(Spacing.xl),
                 child: Text('Failed to load lists'),
@@ -941,9 +1004,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
               if (lists.isEmpty) {
                 return const Padding(
                   padding: EdgeInsets.all(Spacing.xl),
-                  child: Center(
-                    child: Text('No lists yet.'),
-                  ),
+                  child: Center(child: Text('No lists yet.')),
                 );
               }
               return ConstrainedBox(
@@ -965,9 +1026,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
                       ),
                       subtitle: Text('${list.itemCount} items'),
                       onTap: () {
-                        ref.read(userListsProvider.notifier).addItemToList(
-                          list.id, media,
-                        );
+                        ref.read(userListsProvider.notifier).addItemToList(list.id, media);
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -995,16 +1054,12 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
                 final updatedLists = ref.read(userListsProvider).valueOrNull ?? [];
                 final newList = updatedLists.isNotEmpty ? updatedLists.first : null;
                 if (newList != null) {
-                  ref.read(userListsProvider.notifier).addItemToList(
-                    newList.id, media,
-                  );
+                  ref.read(userListsProvider.notifier).addItemToList(newList.id, media);
                 }
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(newList != null
-                        ? 'Added to "${newList.title}"'
-                        : 'List created'),
+                    content: Text(newList != null ? 'Added to "${newList.title}"' : 'List created'),
                     duration: const Duration(seconds: 2),
                   ),
                 );
@@ -1021,15 +1076,840 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
       content: content,
     );
   }
+}
 
-  Widget _buildSidePanelStats(MediaModel media) {
-    final stats = <Map<String, dynamic>>[];
+// ──────────────────────────────────────────────
+// Stats Card
+// ──────────────────────────────────────────────
+
+class _StatsCard extends StatelessWidget {
+  final MediaModel media;
+
+  const _StatsCard({required this.media});
+
+  @override
+  Widget build(BuildContext context) {
+    return MediaStats(
+      runtime: media.runtime,
+      releaseDate: media.releaseDate,
+      countries: media.countries,
+      language: media.language,
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// List Entry Section
+// ──────────────────────────────────────────────
+
+class _ListEntrySection extends ConsumerWidget {
+  final MediaModel media;
+
+  const _ListEntrySection({required this.media});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userMediaList = ref.watch(userMediaProvider).valueOrNull ?? [];
+    final entry = userMediaList.where((m) => m.mediaId == media.id).firstOrNull;
+    if (entry == null) return SizedBox.shrink();
+
+    final months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsetsDirectional.all(Spacing.lg),
+      decoration: BoxDecoration(
+        color: context.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadiusDirectional.all(Radius.circular(Spacing.cardRadiusMd)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.list_alt_rounded, size: 18, color: context.colorScheme.primary),
+              SizedBox(width: Spacing.sm),
+              Text(
+                'In Your List',
+                style: context.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: Spacing.md),
+          _entryRow(context, 'Status', _statusLabel(entry.status)),
+          if (entry.userRating != null)
+            _entryRow(context, 'Rating', '${entry.userRating!.toStringAsFixed(1)} / 10'),
+          if (entry.episodeProgress > 0 && entry.totalEpisodes > 0)
+            _entryRow(context, 'Progress', '${entry.episodeProgress} / ${entry.totalEpisodes} episodes'),
+          if (entry.createdAt != null)
+            _entryRow(context, 'Added', '${months[entry.createdAt!.month - 1]} ${entry.createdAt!.day}, ${entry.createdAt!.year}'),
+          if (entry.updatedAt != null)
+            _entryRow(context, 'Updated', '${months[entry.updatedAt!.month - 1]} ${entry.updatedAt!.day}, ${entry.updatedAt!.year}'),
+        ],
+      ),
+    );
+  }
+
+  Widget _entryRow(BuildContext context, String label, String value) {
+    return Padding(
+      padding: EdgeInsetsDirectional.only(bottom: Spacing.xs),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 80,
+            child: Text(
+              label,
+              style: context.textTheme.bodySmall?.copyWith(
+                color: context.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: context.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _statusLabel(WatchStatus status) {
+    switch (status) {
+      case WatchStatus.watching:
+        return 'Watching';
+      case WatchStatus.completed:
+        return 'Completed';
+      case WatchStatus.onHold:
+        return 'On Hold';
+      case WatchStatus.dropped:
+        return 'Dropped';
+      case WatchStatus.planToWatch:
+        return 'Plan to Watch';
+      case WatchStatus.rewatching:
+        return 'Rewatching';
+    }
+  }
+}
+
+// ──────────────────────────────────────────────
+// Library Card
+// ──────────────────────────────────────────────
+
+class _LibraryCard extends ConsumerWidget {
+  final MediaModel media;
+
+  const _LibraryCard({required this.media});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final membershipAsync = ref.watch(mediaListMembershipProvider(media.id));
+    final userMediaList = ref.watch(userMediaProvider).valueOrNull ?? [];
+    final trackingEntry = userMediaList.where((m) => m.mediaId == media.id).firstOrNull;
+
+    return membershipAsync.when(
+      data: (lists) {
+        if (lists.isEmpty) return SizedBox.shrink();
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsetsDirectional.all(Spacing.lg),
+          decoration: BoxDecoration(
+            color: context.colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadiusDirectional.all(Radius.circular(Spacing.cardRadiusMd)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.bookmark_rounded, size: 18, color: context.colorScheme.primary),
+                  SizedBox(width: Spacing.sm),
+                  Text(
+                    'In Your Library',
+                    style: context.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+              SizedBox(height: Spacing.md),
+              ...lists.map((list) => _listEntry(context, list, trackingEntry)),
+            ],
+          ),
+        );
+      },
+      loading: () => SizedBox.shrink(),
+      error: (_, _) => SizedBox.shrink(),
+    );
+  }
+
+  Widget _listEntry(BuildContext context, Map<String, dynamic> list, dynamic trackingEntry) {
+    final title = list['list_title'] as String? ?? 'Unknown List';
+    final months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    String? addedLabel;
+    final addedAt = list['added_at'] as String?;
+    if (addedAt != null) {
+      try {
+        final dt = DateTime.parse(addedAt);
+        addedLabel = '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+      } catch (_) {}
+    }
+
+    return Padding(
+      padding: EdgeInsetsDirectional.only(bottom: Spacing.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          SizedBox(height: Spacing.xs),
+          Row(
+            children: [
+              Icon(Icons.circle, size: 6, color: context.colorScheme.onSurfaceVariant),
+              SizedBox(width: Spacing.xs),
+              Text(
+                trackingEntry != null ? _statusLabel(trackingEntry.status) : 'Not tracked',
+                style: context.textTheme.bodySmall?.copyWith(color: context.colorScheme.onSurfaceVariant),
+              ),
+              if (addedLabel != null) ...[
+                SizedBox(width: Spacing.md),
+                Icon(Icons.circle, size: 6, color: context.colorScheme.onSurfaceVariant),
+                SizedBox(width: Spacing.xs),
+                Text(
+                  addedLabel,
+                  style: context.textTheme.bodySmall?.copyWith(color: context.colorScheme.onSurfaceVariant),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _statusLabel(WatchStatus status) {
+    switch (status) {
+      case WatchStatus.watching: return 'Watching';
+      case WatchStatus.completed: return 'Completed';
+      case WatchStatus.onHold: return 'On Hold';
+      case WatchStatus.dropped: return 'Dropped';
+      case WatchStatus.planToWatch: return 'Plan to Watch';
+      case WatchStatus.rewatching: return 'Rewatching';
+    }
+  }
+}
+
+// ──────────────────────────────────────────────
+// Section Header
+// ──────────────────────────────────────────────
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+
+  const _SectionHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: context.textTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// Cast Section
+// ──────────────────────────────────────────────
+
+class _CastSection extends StatelessWidget {
+  final Map<String, dynamic> credits;
+
+  const _CastSection({required this.credits});
+
+  @override
+  Widget build(BuildContext context) {
+    final cast = credits['cast'] as List<dynamic>? ?? [];
+    if (cast.isEmpty) return SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+          child: _SectionHeader(title: 'Cast'),
+        ),
+        SizedBox(height: Spacing.md),
+        SizedBox(
+          height: 150,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+            itemCount: cast.length,
+            separatorBuilder: (_, _) => SizedBox(width: Spacing.md),
+            itemBuilder: (context, index) {
+              final person = cast[index] as Map<String, dynamic>;
+              return CastCard(
+                name: person['name'] as String? ?? '',
+                character: person['character'] as String?,
+                profilePath: person['profile_path'] as String?,
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// Crew Section
+// ──────────────────────────────────────────────
+
+class _CrewSection extends StatelessWidget {
+  final Map<String, dynamic> credits;
+
+  const _CrewSection({required this.credits});
+
+  @override
+  Widget build(BuildContext context) {
+    final crew = credits['crew'] as List<dynamic>? ?? [];
+    if (crew.isEmpty) return SizedBox.shrink();
+
+    final keyRoles = crew
+        .where((c) => ['Director', 'Producer', 'Writer', 'Screenplay'].contains(c['job'] as String?))
+        .take(6)
+        .toList();
+    if (keyRoles.isEmpty) return SizedBox.shrink();
+
+    return Padding(
+      padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionHeader(title: 'Crew'),
+          SizedBox(height: Spacing.md),
+          ...keyRoles.map((person) {
+            return Padding(
+              padding: EdgeInsetsDirectional.only(bottom: Spacing.sm),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: context.colorScheme.surfaceContainerHighest,
+                    backgroundImage: person['profile_path'] != null
+                        ? CachedNetworkImageProvider(
+                            '${AppConstants.tmdbImageBaseUrl}/w185${person['profile_path']}',
+                          )
+                        : null,
+                    child: person['profile_path'] == null
+                        ? Icon(Icons.person_rounded, color: context.colorScheme.onSurfaceVariant)
+                        : null,
+                  ),
+                  SizedBox(width: Spacing.md),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        person['name'] as String? ?? '',
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        person['job'] as String? ?? '',
+                        style: context.textTheme.labelSmall?.copyWith(
+                          color: context.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// Trailers Section
+// ──────────────────────────────────────────────
+
+class _TrailersSection extends StatelessWidget {
+  final List<Map<String, dynamic>> trailers;
+
+  const _TrailersSection({required this.trailers});
+
+  @override
+  Widget build(BuildContext context) {
+    if (trailers.isEmpty) return SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+          child: _SectionHeader(title: 'Trailers'),
+        ),
+        SizedBox(height: Spacing.md),
+        SizedBox(
+          height: 200,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+            itemCount: trailers.length,
+            separatorBuilder: (_, _) => SizedBox(width: Spacing.md),
+            itemBuilder: ((context, index) {
+              final trailer = trailers[index];
+              final key = trailer['key'] as String? ?? '';
+              return GestureDetector(
+                onTap: () => launchUrl(Uri.parse('https://www.youtube.com/watch?v=$key')),
+                child: Container(
+                  width: 320,
+                  decoration: BoxDecoration(
+                    color: context.colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadiusDirectional.all(
+                      Radius.circular(Spacing.cardRadiusMd),
+                    ),
+                    image: DecorationImage(
+                      image: CachedNetworkImageProvider(
+                        'https://img.youtube.com/vi/$key/maxresdefault.jpg',
+                      ),
+                      fit: BoxFit.cover,
+                      onError: (_, _) {},
+                    ),
+                  ),
+                  child: Center(
+                    child: Container(
+                      padding: EdgeInsetsDirectional.all(Spacing.lg),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.play_arrow_rounded,
+                        size: 40,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// Media Row Section (Recommendations / Similar)
+// ──────────────────────────────────────────────
+
+class _MediaRowSection extends StatelessWidget {
+  final String title;
+  final List items;
+
+  const _MediaRowSection({required this.title, required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    if (items.isEmpty) return SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+          child: _SectionHeader(title: title),
+        ),
+        SizedBox(height: Spacing.md),
+        SizedBox(
+          height: 210,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+            itemCount: items.length,
+            separatorBuilder: (_, _) => SizedBox(width: Spacing.sm),
+            itemBuilder: (context, index) {
+              final item = items[index] as MediaModel;
+              final mediaTypeStr = item.mediaType == MediaType.tv ? 'tv' : 'movie';
+              return SizedBox(
+                width: AppConstants.posterWidth,
+                child: GestureDetector(
+                  onTap: () => context.navigateToMedia(mediaTypeStr, item.id.toString()),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadiusDirectional.all(
+                            Radius.circular(Spacing.cardRadiusSm),
+                          ),
+                          child: item.posterPath != null
+                              ? CachedNetworkImage(
+                                  imageUrl: '${AppConstants.tmdbImageBaseUrl}/w342${item.posterPath}',
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  placeholder: (_, _) => _itemPlaceholder(context),
+                                  errorWidget: (_, _, _) => _itemPlaceholder(context),
+                                )
+                              : _itemPlaceholder(context),
+                        ),
+                      ),
+                      SizedBox(height: Spacing.xs),
+                      Text(
+                        item.title,
+                        style: context.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _itemPlaceholder(BuildContext context) {
+    return Container(
+      color: context.colorScheme.surfaceContainerHighest,
+      child: Icon(
+        Icons.movie_outlined,
+        size: 32,
+        color: context.colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// Reviews Section
+// ──────────────────────────────────────────────
+
+class _ReviewsSection extends ConsumerWidget {
+  final AsyncValue<List> reviewsAsync;
+
+  const _ReviewsSection({required this.reviewsAsync});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            _SectionHeader(title: 'Reviews'),
+            Spacer(),
+            TextButton.icon(
+              onPressed: () {},
+              icon: Icon(Icons.edit_rounded, size: 18),
+              label: Text('Write Review'),
+            ),
+          ],
+        ),
+        SizedBox(height: Spacing.md),
+        reviewsAsync.when(
+          data: (reviews) {
+            if (reviews.isEmpty) {
+              return Container(
+                width: double.infinity,
+                padding: EdgeInsetsDirectional.all(Spacing.xxl),
+                decoration: BoxDecoration(
+                  color: context.colorScheme.surfaceContainerLow,
+                  borderRadius: BorderRadiusDirectional.all(Radius.circular(Spacing.cardRadiusMd)),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.rate_review_outlined,
+                      size: 48,
+                      color: context.colorScheme.onSurfaceVariant,
+                    ),
+                    SizedBox(height: Spacing.md),
+                    Text(
+                      'No reviews yet. Be the first to review!',
+                      textAlign: TextAlign.center,
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: context.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: reviews.length,
+              itemBuilder: (context, index) {
+                final rev = reviews[index] as ReviewModel;
+                return ReviewCard(review: rev, authorName: rev.userId);
+              },
+            );
+          },
+          loading: () => Center(
+            child: Padding(
+              padding: EdgeInsetsDirectional.all(Spacing.xl),
+              child: CircularProgressIndicator(),
+            ),
+          ),
+          error: (_, _) => Padding(
+            padding: EdgeInsetsDirectional.all(Spacing.xl),
+            child: Center(
+              child: Text(
+                'Failed to load reviews',
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.colorScheme.error,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// Activity Section
+// ──────────────────────────────────────────────
+
+class _ActivitySection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionHeader(title: 'Activity'),
+        SizedBox(height: Spacing.md),
+        Container(
+          width: double.infinity,
+          padding: EdgeInsetsDirectional.all(Spacing.xl),
+          decoration: BoxDecoration(
+            color: context.colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadiusDirectional.all(Radius.circular(Spacing.cardRadiusMd)),
+          ),
+          child: Column(
+            children: [
+              Icon(
+                Icons.timeline_rounded,
+                size: 36,
+                color: context.colorScheme.onSurfaceVariant,
+              ),
+              SizedBox(height: Spacing.sm),
+              Text(
+                'No recent activity',
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// Side Panel (Desktop)
+// ──────────────────────────────────────────────
+
+class _SidePanel extends ConsumerWidget {
+  final MediaModel media;
+
+  const _SidePanel({required this.media});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userMediaList = ref.watch(userMediaProvider).valueOrNull ?? [];
+    final currentUserMedia = userMediaList.where((m) => m.mediaId == media.id).firstOrNull;
+    final currentStatus = currentUserMedia?.status ?? WatchStatus.planToWatch;
+
+    return Padding(
+      padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          StatusDropdown(
+            currentStatus: currentStatus,
+            onChanged: (status) {
+              final notifier = ref.read(userMediaProvider.notifier);
+              if (currentUserMedia != null) {
+                notifier.updateStatus(currentUserMedia, status);
+              } else {
+                notifier.addMedia(
+                  mediaId: media.id,
+                  mediaType: media.mediaType,
+                  status: status,
+                );
+                BehaviorService.instance.trackMediaSave(media.id);
+              }
+              if (status == WatchStatus.completed) {
+                BehaviorService.instance.trackMediaComplete(media.id);
+              }
+            },
+          ),
+          SizedBox(height: Spacing.lg),
+          OutlinedButton.icon(
+            onPressed: () => _showAddToListSheet(context, ref, media),
+            icon: Icon(Icons.playlist_add_rounded),
+            label: Text('Add to List'),
+            style: OutlinedButton.styleFrom(
+              padding: EdgeInsetsDirectional.symmetric(vertical: Spacing.md),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadiusDirectional.all(Radius.circular(Spacing.cardRadiusMd)),
+              ),
+            ),
+          ),
+          SizedBox(height: Spacing.lg),
+          _LibraryCard(media: media),
+          SizedBox(height: Spacing.xl),
+          _SidePanelStats(media: media),
+        ],
+      ),
+    );
+  }
+
+  void _showAddToListSheet(BuildContext context, WidgetRef ref, MediaModel media) {
+    final content = Consumer(builder: (context, ref, _) {
+      final listsAsync = ref.watch(userListsProvider);
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          listsAsync.when(
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(Spacing.xl),
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            error: (_, _) => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(Spacing.xl),
+                child: Text('Failed to load lists'),
+              ),
+            ),
+            data: (lists) {
+              if (lists.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(Spacing.xl),
+                  child: Center(child: Text('No lists yet.')),
+                );
+              }
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.5,
+                ),
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  children: [
+                    ...lists.map((list) => ListTile(
+                      leading: Icon(
+                        list.isPinned ? Icons.push_pin_rounded : Icons.folder_rounded,
+                      ),
+                      title: Text(
+                        list.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text('${list.itemCount} items'),
+                      onTap: () {
+                        ref.read(userListsProvider.notifier).addItemToList(list.id, media);
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Added to "${list.title}"'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    )),
+                  ],
+                ),
+              );
+            },
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.add_rounded),
+            title: const Text('Create New List'),
+            onTap: () async {
+              final created = await showDialog<bool>(
+                context: context,
+                builder: (dialogContext) => const CreateListDialog(),
+              );
+              if (created == true && context.mounted) {
+                final updatedLists = ref.read(userListsProvider).valueOrNull ?? [];
+                final newList = updatedLists.isNotEmpty ? updatedLists.first : null;
+                if (newList != null) {
+                  ref.read(userListsProvider.notifier).addItemToList(newList.id, media);
+                }
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(newList != null ? 'Added to "${newList.title}"' : 'List created'),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+          ),
+        ],
+      );
+    });
+
+    AppDialog.show(
+      context: context,
+      title: 'Add to List',
+      content: content,
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// Side Panel Stats
+// ──────────────────────────────────────────────
+
+class _SidePanelStats extends StatelessWidget {
+  final MediaModel media;
+
+  const _SidePanelStats({required this.media});
+
+  @override
+  Widget build(BuildContext context) {
+    final stats = <Map<String, String>>[];
 
     if (media.runtime != null) {
-      stats.add({
-        'label': 'Runtime',
-        'value': media.runtime!.toRuntimeString(),
-      });
+      stats.add({'label': 'Runtime', 'value': media.runtime!.toRuntimeString()});
     }
     if (media.releaseDate != null) {
       stats.add({
@@ -1038,23 +1918,16 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
       });
     }
     if (media.countries != null && media.countries!.isNotEmpty) {
-      stats.add({
-        'label': 'Country',
-        'value': media.countries!.join(', '),
-      });
+      stats.add({'label': 'Country', 'value': media.countries!.join(', ')});
     }
     if (media.language != null) {
-      stats.add({
-        'label': 'Language',
-        'value': media.language!,
-      });
+      stats.add({'label': 'Language', 'value': media.language!});
     }
     if (media.status != null) {
-      stats.add({
-        'label': 'Status',
-        'value': media.status!,
-      });
+      stats.add({'label': 'Status', 'value': media.status!});
     }
+
+    if (stats.isEmpty) return SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1072,7 +1945,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                stat['label'] as String,
+                stat['label']!,
                 style: context.textTheme.bodySmall?.copyWith(
                   color: context.colorScheme.onSurfaceVariant,
                 ),
@@ -1080,7 +1953,7 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
               SizedBox(width: Spacing.sm),
               Expanded(
                 child: Text(
-                  stat['value'] as String,
+                  stat['value']!,
                   textAlign: TextAlign.end,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,

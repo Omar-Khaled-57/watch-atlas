@@ -173,13 +173,28 @@ class _CreateListDialogState extends ConsumerState<CreateListDialog> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     final notifier = ref.read(userListsProvider.notifier);
-    notifier.createList(
-      title: _titleController.text.trim(),
-      description: _descriptionController.text.trim().isEmpty
-          ? null
-          : _descriptionController.text.trim(),
-      listType: _selectedType,
-    );
+    if (widget.editId != null) {
+      final current = ref.read(userListsProvider).valueOrNull ?? [];
+      final existing = current.where((l) => l.id == widget.editId).firstOrNull;
+      if (existing != null) {
+        notifier.updateList(existing.copyWith(
+          title: _titleController.text.trim(),
+          description: _descriptionController.text.trim().isEmpty
+              ? null
+              : _descriptionController.text.trim(),
+          listType: _selectedType,
+          updatedAt: DateTime.now(),
+        ));
+      }
+    } else {
+      notifier.createList(
+        title: _titleController.text.trim(),
+        description: _descriptionController.text.trim().isEmpty
+            ? null
+            : _descriptionController.text.trim(),
+        listType: _selectedType,
+      );
+    }
     Navigator.of(context).pop(true);
   }
 

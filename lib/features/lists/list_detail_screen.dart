@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,13 +6,16 @@ import 'package:share_plus/share_plus.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/extensions/datetime_extensions.dart';
+import '../../core/extensions/string_extensions.dart';
 import '../../core/models/media_enums.dart';
+import '../../core/shared/empty_state.dart';
 import '../../core/shared/loading_widget.dart';
 import '../../core/shared/expandable_text.dart';
 import '../../models/user_list_model.dart';
 import '../../models/user_media_model.dart';
 import '../../features/tracking/providers/tracking_providers.dart';
 import 'providers/lists_providers.dart';
+import 'widgets/create_list_dialog.dart';
 
 enum DetailViewMode { grid, list }
 
@@ -28,8 +32,16 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
   DetailViewMode _viewMode = DetailViewMode.grid;
   String _categoryFilter = 'all';
   String _statusFilter = 'all';
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
 
   final _statuses = ['all', 'watching', 'completed', 'planToWatch', 'onHold', 'dropped'];
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +72,11 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
           appBar: AppBar(
             title: Text(listData.title),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.edit_rounded),
+                tooltip: 'Rename',
+                onPressed: () => _showRenameDialog(listData),
+              ),
               if (listData.listType == MediaListType.collaborative)
                 IconButton(
                   icon: const Icon(Icons.favorite_border_rounded),
@@ -95,16 +112,22 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
     ColorScheme colorScheme,
     TextTheme textTheme,
   ) {
-    final itemMediaIds = items.map((i) => i['media_id'] as int).toSet();
-
     final filteredByCategory = _categoryFilter == 'all'
         ? items
         : items.where((i) => _matchesCategory(i, _categoryFilter)).toList();
 
+    final searched = _searchQuery.isEmpty
+        ? filteredByCategory
+        : filteredByCategory.where((i) {
+            final mediaData = i['media'] as Map<String, dynamic>?;
+            final title = mediaData?['title'] as String? ?? '';
+            return title.toLowerCase().contains(_searchQuery.toLowerCase());
+          }).toList();
+
     final statusCounts = {
       'watching': 0, 'completed': 0, 'planToWatch': 0, 'onHold': 0, 'dropped': 0,
     };
-    for (final item in filteredByCategory) {
+    for (final item in searched) {
       final mediaId = item['media_id'] as int;
       final um = userMedia.where((u) => u.mediaId == mediaId).firstOrNull;
       if (um != null) {
@@ -118,14 +141,45 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
       slivers: [
         SliverToBoxAdapter(child: _buildCover(listData, items, colorScheme, textTheme)),
         SliverToBoxAdapter(child: _buildMeta(listData, colorScheme, textTheme)),
+        SliverToBoxAdapter(child: _buildSearchField(colorScheme, textTheme)),
         SliverToBoxAdapter(child: _buildCategoryTabs(categories, colorScheme, textTheme)),
         SliverToBoxAdapter(child: _buildStatusChips(colorScheme, textTheme)),
         SliverToBoxAdapter(child: _buildFilterToolbar(colorScheme, textTheme)),
-        _buildItemsGrid(filteredByCategory, userMedia, crossAxisCount, colorScheme, textTheme),
-        if (filteredByCategory.isNotEmpty)
-          SliverToBoxAdapter(child: _buildInsights(filteredByCategory, userMedia, statusCounts, colorScheme, textTheme)),
+        _buildItemsGrid(searched, userMedia, crossAxisCount, colorScheme, textTheme),
+        if (searched.isNotEmpty)
+          SliverToBoxAdapter(child: _buildInsights(searched, userMedia, statusCounts, colorScheme, textTheme)),
         const SliverPadding(padding: EdgeInsetsDirectional.only(bottom: 80)),
       ],
+    );
+  }
+
+  Widget _buildSearchField(ColorScheme colorScheme, TextTheme textTheme) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(20, 8, 20, 0),
+      child: TextField(
+        controller: _searchController,
+        onChanged: (v) => setState(() => _searchQuery = v),
+        decoration: InputDecoration(
+          hintText: 'Search items...',
+          hintStyle: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+          prefixIcon: Icon(Icons.search_rounded, size: 18, color: colorScheme.onSurfaceVariant),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: Icon(Icons.clear_rounded, size: 18),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() => _searchQuery = '');
+                  },
+                )
+              : null,
+          filled: true,
+          fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(Spacing.chipRadius)), borderSide: BorderSide.none),
+          contentPadding: const EdgeInsetsDirectional.symmetric(vertical: 10, horizontal: 16),
+          isDense: true,
+        ),
+        style: textTheme.bodyMedium,
+      ),
     );
   }
 
@@ -307,62 +361,146 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
     if (filtered.isEmpty) {
       return SliverFillRemaining(
         hasScrollBody: false,
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.search_off_rounded, size: 48, color: colorScheme.onSurfaceVariant),
-              const SizedBox(height: Spacing.md),
-              Text('No items match', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
-            ],
-          ),
+        child: EmptyState(
+          title: _searchQuery.isNotEmpty ? 'No results' : 'No items in this list',
+          subtitle: _searchQuery.isNotEmpty ? 'Try a different search term' : 'Add media from the details page',
         ),
       );
     }
 
     if (_viewMode == DetailViewMode.grid) {
-      return SliverPadding(
-        padding: const EdgeInsetsDirectional.fromSTEB(20, 8, 20, 0),
-        sliver: SliverGrid(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            childAspectRatio: 0.6,
-            crossAxisSpacing: Spacing.sm,
-            mainAxisSpacing: Spacing.sm,
-          ),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) => _GridTile(
-              item: filtered[index],
-              userMedia: userMedia,
-              colorScheme: colorScheme,
-              textTheme: textTheme,
-              onTap: () {
-                final type = filtered[index]['media_type'] as String? ?? 'movie';
-                context.push('/media/$type/${filtered[index]['media_id']}');
-              },
-            ),
-            childCount: filtered.length,
-          ),
+    return SliverPadding(
+      padding: const EdgeInsetsDirectional.fromSTEB(20, 8, 20, 0),
+      sliver: SliverGrid(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          childAspectRatio: 0.6,
+          crossAxisSpacing: Spacing.sm,
+          mainAxisSpacing: Spacing.sm,
         ),
-      );
+        delegate: SliverChildBuilderDelegate(
+          (context, index) => _GridTileWithMenu(
+            item: filtered[index],
+            userMedia: userMedia,
+            colorScheme: colorScheme,
+            textTheme: textTheme,
+            onTap: () {
+              final item = filtered[index];
+              final mediaData = item['media'] as Map<String, dynamic>?;
+              final type = mediaData?['media_type'] as String? ?? item['media_type'] as String? ?? 'movie';
+              context.push('/media/$type/${item['media_id']}');
+            },
+            onRemove: () => _confirmRemoveItem(filtered[index]),
+            onMove: () => _showMoveCopyDialog(filtered[index], move: true),
+            onCopy: () => _showMoveCopyDialog(filtered[index], move: false),
+          ),
+          childCount: filtered.length,
+        ),
+      ),
+    );
     }
 
     return SliverPadding(
       padding: const EdgeInsetsDirectional.fromSTEB(20, 4, 20, 0),
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate(
-          (context, index) => _ListTile(
+          (context, index) => _ListTileWithMenu(
             item: filtered[index],
             userMedia: userMedia,
             colorScheme: colorScheme,
             textTheme: textTheme,
             onTap: () {
-              final type = filtered[index]['media_type'] as String? ?? 'movie';
-              context.push('/media/$type/${filtered[index]['media_id']}');
+              final item = filtered[index];
+              final mediaData = item['media'] as Map<String, dynamic>?;
+              final type = mediaData?['media_type'] as String? ?? item['media_type'] as String? ?? 'movie';
+              context.push('/media/$type/${item['media_id']}');
             },
+            onRemove: () => _confirmRemoveItem(filtered[index]),
+            onMove: () => _showMoveCopyDialog(filtered[index], move: true),
+            onCopy: () => _showMoveCopyDialog(filtered[index], move: false),
           ),
           childCount: filtered.length,
         ),
+      ),
+    );
+  }
+
+  void _showRenameDialog(UserListModel list) {
+    showDialog(
+      context: context,
+      builder: (context) => CreateListDialog(
+        editId: list.id,
+        initialTitle: list.title,
+        initialDescription: list.description,
+        initialType: list.listType,
+      ),
+    );
+  }
+
+  void _confirmRemoveItem(Map<String, dynamic> item) {
+    final mediaId = item['media_id'] as int;
+    final mediaData = item['media'] as Map<String, dynamic>?;
+    final title = mediaData?['title'] as String? ?? 'this item';
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Remove "$title"?'),
+        content: const Text('This will remove the item from this list.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+            onPressed: () {
+              ref.read(userListsProvider.notifier).removeItemFromList(widget.listId, mediaId);
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Removed from list')));
+            },
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMoveCopyDialog(Map<String, dynamic> item, {required bool move}) {
+    final mediaId = item['media_id'] as int;
+    final lists = ref.read(userListsProvider).valueOrNull ?? [];
+    final otherLists = lists.where((l) => l.id != widget.listId).toList();
+
+    if (otherLists.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(move ? 'No other lists to move to' : 'No other lists to copy to')),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(move ? 'Move to...' : 'Copy to...'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView(
+            shrinkWrap: true,
+            children: otherLists.map((list) => ListTile(
+              leading: const Icon(Icons.folder_rounded),
+              title: Text(list.title),
+              subtitle: Text('${list.itemCount} items'),
+              onTap: () {
+                if (move) {
+                  ref.read(userListsProvider.notifier).moveItemToList(widget.listId, list.id, mediaId);
+                } else {
+                  ref.read(userListsProvider.notifier).copyItemToList(list.id, mediaId);
+                }
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('${move ? "Moved" : "Copied"} to "${list.title}"')),
+                );
+              },
+            )).toList(),
+          ),
+        ),
+        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel'))],
       ),
     );
   }
@@ -469,6 +607,9 @@ class _GridTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final mediaId = item['media_id'] as int;
     final um = userMedia.where((u) => u.mediaId == mediaId).firstOrNull;
+    final mediaData = item['media'] as Map<String, dynamic>?;
+    final title = mediaData?['title'] as String? ?? 'ID: $mediaId';
+    final posterPath = mediaData?['poster_path'] as String?;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -483,11 +624,27 @@ class _GridTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: Container(
-                color: colorScheme.surfaceContainerHighest,
-                child: Center(
-                  child: Icon(Icons.movie_outlined, size: 32, color: colorScheme.onSurfaceVariant),
-                ),
+              child: posterPath != null
+                  ? CachedNetworkImage(
+                      imageUrl: posterPath.posterUrl,
+                      fit: BoxFit.cover,
+                      errorWidget: (_, __, ___) => Container(
+                        color: colorScheme.surfaceContainerHighest,
+                        child: Center(child: Icon(Icons.movie_outlined, size: 32, color: colorScheme.onSurfaceVariant)),
+                      ),
+                    )
+                  : Container(
+                      color: colorScheme.surfaceContainerHighest,
+                      child: Center(child: Icon(Icons.movie_outlined, size: 32, color: colorScheme.onSurfaceVariant)),
+                    ),
+            ),
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(6, 4, 6, 4),
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
               ),
             ),
             if (um != null)
@@ -548,8 +705,11 @@ class _ListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final mediaId = item['media_id'] as int;
     final note = item['note'] as String?;
-    final mediaType = item['media_type'] as String? ?? 'movie';
     final um = userMedia.where((u) => u.mediaId == mediaId).firstOrNull;
+    final mediaData = item['media'] as Map<String, dynamic>?;
+    final title = mediaData?['title'] as String? ?? 'ID: $mediaId';
+    final posterPath = mediaData?['poster_path'] as String?;
+    final mediaType = mediaData?['media_type'] as String? ?? item['media_type'] as String? ?? 'movie';
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -565,21 +725,27 @@ class _ListTile extends StatelessWidget {
           padding: const EdgeInsetsDirectional.all(14),
           child: Row(
             children: [
-              Container(
-                width: 56,
-                height: 72,
-                decoration: BoxDecoration(
+              ClipRRect(
+                borderRadius: BorderRadiusDirectional.all(Radius.circular(8)),
+                child: Container(
+                  width: 56,
+                  height: 72,
                   color: colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadiusDirectional.all(Radius.circular(8)),
+                  child: posterPath != null
+                      ? CachedNetworkImage(
+                          imageUrl: posterPath.posterUrl,
+                          fit: BoxFit.cover,
+                          errorWidget: (_, __, ___) => Icon(Icons.movie_outlined, size: 24, color: colorScheme.onSurfaceVariant),
+                        )
+                      : Center(child: Icon(Icons.movie_outlined, size: 24, color: colorScheme.onSurfaceVariant)),
                 ),
-                child: Center(child: Icon(Icons.movie_outlined, size: 24, color: colorScheme.onSurfaceVariant)),
               ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('ID: $mediaId', style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+                    Text(title, style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
                     if (note != null && note.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(note, style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -643,5 +809,97 @@ class _ListTile extends StatelessWidget {
       'dropped' => const Color(0xFFF44336),
       _ => colorScheme.onSurfaceVariant,
     };
+  }
+}
+
+class _GridTileWithMenu extends StatelessWidget {
+  final Map<String, dynamic> item;
+  final List<UserMediaModel> userMedia;
+  final ColorScheme colorScheme;
+  final TextTheme textTheme;
+  final VoidCallback onTap;
+  final VoidCallback onRemove;
+  final VoidCallback onMove;
+  final VoidCallback onCopy;
+
+  const _GridTileWithMenu({
+    required this.item,
+    required this.userMedia,
+    required this.colorScheme,
+    required this.textTheme,
+    required this.onTap,
+    required this.onRemove,
+    required this.onMove,
+    required this.onCopy,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onLongPressStart: (details) => _showMenu(context, details),
+      child: _GridTile(item: item, userMedia: userMedia, colorScheme: colorScheme, textTheme: textTheme, onTap: onTap),
+    );
+  }
+
+  void _showMenu(BuildContext context, LongPressStartDetails details) {
+    showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(details.globalPosition.dx, details.globalPosition.dy, details.globalPosition.dx, details.globalPosition.dy),
+      items: [
+        const PopupMenuItem(value: 'remove', child: ListTile(leading: Icon(Icons.remove_circle_outline_rounded), title: Text('Remove'), dense: true)),
+        const PopupMenuItem(value: 'move', child: ListTile(leading: Icon(Icons.drive_file_move_rounded), title: Text('Move'), dense: true)),
+        const PopupMenuItem(value: 'copy', child: ListTile(leading: Icon(Icons.copy_rounded), title: Text('Copy'), dense: true)),
+      ],
+    ).then((value) {
+      if (value == 'remove') onRemove();
+      if (value == 'move') onMove();
+      if (value == 'copy') onCopy();
+    });
+  }
+}
+
+class _ListTileWithMenu extends StatelessWidget {
+  final Map<String, dynamic> item;
+  final List<UserMediaModel> userMedia;
+  final ColorScheme colorScheme;
+  final TextTheme textTheme;
+  final VoidCallback onTap;
+  final VoidCallback onRemove;
+  final VoidCallback onMove;
+  final VoidCallback onCopy;
+
+  const _ListTileWithMenu({
+    required this.item,
+    required this.userMedia,
+    required this.colorScheme,
+    required this.textTheme,
+    required this.onTap,
+    required this.onRemove,
+    required this.onMove,
+    required this.onCopy,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _ListTile(item: item, userMedia: userMedia, colorScheme: colorScheme, textTheme: textTheme, onTap: onTap),
+        ),
+        PopupMenuButton<String>(
+          icon: Icon(Icons.more_vert_rounded, size: 18, color: colorScheme.onSurfaceVariant),
+          onSelected: (value) {
+            if (value == 'remove') onRemove();
+            if (value == 'move') onMove();
+            if (value == 'copy') onCopy();
+          },
+          itemBuilder: (_) => [
+            const PopupMenuItem(value: 'remove', child: ListTile(leading: Icon(Icons.remove_circle_outline_rounded), title: Text('Remove'), dense: true)),
+            const PopupMenuItem(value: 'move', child: ListTile(leading: Icon(Icons.drive_file_move_rounded), title: Text('Move'), dense: true)),
+            const PopupMenuItem(value: 'copy', child: ListTile(leading: Icon(Icons.copy_rounded), title: Text('Copy'), dense: true)),
+          ],
+        ),
+      ],
+    );
   }
 }

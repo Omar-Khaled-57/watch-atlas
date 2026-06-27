@@ -9,39 +9,39 @@ part of 'user_list_model.dart';
 _UserListModel _$UserListModelFromJson(Map<String, dynamic> json) =>
     _UserListModel(
       id: json['id'] as String,
-      userId: json['userId'] as String,
+      userId: json['user_id'] as String,
       title: json['title'] as String,
       description: json['description'] as String?,
       listType:
-          $enumDecodeNullable(_$MediaListTypeEnumMap, json['listType']) ??
+          $enumDecodeNullable(_$MediaListTypeEnumMap, json['list_type']) ??
           MediaListType.public,
-      isPinned: json['isPinned'] as bool? ?? false,
+      isPinned: json['is_pinned'] as bool? ?? false,
       tags:
           (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
           const [],
-      createdAt: json['createdAt'] == null
+      createdAt: json['created_at'] == null
           ? null
-          : DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] == null
+          : DateTime.parse(json['created_at'] as String),
+      updatedAt: json['updated_at'] == null
           ? null
-          : DateTime.parse(json['updatedAt'] as String),
-      itemCount: (json['itemCount'] as num?)?.toInt() ?? 0,
-      likesCount: (json['likesCount'] as num?)?.toInt() ?? 0,
+          : DateTime.parse(json['updated_at'] as String),
+      itemCount: (json['item_count'] as num?)?.toInt() ?? 0,
+      likesCount: (json['likes_count'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$UserListModelToJson(_UserListModel instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'userId': instance.userId,
+      'user_id': instance.userId,
       'title': instance.title,
       'description': instance.description,
-      'listType': _$MediaListTypeEnumMap[instance.listType]!,
-      'isPinned': instance.isPinned,
+      'list_type': _$MediaListTypeEnumMap[instance.listType]!,
+      'is_pinned': instance.isPinned,
       'tags': instance.tags,
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
-      'itemCount': instance.itemCount,
-      'likesCount': instance.likesCount,
+      'created_at': instance.createdAt?.toIso8601String(),
+      'updated_at': instance.updatedAt?.toIso8601String(),
+      'item_count': instance.itemCount,
+      'likes_count': instance.likesCount,
     };
 
 const _$MediaListTypeEnumMap = {

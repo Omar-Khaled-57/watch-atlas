@@ -1,8 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
+import '../../core/extensions/string_extensions.dart';
 import '../../models/user_media_model.dart';
 import '../tracking/providers/tracking_providers.dart';
 import 'providers/lists_providers.dart';
@@ -254,8 +256,10 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
               colorScheme: colorScheme,
               textTheme: textTheme,
               onTap: () {
-                final type = filtered[index]['media_type'] as String? ?? 'movie';
-                context.push('/media/$type/${filtered[index]['media_id']}');
+                final item = filtered[index];
+                final mediaData = item['media'] as Map<String, dynamic>?;
+                final type = mediaData?['media_type'] as String? ?? item['media_type'] as String? ?? 'movie';
+                context.push('/media/$type/${item['media_id']}');
               },
             ),
             childCount: filtered.length,
@@ -274,8 +278,10 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
             colorScheme: colorScheme,
             textTheme: textTheme,
             onTap: () {
-              final type = filtered[index]['media_type'] as String? ?? 'movie';
-              context.push('/media/$type/${filtered[index]['media_id']}');
+              final item = filtered[index];
+              final mediaData = item['media'] as Map<String, dynamic>?;
+              final type = mediaData?['media_type'] as String? ?? item['media_type'] as String? ?? 'movie';
+              context.push('/media/$type/${item['media_id']}');
             },
           ),
           childCount: filtered.length,
@@ -331,6 +337,9 @@ class _GridTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final mediaId = item['media_id'] as int;
     final um = userMedia.where((u) => u.mediaId == mediaId).firstOrNull;
+    final mediaData = item['media'] as Map<String, dynamic>?;
+    final title = mediaData?['title'] as String? ?? 'ID: $mediaId';
+    final posterPath = mediaData?['poster_path'] as String?;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -345,9 +354,27 @@ class _GridTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: Container(
-                color: colorScheme.surfaceContainerHighest,
-                child: Center(child: Icon(Icons.movie_outlined, size: 32, color: colorScheme.onSurfaceVariant)),
+              child: posterPath != null
+                  ? CachedNetworkImage(
+                      imageUrl: posterPath.posterUrl,
+                      fit: BoxFit.cover,
+                      errorWidget: (_, __, ___) => Container(
+                        color: colorScheme.surfaceContainerHighest,
+                        child: Center(child: Icon(Icons.movie_outlined, size: 32, color: colorScheme.onSurfaceVariant)),
+                      ),
+                    )
+                  : Container(
+                      color: colorScheme.surfaceContainerHighest,
+                      child: Center(child: Icon(Icons.movie_outlined, size: 32, color: colorScheme.onSurfaceVariant)),
+                    ),
+            ),
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(6, 4, 6, 4),
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
               ),
             ),
             if (um != null)
@@ -360,7 +387,8 @@ class _GridTile extends StatelessWidget {
                     const SizedBox(width: Spacing.xs),
                     Expanded(
                       child: Text(
-                        um.status.name[0].toUpperCase() + um.status.name.substring(1).replaceAllMapped(RegExp(r'[A-Z]'), (m) => ' ${m.group(0)}'),
+                        um.status.name[0].toUpperCase() + um.status.name.substring(1).replaceAllMapped(
+                          RegExp(r'[A-Z]'), (m) => ' ${m.group(0)}'),
                         style: textTheme.labelSmall?.copyWith(fontSize: 9),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -407,8 +435,11 @@ class _ListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final mediaId = item['media_id'] as int;
     final note = item['note'] as String?;
-    final mediaType = item['media_type'] as String? ?? 'movie';
     final um = userMedia.where((u) => u.mediaId == mediaId).firstOrNull;
+    final mediaData = item['media'] as Map<String, dynamic>?;
+    final title = mediaData?['title'] as String? ?? 'ID: $mediaId';
+    final posterPath = mediaData?['poster_path'] as String?;
+    final mediaType = mediaData?['media_type'] as String? ?? item['media_type'] as String? ?? 'movie';
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -424,21 +455,27 @@ class _ListTile extends StatelessWidget {
           padding: const EdgeInsetsDirectional.all(14),
           child: Row(
             children: [
-              Container(
-                width: 56,
-                height: 72,
-                decoration: BoxDecoration(
+              ClipRRect(
+                borderRadius: BorderRadiusDirectional.all(Radius.circular(8)),
+                child: Container(
+                  width: 56,
+                  height: 72,
                   color: colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadiusDirectional.all(Radius.circular(8)),
+                  child: posterPath != null
+                      ? CachedNetworkImage(
+                          imageUrl: posterPath.posterUrl,
+                          fit: BoxFit.cover,
+                          errorWidget: (_, __, ___) => Icon(Icons.movie_outlined, size: 24, color: colorScheme.onSurfaceVariant),
+                        )
+                      : Center(child: Icon(Icons.movie_outlined, size: 24, color: colorScheme.onSurfaceVariant)),
                 ),
-                child: Center(child: Icon(Icons.movie_outlined, size: 24, color: colorScheme.onSurfaceVariant)),
               ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('ID: $mediaId', style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+                    Text(title, style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
                     if (note != null && note.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(note, style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),

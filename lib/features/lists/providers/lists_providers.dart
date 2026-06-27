@@ -9,8 +9,9 @@ import '../../../models/user_list_model.dart';
 class UserListsNotifier extends StateNotifier<AsyncValue<List<UserListModel>>> {
   final SupabaseService _supabase;
   final String _userId;
+  final Ref _ref;
 
-  UserListsNotifier(this._supabase, this._userId) : super(const AsyncValue.loading()) {
+  UserListsNotifier(this._supabase, this._userId, this._ref) : super(const AsyncValue.loading()) {
     _load();
   }
 
@@ -21,7 +22,15 @@ class UserListsNotifier extends StateNotifier<AsyncValue<List<UserListModel>>> {
           .eq('user_id', _userId)
           .order('created_at', ascending: false);
       final list = (response as List<dynamic>)
-          .map((json) => UserListModel.fromJson(json as Map<String, dynamic>))
+          .map((json) {
+            try {
+              return UserListModel.fromJson(json as Map<String, dynamic>);
+            } catch (e) {
+              debugPrint('Skipping invalid list row: $e');
+              return null;
+            }
+          })
+          .whereType<UserListModel>()
           .toList();
       state = AsyncValue.data(list);
     } catch (e) {
@@ -58,8 +67,22 @@ class UserListsNotifier extends StateNotifier<AsyncValue<List<UserListModel>>> {
     final current = state.value ?? [];
     state = AsyncValue.data([list, ...current]);
     try {
-      await _supabase.userLists.insert(list.toJson());
-    } catch (_) {}
+      await _supabase.userLists.insert({
+        'id': list.id,
+        'user_id': list.userId,
+        'title': list.title,
+        'description': list.description,
+        'list_type': list.listType.name,
+        'is_pinned': list.isPinned,
+        'tags': list.tags,
+        'created_at': list.createdAt?.toIso8601String(),
+        'updated_at': list.updatedAt?.toIso8601String(),
+        'item_count': list.itemCount,
+        'likes_count': list.likesCount,
+      });
+    } catch (e) {
+      debugPrint('Failed to create list in DB: $e');
+    }
   }
 
   Future<void> updateList(UserListModel updated) async {
@@ -70,7 +93,19 @@ class UserListsNotifier extends StateNotifier<AsyncValue<List<UserListModel>>> {
       state = AsyncValue.data(List.from(current));
     }
     try {
-      await _supabase.userLists.upsert(updated.toJson()).eq('id', updated.id);
+      await _supabase.userLists.upsert({
+        'id': updated.id,
+        'user_id': updated.userId,
+        'title': updated.title,
+        'description': updated.description,
+        'list_type': updated.listType.name,
+        'is_pinned': updated.isPinned,
+        'tags': updated.tags,
+        'created_at': updated.createdAt?.toIso8601String(),
+        'updated_at': updated.updatedAt?.toIso8601String(),
+        'item_count': updated.itemCount,
+        'likes_count': updated.likesCount,
+      }).eq('id', updated.id);
     } catch (_) {}
   }
 
@@ -87,30 +122,45 @@ class UserListsNotifier extends StateNotifier<AsyncValue<List<UserListModel>>> {
     } catch (_) {}
   }
 
+  Future<void> _syncItemCount(String listId) async {
+    try {
+      final current = state.value ?? [];
+      final idx = current.indexWhere((l) => l.id == listId);
+      if (idx < 0) return;
+      await _supabase.userLists
+          .update({'item_count': current[idx].itemCount, 'updated_at': DateTime.now().toIso8601String()})
+          .eq('id', listId);
+    } catch (_) {}
+  }
+
   Future<void> addItemToList(String listId, MediaModel media, {String? note}) async {
     try {
-      await _supabase.media.upsert({
-        'id': media.id,
-        'media_type': media.mediaType.name,
-        'title': media.title,
-        'original_title': media.originalTitle,
-        'overview': media.overview,
-        'poster_path': media.posterPath,
-        'backdrop_path': media.backdropPath,
-        'vote_average': media.voteAverage,
-        'vote_count': media.voteCount,
-        'popularity': media.popularity,
-        'release_date': media.releaseDate?.toIso8601String(),
-        'runtime': media.runtime,
-        'genres': media.genres,
-        'countries': media.countries,
-        'status': media.status,
-        'language': media.language,
-        'adult': media.adult,
-        'total_episodes': media.totalEpisodes,
-        'total_seasons': media.totalSeasons,
-        'updated_at': DateTime.now().toIso8601String(),
-      });
+      try {
+        await _supabase.media.upsert({
+          'id': media.id,
+          'media_type': media.mediaType.name,
+          'title': media.title,
+          'original_title': media.originalTitle,
+          'overview': media.overview,
+          'poster_path': media.posterPath,
+          'backdrop_path': media.backdropPath,
+          'vote_average': media.voteAverage,
+          'vote_count': media.voteCount,
+          'popularity': media.popularity,
+          'release_date': media.releaseDate?.toIso8601String(),
+          'runtime': media.runtime,
+          'genres': media.genres,
+          'countries': media.countries,
+          'status': media.status,
+          'language': media.language,
+          'adult': media.adult,
+          'total_episodes': media.totalEpisodes,
+          'total_seasons': media.totalSeasons,
+          'updated_at': DateTime.now().toIso8601String(),
+        });
+      } catch (e) {
+        debugPrint('Media upsert failed (may already exist), continuing: $e');
+      }
       await _supabase.listItems.insert({
         'list_id': listId,
         'media_id': media.id,
@@ -127,6 +177,8 @@ class UserListsNotifier extends StateNotifier<AsyncValue<List<UserListModel>>> {
         current[index] = updated;
         state = AsyncValue.data(List.from(current));
       }
+      _ref.invalidate(mediaListMembershipProvider(media.id));
+      _syncItemCount(listId);
     } catch (e) {
       debugPrint('Failed to add item to list: $e');
     }
@@ -145,7 +197,66 @@ class UserListsNotifier extends StateNotifier<AsyncValue<List<UserListModel>>> {
         current[index] = updated;
         state = AsyncValue.data(List.from(current));
       }
+      _ref.invalidate(mediaListMembershipProvider(mediaId));
+      _syncItemCount(listId);
     } catch (_) {}
+  }
+
+  Future<void> moveItemToList(String fromListId, String toListId, int mediaId, {String? note}) async {
+    try {
+      await _supabase.listItems.insert({
+        'list_id': toListId,
+        'media_id': mediaId,
+        'note': note,
+        'sort_order': 0,
+      });
+      await _supabase.listItems.delete().eq('list_id', fromListId).eq('media_id', mediaId);
+      final current = state.value ?? [];
+      final fromIdx = current.indexWhere((l) => l.id == fromListId);
+      final toIdx = current.indexWhere((l) => l.id == toListId);
+      if (fromIdx >= 0) {
+        current[fromIdx] = current[fromIdx].copyWith(
+          itemCount: (current[fromIdx].itemCount - 1).clamp(0, 999999),
+          updatedAt: DateTime.now(),
+        );
+      }
+      if (toIdx >= 0) {
+        current[toIdx] = current[toIdx].copyWith(
+          itemCount: current[toIdx].itemCount + 1,
+          updatedAt: DateTime.now(),
+        );
+      }
+      state = AsyncValue.data(List.from(current));
+      _ref.invalidate(mediaListMembershipProvider(mediaId));
+      _syncItemCount(fromListId);
+      _syncItemCount(toListId);
+    } catch (e) {
+      debugPrint('Failed to move item: $e');
+    }
+  }
+
+  Future<void> copyItemToList(String toListId, int mediaId, {String? note}) async {
+    try {
+      await _supabase.listItems.insert({
+        'list_id': toListId,
+        'media_id': mediaId,
+        'note': note,
+        'sort_order': 0,
+      });
+      final current = state.value ?? [];
+      final toIdx = current.indexWhere((l) => l.id == toListId);
+      if (toIdx >= 0) {
+        current[toIdx] = current[toIdx].copyWith(
+          itemCount: current[toIdx].itemCount + 1,
+          updatedAt: DateTime.now(),
+        );
+      }
+      state = AsyncValue.data(List.from(current));
+      _ref.invalidate(mediaListMembershipProvider(mediaId));
+      _syncItemCount(toListId);
+    } catch (e) {
+      debugPrint('Failed to copy item: $e');
+    }
   }
 
   Future<void> reorderItems(String listId, List<int> mediaIds) async {
@@ -181,7 +292,7 @@ class UserListsNotifier extends StateNotifier<AsyncValue<List<UserListModel>>> {
 final userListsProvider = StateNotifierProvider<UserListsNotifier, AsyncValue<List<UserListModel>>>((ref) {
   final supabase = ref.watch(supabaseServiceProvider);
   final userId = ref.watch(authServiceProvider).userId;
-  return UserListsNotifier(supabase, userId);
+  return UserListsNotifier(supabase, userId, ref);
 });
 
 final pinnedListsProvider = Provider<List<UserListModel>>((ref) {
@@ -193,7 +304,7 @@ final listItemsProvider = FutureProvider.family<List<Map<String, dynamic>>, Stri
   final supabase = ref.watch(supabaseServiceProvider);
   try {
     final response = await supabase.listItems
-        .select()
+        .select('*, media(id, title, poster_path, media_type)')
         .eq('list_id', listId)
         .order('sort_order', ascending: true);
     return (response as List<dynamic>).cast<Map<String, dynamic>>();
@@ -216,7 +327,7 @@ final allListItemsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) as
     final allItems = <Map<String, dynamic>>[];
     for (final lid in listIds) {
       final response = await supabase.listItems
-          .select()
+          .select('*, media(id, title, poster_path, media_type)')
           .eq('list_id', lid)
           .order('sort_order', ascending: true);
       allItems.addAll((response as List<dynamic>).cast<Map<String, dynamic>>());
@@ -234,11 +345,51 @@ final totalTitlesProvider = Provider<int>((ref) {
 
 final listCategoriesProvider = FutureProvider.family<List<String>, String>((ref, listId) async {
   final items = await ref.watch(listItemsProvider(listId).future);
-  final categories = items.map((item) => item['media_type'] as String? ?? 'unknown').toSet();
+  final categories = items.map((item) {
+    final mediaData = item['media'] as Map<String, dynamic>?;
+    return mediaData?['media_type'] as String? ?? item['media_type'] as String? ?? 'unknown';
+  }).toSet();
   final ordered = <String>[];
   if (categories.contains('tv')) ordered.add('TV Shows');
   if (categories.contains('movie')) ordered.add('Movies');
   if (categories.contains('anime')) ordered.add('Anime');
   ordered.addAll(categories.where((c) => c != 'tv' && c != 'movie' && c != 'anime').map((c) => c[0].toUpperCase() + c.substring(1)));
   return ordered;
+});
+
+final mediaListMembershipProvider = FutureProvider.family<List<Map<String, dynamic>>, int>((ref, mediaId) async {
+  final supabase = ref.watch(supabaseServiceProvider);
+  final userId = ref.watch(authServiceProvider).userId;
+  if (userId.isEmpty) return [];
+  try {
+    final lists = await supabase.userLists
+        .select('id, title')
+        .eq('user_id', userId);
+    final userLists = (lists as List<dynamic>).cast<Map<String, dynamic>>();
+    if (userLists.isEmpty) return [];
+    final userListIds = userLists.map((l) => l['id'] as String).toList();
+
+    final items = await supabase.listItems
+        .select('list_id, added_at')
+        .eq('media_id', mediaId)
+        .or('list_id.in.(${userListIds.join(',')})');
+    final listItems = (items as List<dynamic>).cast<Map<String, dynamic>>();
+
+    final result = <Map<String, dynamic>>[];
+    for (final item in listItems) {
+      final listId = item['list_id'] as String;
+      final matchingList = userLists.where((l) => l['id'] == listId).firstOrNull;
+      if (matchingList != null) {
+        result.add({
+          'list_id': listId,
+          'list_title': matchingList['title'] as String,
+          'added_at': item['added_at'] as String?,
+        });
+      }
+    }
+    return result;
+  } catch (e) {
+    debugPrint('Failed to load list membership: $e');
+    return [];
+  }
 });

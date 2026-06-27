@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/models/media_enums.dart';
@@ -85,10 +86,8 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen>
                       final item = recentlyUpdated[index];
                       return SizedBox(
                         width: 120,
-                        child: ProgressCard(
+                        child: _MediaTile(
                           userMedia: item,
-                          title: 'Media #${item.mediaId}',
-                          posterUrl: null,
                           onTap: () => _navigateToDetail(item.mediaId, item.mediaType),
                           onLongPress: () => _showQuickStatus(context, item),
                         ),
@@ -291,9 +290,8 @@ class _MediaGrid extends ConsumerWidget {
             itemCount: filtered.length,
             itemBuilder: (context, index) {
               final item = filtered[index];
-              return ProgressCard(
+              return _MediaTile(
                 userMedia: item,
-                title: 'Media #${item.mediaId}',
                 onTap: () => context.push('/media/${item.mediaType.name}/${item.mediaId}'),
                 onLongPress: () {
                   showDialog(
@@ -304,6 +302,50 @@ class _MediaGrid extends ConsumerWidget {
               );
             },
           ),
+        );
+      },
+    );
+  }
+}
+
+class _MediaTile extends ConsumerWidget {
+  final UserMediaModel userMedia;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+
+  const _MediaTile({
+    required this.userMedia,
+    this.onTap,
+    this.onLongPress,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mediaAsync = ref.watch(mediaByIdProvider((mediaId: userMedia.mediaId, mediaType: userMedia.mediaType)));
+
+    return mediaAsync.when(
+      loading: () => ProgressCard(
+        userMedia: userMedia,
+        title: '',
+        onTap: onTap,
+        onLongPress: onLongPress,
+      ),
+      error: (_, __) => ProgressCard(
+        userMedia: userMedia,
+        title: 'Media #${userMedia.mediaId}',
+        onTap: onTap,
+        onLongPress: onLongPress,
+      ),
+      data: (media) {
+        final posterUrl = media?.posterPath != null
+            ? AppConstants.mediaImageUrl(media!.posterPath!, size: 'w342')
+            : null;
+        return ProgressCard(
+          userMedia: userMedia,
+          title: media?.title ?? 'Media #${userMedia.mediaId}',
+          posterUrl: posterUrl,
+          onTap: onTap,
+          onLongPress: onLongPress,
         );
       },
     );

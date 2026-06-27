@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserListModel {
 
- String get id; String get userId; String get title; String? get description; MediaListType get listType; bool get isPinned; List<String> get tags; DateTime? get createdAt; DateTime? get updatedAt; int get itemCount; int get likesCount;
+ String get id;@JsonKey(name: 'user_id') String get userId; String get title; String? get description;@JsonKey(name: 'list_type') MediaListType get listType;@JsonKey(name: 'is_pinned') bool get isPinned; List<String> get tags;@JsonKey(name: 'created_at') DateTime? get createdAt;@JsonKey(name: 'updated_at') DateTime? get updatedAt;@JsonKey(name: 'item_count') int get itemCount;@JsonKey(name: 'likes_count') int get likesCount;
 /// Create a copy of UserListModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $UserListModelCopyWith<$Res>  {
   factory $UserListModelCopyWith(UserListModel value, $Res Function(UserListModel) _then) = _$UserListModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String userId, String title, String? description, MediaListType listType, bool isPinned, List<String> tags, DateTime? createdAt, DateTime? updatedAt, int itemCount, int likesCount
+ String id,@JsonKey(name: 'user_id') String userId, String title, String? description,@JsonKey(name: 'list_type') MediaListType listType,@JsonKey(name: 'is_pinned') bool isPinned, List<String> tags,@JsonKey(name: 'created_at') DateTime? createdAt,@JsonKey(name: 'updated_at') DateTime? updatedAt,@JsonKey(name: 'item_count') int itemCount,@JsonKey(name: 'likes_count') int likesCount
 });
 
 
@@ -163,7 +163,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId,  String title,  String? description,  MediaListType listType,  bool isPinned,  List<String> tags,  DateTime? createdAt,  DateTime? updatedAt,  int itemCount,  int likesCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'user_id')  String userId,  String title,  String? description, @JsonKey(name: 'list_type')  MediaListType listType, @JsonKey(name: 'is_pinned')  bool isPinned,  List<String> tags, @JsonKey(name: 'created_at')  DateTime? createdAt, @JsonKey(name: 'updated_at')  DateTime? updatedAt, @JsonKey(name: 'item_count')  int itemCount, @JsonKey(name: 'likes_count')  int likesCount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserListModel() when $default != null:
 return $default(_that.id,_that.userId,_that.title,_that.description,_that.listType,_that.isPinned,_that.tags,_that.createdAt,_that.updatedAt,_that.itemCount,_that.likesCount);case _:
@@ -184,7 +184,7 @@ return $default(_that.id,_that.userId,_that.title,_that.description,_that.listTy
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId,  String title,  String? description,  MediaListType listType,  bool isPinned,  List<String> tags,  DateTime? createdAt,  DateTime? updatedAt,  int itemCount,  int likesCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'user_id')  String userId,  String title,  String? description, @JsonKey(name: 'list_type')  MediaListType listType, @JsonKey(name: 'is_pinned')  bool isPinned,  List<String> tags, @JsonKey(name: 'created_at')  DateTime? createdAt, @JsonKey(name: 'updated_at')  DateTime? updatedAt, @JsonKey(name: 'item_count')  int itemCount, @JsonKey(name: 'likes_count')  int likesCount)  $default,) {final _that = this;
 switch (_that) {
 case _UserListModel():
 return $default(_that.id,_that.userId,_that.title,_that.description,_that.listType,_that.isPinned,_that.tags,_that.createdAt,_that.updatedAt,_that.itemCount,_that.likesCount);case _:
@@ -204,7 +204,7 @@ return $default(_that.id,_that.userId,_that.title,_that.description,_that.listTy
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId,  String title,  String? description,  MediaListType listType,  bool isPinned,  List<String> tags,  DateTime? createdAt,  DateTime? updatedAt,  int itemCount,  int likesCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'user_id')  String userId,  String title,  String? description, @JsonKey(name: 'list_type')  MediaListType listType, @JsonKey(name: 'is_pinned')  bool isPinned,  List<String> tags, @JsonKey(name: 'created_at')  DateTime? createdAt, @JsonKey(name: 'updated_at')  DateTime? updatedAt, @JsonKey(name: 'item_count')  int itemCount, @JsonKey(name: 'likes_count')  int likesCount)?  $default,) {final _that = this;
 switch (_that) {
 case _UserListModel() when $default != null:
 return $default(_that.id,_that.userId,_that.title,_that.description,_that.listType,_that.isPinned,_that.tags,_that.createdAt,_that.updatedAt,_that.itemCount,_that.likesCount);case _:
@@ -219,15 +219,15 @@ return $default(_that.id,_that.userId,_that.title,_that.description,_that.listTy
 @JsonSerializable()
 
 class _UserListModel implements UserListModel {
-  const _UserListModel({required this.id, required this.userId, required this.title, this.description, this.listType = MediaListType.public, this.isPinned = false, final  List<String> tags = const [], this.createdAt, this.updatedAt, this.itemCount = 0, this.likesCount = 0}): _tags = tags;
+  const _UserListModel({required this.id, @JsonKey(name: 'user_id') required this.userId, required this.title, this.description, @JsonKey(name: 'list_type') this.listType = MediaListType.public, @JsonKey(name: 'is_pinned') this.isPinned = false, final  List<String> tags = const [], @JsonKey(name: 'created_at') this.createdAt, @JsonKey(name: 'updated_at') this.updatedAt, @JsonKey(name: 'item_count') this.itemCount = 0, @JsonKey(name: 'likes_count') this.likesCount = 0}): _tags = tags;
   factory _UserListModel.fromJson(Map<String, dynamic> json) => _$UserListModelFromJson(json);
 
 @override final  String id;
-@override final  String userId;
+@override@JsonKey(name: 'user_id') final  String userId;
 @override final  String title;
 @override final  String? description;
-@override@JsonKey() final  MediaListType listType;
-@override@JsonKey() final  bool isPinned;
+@override@JsonKey(name: 'list_type') final  MediaListType listType;
+@override@JsonKey(name: 'is_pinned') final  bool isPinned;
  final  List<String> _tags;
 @override@JsonKey() List<String> get tags {
   if (_tags is EqualUnmodifiableListView) return _tags;
@@ -235,10 +235,10 @@ class _UserListModel implements UserListModel {
   return EqualUnmodifiableListView(_tags);
 }
 
-@override final  DateTime? createdAt;
-@override final  DateTime? updatedAt;
-@override@JsonKey() final  int itemCount;
-@override@JsonKey() final  int likesCount;
+@override@JsonKey(name: 'created_at') final  DateTime? createdAt;
+@override@JsonKey(name: 'updated_at') final  DateTime? updatedAt;
+@override@JsonKey(name: 'item_count') final  int itemCount;
+@override@JsonKey(name: 'likes_count') final  int likesCount;
 
 /// Create a copy of UserListModel
 /// with the given fields replaced by the non-null parameter values.
@@ -273,7 +273,7 @@ abstract mixin class _$UserListModelCopyWith<$Res> implements $UserListModelCopy
   factory _$UserListModelCopyWith(_UserListModel value, $Res Function(_UserListModel) _then) = __$UserListModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String userId, String title, String? description, MediaListType listType, bool isPinned, List<String> tags, DateTime? createdAt, DateTime? updatedAt, int itemCount, int likesCount
+ String id,@JsonKey(name: 'user_id') String userId, String title, String? description,@JsonKey(name: 'list_type') MediaListType listType,@JsonKey(name: 'is_pinned') bool isPinned, List<String> tags,@JsonKey(name: 'created_at') DateTime? createdAt,@JsonKey(name: 'updated_at') DateTime? updatedAt,@JsonKey(name: 'item_count') int itemCount,@JsonKey(name: 'likes_count') int likesCount
 });
 
 

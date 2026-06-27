@@ -8,16 +8,16 @@ part 'user_list_model.g.dart';
 abstract class UserListModel with _$UserListModel {
   const factory UserListModel({
     required String id,
-    required String userId,
+    @JsonKey(name: 'user_id') required String userId,
     required String title,
     String? description,
-    @Default(MediaListType.public) MediaListType listType,
-    @Default(false) bool isPinned,
+    @JsonKey(name: 'list_type') @Default(MediaListType.public) MediaListType listType,
+    @JsonKey(name: 'is_pinned') @Default(false) bool isPinned,
     @Default([]) List<String> tags,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    @Default(0) int itemCount,
-    @Default(0) int likesCount,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
+    @JsonKey(name: 'item_count') @Default(0) int itemCount,
+    @JsonKey(name: 'likes_count') @Default(0) int likesCount,
   }) = _UserListModel;
 
   factory UserListModel.fromJson(Map<String, dynamic> json) => _$UserListModelFromJson(json);

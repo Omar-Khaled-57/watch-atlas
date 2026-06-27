@@ -45,7 +45,7 @@ final watchedMediaDetailsProvider = FutureProvider<Map<int, MediaModel>>((ref) a
         mediaType: um.mediaType,
         title: data['title'] as String? ?? data['name'] as String? ?? '',
         genres: genres,
-        countries: data['origin_country'] as List<String>?,
+        countries: (data['origin_country'] as List<dynamic>?)?.cast<String>(),
         releaseDate: _parseDate(data['release_date'] as String? ?? data['first_air_date'] as String?),
       );
     } catch (e) {
@@ -118,14 +118,9 @@ final weeklyActivityProvider = FutureProvider<List<ActivityDay>>((ref) async {
     dayCounts[key] = 0;
   }
   for (final um in userMedia) {
-    if (um.completedAt != null && um.completedAt!.isAfter(weekAgo.subtract(const Duration(days: 1)))) {
-      final key = '${um.completedAt!.year}-${um.completedAt!.month.toString().padLeft(2, '0')}-${um.completedAt!.day.toString().padLeft(2, '0')}';
-      if (dayCounts.containsKey(key)) {
-        dayCounts[key] = (dayCounts[key] ?? 0) + 1;
-      }
-    }
-    if (um.updatedAt != null && um.updatedAt!.isAfter(weekAgo.subtract(const Duration(days: 1)))) {
-      final key = '${um.updatedAt!.year}-${um.updatedAt!.month.toString().padLeft(2, '0')}-${um.updatedAt!.day.toString().padLeft(2, '0')}';
+    final eventDate = um.completedAt ?? um.updatedAt;
+    if (eventDate != null && eventDate.isAfter(weekAgo.subtract(const Duration(days: 1)))) {
+      final key = '${eventDate.year}-${eventDate.month.toString().padLeft(2, '0')}-${eventDate.day.toString().padLeft(2, '0')}';
       if (dayCounts.containsKey(key)) {
         dayCounts[key] = (dayCounts[key] ?? 0) + 1;
       }

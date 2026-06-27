@@ -3,18 +3,18 @@ import '../../../core/constants/dimensions.dart';
 import '../../../core/models/media_enums.dart';
 
 class StatusDropdown extends StatelessWidget {
-  final WatchStatus? currentStatus;
-  final ValueChanged<WatchStatus?>? onChanged;
+  final WatchStatus currentStatus;
+  final ValueChanged<WatchStatus>? onChanged;
 
   const StatusDropdown({
     super.key,
-    this.currentStatus,
+    this.currentStatus = WatchStatus.planToWatch,
     this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<WatchStatus?>(
+    return DropdownButtonFormField<WatchStatus>(
       value: currentStatus,
       decoration: InputDecoration(
         labelText: 'Watch Status',
@@ -27,38 +27,30 @@ class StatusDropdown extends StatelessWidget {
           horizontal: 16,
           vertical: 12,
         ),
-        prefixIcon: Icon(
-          _statusIcon(currentStatus),
-          size: 20,
-        ),
       ),
-      items: [
-        DropdownMenuItem(
-          value: null,
-          child: Text('Not in list'),
-        ),
-        ...WatchStatus.values.map((status) {
-          return DropdownMenuItem(
-            value: status,
-            child: Row(
-              children: [
-                Icon(
-                  _statusIcon(status),
-                  size: 18,
-                  color: _statusColor(status, context),
-                ),
-                SizedBox(width: Spacing.md),
-                Text(_statusLabel(status)),
-              ],
-            ),
-          );
-        }),
-      ],
-      onChanged: onChanged,
+      items: WatchStatus.values.map((status) {
+        return DropdownMenuItem(
+          value: status,
+          child: Row(
+            children: [
+              Icon(
+                _statusIcon(status),
+                size: 18,
+                color: _statusColor(status, context),
+              ),
+              SizedBox(width: Spacing.md),
+              Text(_statusLabel(status)),
+            ],
+          ),
+        );
+      }).toList(),
+      onChanged: (value) {
+        if (value != null) onChanged?.call(value);
+      },
     );
   }
 
-  IconData _statusIcon(WatchStatus? status) {
+  IconData _statusIcon(WatchStatus status) {
     switch (status) {
       case WatchStatus.watching:
         return Icons.play_circle_rounded;
@@ -72,8 +64,6 @@ class StatusDropdown extends StatelessWidget {
         return Icons.bookmark_add_rounded;
       case WatchStatus.rewatching:
         return Icons.replay_rounded;
-      case null:
-        return Icons.remove_circle_outline_rounded;
     }
   }
 

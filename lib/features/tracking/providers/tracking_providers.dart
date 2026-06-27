@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:postgrest/postgrest.dart';
 import '../../../core/models/media_enums.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/services/supabase_service.dart';
@@ -34,34 +35,6 @@ class UserMediaNotifier extends StateNotifier<AsyncValue<List<UserMediaModel>>> 
     }
   }
 
-  List<UserMediaModel> byStatus(WatchStatus status) {
-    return state.value?.where((m) => m.status == status).toList() ?? [];
-  }
-
-  List<UserMediaModel> get recentlyUpdated {
-    final all = List<UserMediaModel>.from(state.value ?? []);
-    all.sort((a, b) {
-      final aTime = a.updatedAt ?? a.createdAt ?? DateTime(2000);
-      final bTime = b.updatedAt ?? b.createdAt ?? DateTime(2000);
-      return bTime.compareTo(aTime);
-    });
-    return all.take(10).toList();
-  }
-
-  int get totalWatched {
-    return state.value?.where((m) => m.status == WatchStatus.completed).length ?? 0;
-  }
-
-  int get totalEpisodesWatched {
-    final list = state.value;
-    if (list == null) return 0;
-    return list.fold(0, (int sum, m) => sum + m.episodeProgress);
-  }
-
-  int get totalHours {
-    final eps = totalEpisodesWatched;
-    return eps ~/ 2;
-  }
 
   Future<void> updateStatus(UserMediaModel media, WatchStatus newStatus) async {
     final updated = media.copyWith(
@@ -99,7 +72,7 @@ class UserMediaNotifier extends StateNotifier<AsyncValue<List<UserMediaModel>>> 
   Future<void> addMedia({
     required int mediaId,
     required MediaType mediaType,
-    required WatchStatus status,
+    WatchStatus status = WatchStatus.planToWatch,
     int totalEpisodes = 0,
   }) async {
     final now = DateTime.now();
@@ -119,16 +92,19 @@ class UserMediaNotifier extends StateNotifier<AsyncValue<List<UserMediaModel>>> 
 
   Future<void> removeMedia(UserMediaModel media) async {
     final list = state.value ?? [];
+    final previousState = List<UserMediaModel>.from(list);
     state = AsyncValue.data(list.where((m) => m.id != media.id).toList());
     try {
       await _supabase.userMedia.delete().eq('id', media.id);
     } catch (e) {
       debugPrint('Failed to delete user media: $e');
+      state = AsyncValue.data(previousState);
     }
   }
 
-  Future<void> _save(UserMediaModel media) async {
+  Future<void> _save(UserMediaModel media, {bool retried = false}) async {
     final list = state.value ?? [];
+    final previousState = List<UserMediaModel>.from(list);
     final index = list.indexWhere((m) => m.id == media.id);
     if (index >= 0) {
       list[index] = media;
@@ -137,13 +113,19 @@ class UserMediaNotifier extends StateNotifier<AsyncValue<List<UserMediaModel>>> 
     }
     state = AsyncValue.data(List.from(list));
     try {
-      await _supabase.userMedia.upsert(media.toJson()).eq('id', media.id);
+      await _supabase.userMedia.upsert(media.toJson());
     } catch (e) {
-      debugPrint('Upsert failed, trying insert: $e');
-      try {
-        await _supabase.userMedia.insert(media.toJson());
-      } catch (e2) {
-        debugPrint('Insert also failed: $e2');
+      if (!retried) {
+        debugPrint('Upsert failed, trying insert: $e');
+        try {
+          await _supabase.userMedia.insert(media.toJson());
+        } catch (_) {}
+      }
+      if (e is PostgrestException && e.code == '42501') {
+        debugPrint('Permission denied, rolling back: $e');
+        state = AsyncValue.data(previousState);
+      } else {
+        debugPrint('Sync failed, keeping local state: $e');
       }
     }
   }
@@ -156,22 +138,48 @@ final userMediaProvider = StateNotifierProvider<UserMediaNotifier, AsyncValue<Li
 });
 
 final userMediaByStatusProvider = Provider.family<List<UserMediaModel>, WatchStatus>((ref, status) {
-  final notifier = ref.watch(userMediaProvider.notifier);
-  return notifier.byStatus(status);
+  final mediaAsync = ref.watch(userMediaProvider);
+  return mediaAsync.when(
+    data: (list) => list.where((m) => m.status == status).toList(),
+    loading: () => [],
+    error: (_, __) => [],
+  );
 });
 
 final trackingStatsProvider = Provider<Map<String, int>>((ref) {
-  final notifier = ref.watch(userMediaProvider.notifier);
-  return {
-    'totalWatched': notifier.totalWatched,
-    'totalEpisodes': notifier.totalEpisodesWatched,
-    'totalHours': notifier.totalHours,
-  };
+  final mediaAsync = ref.watch(userMediaProvider);
+  return mediaAsync.when(
+    data: (list) {
+      final watched = list.where((m) =>
+          m.status == WatchStatus.completed || m.status == WatchStatus.watching).toList();
+      final totalWatched = watched.where((m) => m.status == WatchStatus.completed).length;
+      final totalEpisodes = watched.fold<int>(0, (sum, m) => sum + m.episodeProgress);
+      return {
+        'totalWatched': totalWatched,
+        'totalEpisodes': totalEpisodes,
+        'totalHours': totalEpisodes ~/ 2,
+      };
+    },
+    loading: () => const {'totalWatched': 0, 'totalEpisodes': 0, 'totalHours': 0},
+    error: (_, __) => const {'totalWatched': 0, 'totalEpisodes': 0, 'totalHours': 0},
+  );
 });
 
 final recentlyUpdatedProvider = Provider<List<UserMediaModel>>((ref) {
-  final notifier = ref.watch(userMediaProvider.notifier);
-  return notifier.recentlyUpdated;
+  final mediaAsync = ref.watch(userMediaProvider);
+  return mediaAsync.when(
+    data: (list) {
+      final sorted = List<UserMediaModel>.from(list);
+      sorted.sort((a, b) {
+        final aTime = a.updatedAt ?? a.createdAt ?? DateTime(2000);
+        final bTime = b.updatedAt ?? b.createdAt ?? DateTime(2000);
+        return bTime.compareTo(aTime);
+      });
+      return sorted.take(10).toList();
+    },
+    loading: () => [],
+    error: (_, __) => [],
+  );
 });
 
 final mediaByIdProvider = FutureProvider.family<MediaModel?, ({int mediaId, MediaType mediaType})>(

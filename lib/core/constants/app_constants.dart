@@ -2,7 +2,7 @@ class AppConstants {
   AppConstants._();
 
   static const String appName = 'WatchAtlas';
-  static const String appVersion = '1.0.0';
+  static const String appVersion = '0.7.3';
   static const String tmdbBaseUrl = 'https://api.themoviedb.org/3';
   static const String tmdbImageBaseUrl = 'https://image.tmdb.org/t/p';
   static const String anilistGraphqlUrl = 'https://graphql.anilist.co';

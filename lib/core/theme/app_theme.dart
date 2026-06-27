@@ -10,11 +10,11 @@ class AppTheme {
   static const Color _darkText = Color(0xFFFFFFFF);
   static const Color _darkMuted = Color(0xFFA1A1AA);
 
-  // Light theme
-  static const Color _lightBg = Color(0xFFFFFFFF);
-  static const Color _lightSurface = Color(0xFFF5F5F5);
-  static const Color _lightText = Color(0xFF111827);
-  static const Color _lightSecondary = Color(0xFF6B7280);
+  // Light theme – warm, eye-friendly palette
+  static const Color _lightBg = Color(0xFFFDFBF7);
+  static const Color _lightSurface = Color(0xFFF5F0EB);
+  static const Color _lightText = Color(0xFF292524);
+  static const Color _lightSecondary = Color(0xFF78716C);
 
   // Accent & states
   static const Color _accent = Color(0xFF00B8FF);
@@ -108,7 +108,7 @@ class AppTheme {
     onErrorContainer: Color(0xFF410002),
     surface: _lightBg,
     onSurface: _lightText,
-    surfaceContainerHighest: Color(0xFFF0F0F0),
+    surfaceContainerHighest: Color(0xFFEDE8E2),
     onSurfaceVariant: _lightSecondary,
     outline: Color(0xFF79747E),
     outlineVariant: Color(0xFFCAC4D0),
@@ -178,7 +178,7 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? _darkSurfaceSecondary : const Color(0xFFF0F0F0),
+        fillColor: isDark ? _darkSurfaceSecondary : const Color(0xFFEDE8E2),
         hintStyle: TextStyle(
           color: isDark ? _darkMuted : _lightSecondary,
           fontSize: 14,

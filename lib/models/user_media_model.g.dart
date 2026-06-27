@@ -9,45 +9,45 @@ part of 'user_media_model.dart';
 _UserMediaModel _$UserMediaModelFromJson(Map<String, dynamic> json) =>
     _UserMediaModel(
       id: json['id'] as String,
-      mediaId: (json['mediaId'] as num).toInt(),
-      userId: json['userId'] as String,
-      mediaType: $enumDecode(_$MediaTypeEnumMap, json['mediaType']),
+      mediaId: (json['media_id'] as num).toInt(),
+      userId: json['user_id'] as String,
+      mediaType: $enumDecode(_$MediaTypeEnumMap, json['media_type']),
       status: $enumDecode(_$WatchStatusEnumMap, json['status']),
-      seasonProgress: (json['seasonProgress'] as num?)?.toInt() ?? 0,
-      episodeProgress: (json['episodeProgress'] as num?)?.toInt() ?? 0,
-      totalEpisodes: (json['totalEpisodes'] as num?)?.toInt() ?? 0,
-      rewatchCount: (json['rewatchCount'] as num?)?.toInt() ?? 0,
-      userRating: (json['userRating'] as num?)?.toDouble(),
-      startedAt: json['startedAt'] == null
+      seasonProgress: (json['season_progress'] as num?)?.toInt() ?? 0,
+      episodeProgress: (json['episode_progress'] as num?)?.toInt() ?? 0,
+      totalEpisodes: (json['total_episodes'] as num?)?.toInt() ?? 0,
+      rewatchCount: (json['rewatch_count'] as num?)?.toInt() ?? 0,
+      userRating: (json['user_rating'] as num?)?.toDouble(),
+      startedAt: json['started_at'] == null
           ? null
-          : DateTime.parse(json['startedAt'] as String),
-      completedAt: json['completedAt'] == null
+          : DateTime.parse(json['started_at'] as String),
+      completedAt: json['completed_at'] == null
           ? null
-          : DateTime.parse(json['completedAt'] as String),
-      createdAt: json['createdAt'] == null
+          : DateTime.parse(json['completed_at'] as String),
+      createdAt: json['created_at'] == null
           ? null
-          : DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] == null
+          : DateTime.parse(json['created_at'] as String),
+      updatedAt: json['updated_at'] == null
           ? null
-          : DateTime.parse(json['updatedAt'] as String),
+          : DateTime.parse(json['updated_at'] as String),
     );
 
 Map<String, dynamic> _$UserMediaModelToJson(_UserMediaModel instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'mediaId': instance.mediaId,
-      'userId': instance.userId,
-      'mediaType': _$MediaTypeEnumMap[instance.mediaType]!,
+      'media_id': instance.mediaId,
+      'user_id': instance.userId,
+      'media_type': _$MediaTypeEnumMap[instance.mediaType]!,
       'status': _$WatchStatusEnumMap[instance.status]!,
-      'seasonProgress': instance.seasonProgress,
-      'episodeProgress': instance.episodeProgress,
-      'totalEpisodes': instance.totalEpisodes,
-      'rewatchCount': instance.rewatchCount,
-      'userRating': instance.userRating,
-      'startedAt': instance.startedAt?.toIso8601String(),
-      'completedAt': instance.completedAt?.toIso8601String(),
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
+      'season_progress': instance.seasonProgress,
+      'episode_progress': instance.episodeProgress,
+      'total_episodes': instance.totalEpisodes,
+      'rewatch_count': instance.rewatchCount,
+      'user_rating': instance.userRating,
+      'started_at': instance.startedAt?.toIso8601String(),
+      'completed_at': instance.completedAt?.toIso8601String(),
+      'created_at': instance.createdAt?.toIso8601String(),
+      'updated_at': instance.updatedAt?.toIso8601String(),
     };
 
 const _$MediaTypeEnumMap = {
@@ -71,8 +71,8 @@ const _$MediaTypeEnumMap = {
 const _$WatchStatusEnumMap = {
   WatchStatus.watching: 'watching',
   WatchStatus.completed: 'completed',
-  WatchStatus.onHold: 'onHold',
+  WatchStatus.onHold: 'on_hold',
   WatchStatus.dropped: 'dropped',
-  WatchStatus.planToWatch: 'planToWatch',
+  WatchStatus.planToWatch: 'plan_to_watch',
   WatchStatus.rewatching: 'rewatching',
 };

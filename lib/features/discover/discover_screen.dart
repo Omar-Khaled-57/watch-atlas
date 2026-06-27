@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,7 +16,7 @@ import '../../core/shared/media_card.dart';
 import '../../models/media_model.dart';
 import 'providers/discover_providers.dart';
 import 'widgets/filter_chip.dart';
-import 'widgets/filter_sheet.dart';
+// import 'widgets/filter_sheet.dart';
 
 class DiscoverScreen extends ConsumerStatefulWidget {
   const DiscoverScreen({super.key});
@@ -107,37 +109,37 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
       appBar: AppBar(
         title: const Text('Discover'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () => _showFilterSheet(context),
-            tooltip: 'Filters',
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.filter_list),
+          //   onPressed: () => _showFilterSheet(context),
+          //   tooltip: 'Filters',
+          // ),
         ],
       ),
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child: SizedBox(height: Spacing.sm)),
+          SliverToBoxAdapter(child: SizedBox(height: 4)),
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsetsDirectional.only(bottom: Spacing.md),
+              padding: EdgeInsetsDirectional.only(bottom: 8),
               child: _buildTabBar(filters),
             ),
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsetsDirectional.only(bottom: Spacing.md),
+              padding: EdgeInsetsDirectional.only(bottom: 8),
               child: _buildSearchBar(),
             ),
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsetsDirectional.only(bottom: Spacing.md),
+              padding: EdgeInsetsDirectional.only(bottom: 8),
               child: _buildGenreChips(filters, genresAsync),
             ),
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsetsDirectional.only(bottom: Spacing.md),
+              padding: EdgeInsetsDirectional.only(bottom: 8),
               child: _buildActiveFilters(filters),
             ),
           ),
@@ -249,7 +251,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
 
   Widget _buildTabBar(DiscoverFilters filters) {
     return Padding(
-      padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg, vertical: Spacing.sm),
+      padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg, vertical: 2),
       child: SegmentedButton<DiscoverMediaTab>(
         segments: const [
           ButtonSegment(value: DiscoverMediaTab.movies, label: Text('Movies')),
@@ -279,32 +281,16 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     return genresAsync.when(
       data: (genres) {
         if (genres.isEmpty) return const SizedBox.shrink();
-        return SizedBox(
-          height: 48,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsetsDirectional.only(start: Spacing.lg, end: Spacing.lg),
-            itemCount: genres.length,
-            separatorBuilder: (_, __) => const SizedBox(width: Spacing.sm),
-            itemBuilder: (context, index) {
-              final genre = genres[index];
-              return FilterChipWidget(
-                label: genre.name,
-                isSelected: filters.genreId == genre.id,
-                onTap: () {
-                  if (filters.genreId == genre.id) {
-                    ref
-                        .read(discoverFilterProvider.notifier)
-                        .setGenreId(null);
-                  } else {
-                    ref
-                        .read(discoverFilterProvider.notifier)
-                        .setGenreId(genre.id);
-                  }
-                },
-              );
-            },
-          ),
+        return _GenreChipsCarousel(
+          genres: genres,
+          selectedGenreId: filters.genreId,
+          onGenreTap: (genre) {
+            if (filters.genreId == genre.id) {
+              ref.read(discoverFilterProvider.notifier).setGenreId(null);
+            } else {
+              ref.read(discoverFilterProvider.notifier).setGenreId(genre.id);
+            }
+          },
         );
       },
       loading: () => SizedBox(
@@ -342,7 +328,12 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     final chips = <Widget>[];
 
     if (filters.genreId != null) {
-      chips.add(_buildActiveChip('Genre: #${filters.genreId}', theme));
+      final genres = ref.watch(genreListProvider).valueOrNull ?? [];
+      final genre = genres.where((g) => g.id == filters.genreId).firstOrNull;
+      chips.add(_buildActiveChip(
+        genre != null ? 'Genre: ${genre.name}' : '#${filters.genreId}',
+        theme,
+      ));
     }
     if (filters.country != null) {
       chips.add(_buildActiveChip('Country: ${filters.country}', theme));
@@ -400,16 +391,127 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     );
   }
 
-  void _showFilterSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => const FilterSheet(),
-    );
-  }
+  // void _showFilterSheet(BuildContext context) {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     isScrollControlled: true,
+  //     backgroundColor: Colors.transparent,
+  //     builder: (_) => const FilterSheet(),
+  //   );
+  // }
 
   void _navigateToDetail(MediaModel media) {
     context.push('/media/${media.mediaType.name}/${media.id}');
+  }
+}
+
+class _GenreChipsCarousel extends StatefulWidget {
+  final List<Genre> genres;
+  final int? selectedGenreId;
+  final ValueChanged<Genre> onGenreTap;
+
+  const _GenreChipsCarousel({
+    required this.genres,
+    required this.selectedGenreId,
+    required this.onGenreTap,
+  });
+
+  @override
+  State<_GenreChipsCarousel> createState() => _GenreChipsCarouselState();
+}
+
+class _GenreChipsCarouselState extends State<_GenreChipsCarousel> {
+  final _scrollController = ScrollController();
+  bool _isDragging = false;
+  double _dragStartScrollOffset = 0;
+  double _dragStartGlobalX = 0;
+
+  bool get _useGrabToScroll {
+    if (kIsWeb) return true;
+    if (!Platform.isAndroid && !Platform.isIOS) return true;
+    return MediaQuery.of(context).orientation == Orientation.landscape;
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onDragStart(DragStartDetails details) {
+    _dragStartScrollOffset = _scrollController.offset;
+    _dragStartGlobalX = details.globalPosition.dx;
+    _isDragging = false;
+  }
+
+  void _onDragUpdate(DragUpdateDetails details) {
+    final delta = _dragStartGlobalX - details.globalPosition.dx;
+    if (!_isDragging && delta.abs() > 6) {
+      setState(() => _isDragging = true);
+    }
+    if (!_isDragging) return;
+    _scrollController.jumpTo(
+      (_dragStartScrollOffset + delta).clamp(
+        0.0,
+        _scrollController.position.maxScrollExtent,
+      ),
+    );
+  }
+
+  void _onDragEnd(DragEndDetails details) {
+    if (!_isDragging) return;
+    final velocity = details.primaryVelocity ?? 0;
+    if (velocity.abs() > 50) {
+      final target = (_scrollController.offset - velocity * 0.15).clamp(
+        0.0,
+        _scrollController.position.maxScrollExtent,
+      );
+      _scrollController.animateTo(
+        target,
+        duration: Duration(
+          milliseconds: (velocity.abs() * 0.5).toInt().clamp(100, 400),
+        ),
+        curve: Curves.easeOut,
+      );
+    }
+    setState(() => _isDragging = false);
+  }
+
+  Widget _buildList() {
+    return SizedBox(
+      height: 36,
+      child: ListView.separated(
+        controller: _scrollController,
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsetsDirectional.only(start: Spacing.lg, end: Spacing.lg),
+        physics: _isDragging ? const NeverScrollableScrollPhysics() : null,
+        itemCount: widget.genres.length,
+        separatorBuilder: (_, __) => const SizedBox(width: Spacing.sm),
+        itemBuilder: (context, index) {
+          final genre = widget.genres[index];
+          return FilterChipWidget(
+            label: genre.name,
+            isSelected: widget.selectedGenreId == genre.id,
+            onTap: () => widget.onGenreTap(genre),
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_useGrabToScroll) return _buildList();
+
+    return MouseRegion(
+      cursor: _isDragging ? SystemMouseCursors.grabbing : SystemMouseCursors.grab,
+      child: GestureDetector(
+        onHorizontalDragStart: _onDragStart,
+        onHorizontalDragUpdate: _onDragUpdate,
+        onHorizontalDragEnd: _onDragEnd,
+        behavior: HitTestBehavior.opaque,
+        child: _buildList(),
+      ),
+    );
   }
 }

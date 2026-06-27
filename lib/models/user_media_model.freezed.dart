@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserMediaModel {
 
- String get id; int get mediaId; String get userId; MediaType get mediaType; WatchStatus get status; int get seasonProgress; int get episodeProgress; int get totalEpisodes; int get rewatchCount; double? get userRating; DateTime? get startedAt; DateTime? get completedAt; DateTime? get createdAt; DateTime? get updatedAt;
+ String get id;@JsonKey(name: 'media_id') int get mediaId;@JsonKey(name: 'user_id') String get userId;@JsonKey(name: 'media_type') MediaType get mediaType; WatchStatus get status;@JsonKey(name: 'season_progress') int get seasonProgress;@JsonKey(name: 'episode_progress') int get episodeProgress;@JsonKey(name: 'total_episodes') int get totalEpisodes;@JsonKey(name: 'rewatch_count') int get rewatchCount;@JsonKey(name: 'user_rating') double? get userRating;@JsonKey(name: 'started_at') DateTime? get startedAt;@JsonKey(name: 'completed_at') DateTime? get completedAt;@JsonKey(name: 'created_at') DateTime? get createdAt;@JsonKey(name: 'updated_at') DateTime? get updatedAt;
 /// Create a copy of UserMediaModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $UserMediaModelCopyWith<$Res>  {
   factory $UserMediaModelCopyWith(UserMediaModel value, $Res Function(UserMediaModel) _then) = _$UserMediaModelCopyWithImpl;
 @useResult
 $Res call({
- String id, int mediaId, String userId, MediaType mediaType, WatchStatus status, int seasonProgress, int episodeProgress, int totalEpisodes, int rewatchCount, double? userRating, DateTime? startedAt, DateTime? completedAt, DateTime? createdAt, DateTime? updatedAt
+ String id,@JsonKey(name: 'media_id') int mediaId,@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'media_type') MediaType mediaType, WatchStatus status,@JsonKey(name: 'season_progress') int seasonProgress,@JsonKey(name: 'episode_progress') int episodeProgress,@JsonKey(name: 'total_episodes') int totalEpisodes,@JsonKey(name: 'rewatch_count') int rewatchCount,@JsonKey(name: 'user_rating') double? userRating,@JsonKey(name: 'started_at') DateTime? startedAt,@JsonKey(name: 'completed_at') DateTime? completedAt,@JsonKey(name: 'created_at') DateTime? createdAt,@JsonKey(name: 'updated_at') DateTime? updatedAt
 });
 
 
@@ -166,7 +166,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int mediaId,  String userId,  MediaType mediaType,  WatchStatus status,  int seasonProgress,  int episodeProgress,  int totalEpisodes,  int rewatchCount,  double? userRating,  DateTime? startedAt,  DateTime? completedAt,  DateTime? createdAt,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'media_id')  int mediaId, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'media_type')  MediaType mediaType,  WatchStatus status, @JsonKey(name: 'season_progress')  int seasonProgress, @JsonKey(name: 'episode_progress')  int episodeProgress, @JsonKey(name: 'total_episodes')  int totalEpisodes, @JsonKey(name: 'rewatch_count')  int rewatchCount, @JsonKey(name: 'user_rating')  double? userRating, @JsonKey(name: 'started_at')  DateTime? startedAt, @JsonKey(name: 'completed_at')  DateTime? completedAt, @JsonKey(name: 'created_at')  DateTime? createdAt, @JsonKey(name: 'updated_at')  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserMediaModel() when $default != null:
 return $default(_that.id,_that.mediaId,_that.userId,_that.mediaType,_that.status,_that.seasonProgress,_that.episodeProgress,_that.totalEpisodes,_that.rewatchCount,_that.userRating,_that.startedAt,_that.completedAt,_that.createdAt,_that.updatedAt);case _:
@@ -187,7 +187,7 @@ return $default(_that.id,_that.mediaId,_that.userId,_that.mediaType,_that.status
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int mediaId,  String userId,  MediaType mediaType,  WatchStatus status,  int seasonProgress,  int episodeProgress,  int totalEpisodes,  int rewatchCount,  double? userRating,  DateTime? startedAt,  DateTime? completedAt,  DateTime? createdAt,  DateTime? updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'media_id')  int mediaId, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'media_type')  MediaType mediaType,  WatchStatus status, @JsonKey(name: 'season_progress')  int seasonProgress, @JsonKey(name: 'episode_progress')  int episodeProgress, @JsonKey(name: 'total_episodes')  int totalEpisodes, @JsonKey(name: 'rewatch_count')  int rewatchCount, @JsonKey(name: 'user_rating')  double? userRating, @JsonKey(name: 'started_at')  DateTime? startedAt, @JsonKey(name: 'completed_at')  DateTime? completedAt, @JsonKey(name: 'created_at')  DateTime? createdAt, @JsonKey(name: 'updated_at')  DateTime? updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _UserMediaModel():
 return $default(_that.id,_that.mediaId,_that.userId,_that.mediaType,_that.status,_that.seasonProgress,_that.episodeProgress,_that.totalEpisodes,_that.rewatchCount,_that.userRating,_that.startedAt,_that.completedAt,_that.createdAt,_that.updatedAt);case _:
@@ -207,7 +207,7 @@ return $default(_that.id,_that.mediaId,_that.userId,_that.mediaType,_that.status
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int mediaId,  String userId,  MediaType mediaType,  WatchStatus status,  int seasonProgress,  int episodeProgress,  int totalEpisodes,  int rewatchCount,  double? userRating,  DateTime? startedAt,  DateTime? completedAt,  DateTime? createdAt,  DateTime? updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'media_id')  int mediaId, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'media_type')  MediaType mediaType,  WatchStatus status, @JsonKey(name: 'season_progress')  int seasonProgress, @JsonKey(name: 'episode_progress')  int episodeProgress, @JsonKey(name: 'total_episodes')  int totalEpisodes, @JsonKey(name: 'rewatch_count')  int rewatchCount, @JsonKey(name: 'user_rating')  double? userRating, @JsonKey(name: 'started_at')  DateTime? startedAt, @JsonKey(name: 'completed_at')  DateTime? completedAt, @JsonKey(name: 'created_at')  DateTime? createdAt, @JsonKey(name: 'updated_at')  DateTime? updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _UserMediaModel() when $default != null:
 return $default(_that.id,_that.mediaId,_that.userId,_that.mediaType,_that.status,_that.seasonProgress,_that.episodeProgress,_that.totalEpisodes,_that.rewatchCount,_that.userRating,_that.startedAt,_that.completedAt,_that.createdAt,_that.updatedAt);case _:
@@ -222,23 +222,23 @@ return $default(_that.id,_that.mediaId,_that.userId,_that.mediaType,_that.status
 @JsonSerializable()
 
 class _UserMediaModel implements UserMediaModel {
-  const _UserMediaModel({required this.id, required this.mediaId, required this.userId, required this.mediaType, required this.status, this.seasonProgress = 0, this.episodeProgress = 0, this.totalEpisodes = 0, this.rewatchCount = 0, this.userRating, this.startedAt, this.completedAt, this.createdAt, this.updatedAt});
+  const _UserMediaModel({required this.id, @JsonKey(name: 'media_id') required this.mediaId, @JsonKey(name: 'user_id') required this.userId, @JsonKey(name: 'media_type') required this.mediaType, required this.status, @JsonKey(name: 'season_progress') this.seasonProgress = 0, @JsonKey(name: 'episode_progress') this.episodeProgress = 0, @JsonKey(name: 'total_episodes') this.totalEpisodes = 0, @JsonKey(name: 'rewatch_count') this.rewatchCount = 0, @JsonKey(name: 'user_rating') this.userRating, @JsonKey(name: 'started_at') this.startedAt, @JsonKey(name: 'completed_at') this.completedAt, @JsonKey(name: 'created_at') this.createdAt, @JsonKey(name: 'updated_at') this.updatedAt});
   factory _UserMediaModel.fromJson(Map<String, dynamic> json) => _$UserMediaModelFromJson(json);
 
 @override final  String id;
-@override final  int mediaId;
-@override final  String userId;
-@override final  MediaType mediaType;
+@override@JsonKey(name: 'media_id') final  int mediaId;
+@override@JsonKey(name: 'user_id') final  String userId;
+@override@JsonKey(name: 'media_type') final  MediaType mediaType;
 @override final  WatchStatus status;
-@override@JsonKey() final  int seasonProgress;
-@override@JsonKey() final  int episodeProgress;
-@override@JsonKey() final  int totalEpisodes;
-@override@JsonKey() final  int rewatchCount;
-@override final  double? userRating;
-@override final  DateTime? startedAt;
-@override final  DateTime? completedAt;
-@override final  DateTime? createdAt;
-@override final  DateTime? updatedAt;
+@override@JsonKey(name: 'season_progress') final  int seasonProgress;
+@override@JsonKey(name: 'episode_progress') final  int episodeProgress;
+@override@JsonKey(name: 'total_episodes') final  int totalEpisodes;
+@override@JsonKey(name: 'rewatch_count') final  int rewatchCount;
+@override@JsonKey(name: 'user_rating') final  double? userRating;
+@override@JsonKey(name: 'started_at') final  DateTime? startedAt;
+@override@JsonKey(name: 'completed_at') final  DateTime? completedAt;
+@override@JsonKey(name: 'created_at') final  DateTime? createdAt;
+@override@JsonKey(name: 'updated_at') final  DateTime? updatedAt;
 
 /// Create a copy of UserMediaModel
 /// with the given fields replaced by the non-null parameter values.
@@ -273,7 +273,7 @@ abstract mixin class _$UserMediaModelCopyWith<$Res> implements $UserMediaModelCo
   factory _$UserMediaModelCopyWith(_UserMediaModel value, $Res Function(_UserMediaModel) _then) = __$UserMediaModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, int mediaId, String userId, MediaType mediaType, WatchStatus status, int seasonProgress, int episodeProgress, int totalEpisodes, int rewatchCount, double? userRating, DateTime? startedAt, DateTime? completedAt, DateTime? createdAt, DateTime? updatedAt
+ String id,@JsonKey(name: 'media_id') int mediaId,@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'media_type') MediaType mediaType, WatchStatus status,@JsonKey(name: 'season_progress') int seasonProgress,@JsonKey(name: 'episode_progress') int episodeProgress,@JsonKey(name: 'total_episodes') int totalEpisodes,@JsonKey(name: 'rewatch_count') int rewatchCount,@JsonKey(name: 'user_rating') double? userRating,@JsonKey(name: 'started_at') DateTime? startedAt,@JsonKey(name: 'completed_at') DateTime? completedAt,@JsonKey(name: 'created_at') DateTime? createdAt,@JsonKey(name: 'updated_at') DateTime? updatedAt
 });
 
 

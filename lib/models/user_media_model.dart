@@ -8,19 +8,19 @@ part 'user_media_model.g.dart';
 abstract class UserMediaModel with _$UserMediaModel {
   const factory UserMediaModel({
     required String id,
-    required int mediaId,
-    required String userId,
-    required MediaType mediaType,
+    @JsonKey(name: 'media_id') required int mediaId,
+    @JsonKey(name: 'user_id') required String userId,
+    @JsonKey(name: 'media_type') required MediaType mediaType,
     required WatchStatus status,
-    @Default(0) int seasonProgress,
-    @Default(0) int episodeProgress,
-    @Default(0) int totalEpisodes,
-    @Default(0) int rewatchCount,
-    double? userRating,
-    DateTime? startedAt,
-    DateTime? completedAt,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    @JsonKey(name: 'season_progress') @Default(0) int seasonProgress,
+    @JsonKey(name: 'episode_progress') @Default(0) int episodeProgress,
+    @JsonKey(name: 'total_episodes') @Default(0) int totalEpisodes,
+    @JsonKey(name: 'rewatch_count') @Default(0) int rewatchCount,
+    @JsonKey(name: 'user_rating') double? userRating,
+    @JsonKey(name: 'started_at') DateTime? startedAt,
+    @JsonKey(name: 'completed_at') DateTime? completedAt,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
   }) = _UserMediaModel;
 
   factory UserMediaModel.fromJson(Map<String, dynamic> json) => _$UserMediaModelFromJson(json);
