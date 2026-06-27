@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/dimensions.dart';
 import '../../../core/extensions/context_extensions.dart';
+import '../../../l10n/l10n.dart';
 import '../../../models/review_model.dart';
 
 class ReviewCard extends StatelessWidget {
@@ -55,7 +56,7 @@ class ReviewCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        authorName ?? 'Anonymous',
+                        authorName ?? context.l10n.anonymous,
                         style: context.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),

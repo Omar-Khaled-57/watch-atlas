@@ -192,3 +192,14 @@ END $$;
 -- ============================================================
 
 GRANT INSERT, UPDATE ON public.media TO authenticated;
+
+-- ============================================================
+-- Recommendation engine columns (needed for personalized recommendations)
+-- ============================================================
+
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS recs_enabled BOOLEAN DEFAULT true;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS recs_clear_requested BOOLEAN DEFAULT false;
+
+-- Note: user_events, user_rec_profiles, media_similarity, recommendations_cache
+-- are defined in schema.sql. Run schema.sql in your Supabase SQL editor
+-- if you haven't already done so.

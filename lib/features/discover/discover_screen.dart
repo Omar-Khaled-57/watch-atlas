@@ -13,6 +13,7 @@ import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/shared/media_card.dart';
+import '../../core/shared/horizontal_carousel.dart';
 import '../../models/media_model.dart';
 import 'providers/discover_providers.dart';
 import 'widgets/filter_chip.dart';
@@ -296,11 +297,11 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
       },
       loading: () => SizedBox(
         height: 48,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          padding: EdgeInsetsDirectional.only(start: Spacing.lg, end: Spacing.lg),
+        child: HorizontalCarousel(
+          height: 48,
           itemCount: 8,
-          separatorBuilder: (_, __) => const SizedBox(width: Spacing.sm),
+          separatorWidth: Spacing.sm,
+          padding: EdgeInsetsDirectional.only(start: Spacing.lg, end: Spacing.lg),
           itemBuilder: (_, __) => Container(
             width: 80,
             height: 36,
@@ -446,7 +447,10 @@ class _GenreChipsCarouselState extends State<_GenreChipsCarousel> {
   }
 
   void _onDragUpdate(DragUpdateDetails details) {
-    final delta = _dragStartGlobalX - details.globalPosition.dx;
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final delta = isRtl
+        ? details.globalPosition.dx - _dragStartGlobalX
+        : _dragStartGlobalX - details.globalPosition.dx;
     if (!_isDragging && delta.abs() > 6) {
       setState(() => _isDragging = true);
     }

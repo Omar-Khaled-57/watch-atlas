@@ -16,26 +16,48 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
   late RangeValues _yearRange;
   late RangeValues _ratingRange;
   late String? _selectedCountry;
-  final _countries = {
-    'US': 'United States',
-    'GB': 'United Kingdom',
-    'KR': 'South Korea',
-    'JP': 'Japan',
-    'IN': 'India',
-    'FR': 'France',
-    'DE': 'Germany',
-    'ES': 'Spain',
-    'BR': 'Brazil',
-    'CA': 'Canada',
-    'AU': 'Australia',
-    'CN': 'China',
-    'TW': 'Taiwan',
-    'HK': 'Hong Kong',
-    'TH': 'Thailand',
-    'EG': 'Egypt',
-    'SA': 'Saudi Arabia',
-    'AE': 'UAE',
-  };
+
+  Map<String, String> get _countries => Localizations.localeOf(context).languageCode == 'ar'
+      ? {
+          'US': 'الولايات المتحدة',
+          'GB': 'المملكة المتحدة',
+          'KR': 'كوريا الجنوبية',
+          'JP': 'اليابان',
+          'IN': 'الهند',
+          'FR': 'فرنسا',
+          'DE': 'ألمانيا',
+          'ES': 'إسبانيا',
+          'BR': 'البرازيل',
+          'CA': 'كندا',
+          'AU': 'أستراليا',
+          'CN': 'الصين',
+          'TW': 'تايوان',
+          'HK': 'هونغ كونغ',
+          'TH': 'تايلاند',
+          'EG': 'مصر',
+          'SA': 'السعودية',
+          'AE': 'الإمارات',
+        }
+      : {
+          'US': 'United States',
+          'GB': 'United Kingdom',
+          'KR': 'South Korea',
+          'JP': 'Japan',
+          'IN': 'India',
+          'FR': 'France',
+          'DE': 'Germany',
+          'ES': 'Spain',
+          'BR': 'Brazil',
+          'CA': 'Canada',
+          'AU': 'Australia',
+          'CN': 'China',
+          'TW': 'Taiwan',
+          'HK': 'Hong Kong',
+          'TH': 'Thailand',
+          'EG': 'Egypt',
+          'SA': 'Saudi Arabia',
+          'AE': 'UAE',
+        };
 
   @override
   void initState() {
@@ -111,7 +133,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               ..._countries.entries.map(
                 (e) => DropdownMenuItem(
                   value: e.key,
-                  child: Text('${e.value} (${e.key})'),
+                  child: Text(context.l10n.countryWithCode(e.value, e.key)),
                 ),
               ),
             ],

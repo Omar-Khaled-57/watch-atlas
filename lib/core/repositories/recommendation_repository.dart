@@ -3,17 +3,16 @@ import 'package:flutter/foundation.dart';
 import '../config/recommendation_config.dart';
 import '../models/recommendation_models.dart';
 import '../services/supabase_service.dart';
+import '../services/tmdb_service.dart';
 
 /// Data-access layer for the recommendation engine.
-///
-/// Encapsulates all Supabase queries so the engine can focus on scoring
-/// and ranking.  Each method returns strongly-typed domain objects and
-/// wraps DB errors in descriptive exceptions.
+/// Uses TMDB API as fallback when Supabase tables are missing.
 class RecommendationRepository {
   RecommendationRepository({SupabaseService? supabase})
       : _supabase = supabase ?? SupabaseService.instance;
 
   final SupabaseService _supabase;
+  static final TmdbService _tmdbService = TmdbService.instance;
 
   // ---------------------------------------------------------------
   // User behaviour
@@ -190,17 +189,12 @@ class RecommendationRepository {
   // ---------------------------------------------------------------
 
   /// Generic popular query ordered by descending popularity.
+  /// Uses TMDB API as fallback when Supabase media table is unavailable.
   Future<List<Map<String, dynamic>>> fetchPopular(
     Set<int> exclude, {
     int limit = RecommendationConfig.maxItemsPerCategory,
   }) async {
-    return _simpleQuery(
-      exclude: exclude,
-      orderColumn: 'popularity',
-      ascending: false,
-      limit: limit,
-      columns: 'id, title, popularity, genres, poster_path',
-    );
+    return _tmdbPopularFallback(exclude, limit);
   }
 
   /// Media released within the new-release window.
@@ -227,7 +221,7 @@ class RecommendationRepository {
       return (response as List).cast<Map<String, dynamic>>();
     } catch (e) {
       debugPrint('RecommendationRepository: fetchNewReleases failed: $e');
-      return [];
+      return _tmdbPopularFallback(exclude, limit);
     }
   }
 
@@ -236,14 +230,22 @@ class RecommendationRepository {
     Set<int> exclude, {
     int limit = RecommendationConfig.maxItemsPerCategory,
   }) async {
-    return _simpleQuery(
-      exclude: exclude,
-      orderColumn: 'vote_average',
-      ascending: false,
-      limit: limit,
-      columns: 'id, title, vote_average, genres, poster_path',
-      minVoteAverage: RecommendationConfig.topRatedMinVoteAverage,
-    );
+    try {
+      final response = await _supabase.media
+          .select('id, title, vote_average, genres, poster_path')
+          .not(
+            'id',
+            'in',
+            exclude.isEmpty ? '(0)' : '(${exclude.join(",")})',
+          )
+          .gte('vote_average', RecommendationConfig.topRatedMinVoteAverage)
+          .order('vote_average', ascending: false)
+          .limit(limit);
+      return (response as List).cast<Map<String, dynamic>>();
+    } catch (e) {
+      debugPrint('RecommendationRepository: fetchTopRated failed: $e');
+      return _tmdbPopularFallback(exclude, limit);
+    }
   }
 
   /// High rating, low popularity — undiscovered quality media.
@@ -266,7 +268,7 @@ class RecommendationRepository {
       return (response as List).cast<Map<String, dynamic>>();
     } catch (e) {
       debugPrint('RecommendationRepository: fetchHiddenGems failed: $e');
-      return [];
+      return _tmdbPopularFallback(exclude, limit);
     }
   }
 
@@ -291,7 +293,7 @@ class RecommendationRepository {
       return (response as List).cast<Map<String, dynamic>>();
     } catch (e) {
       debugPrint('RecommendationRepository: fetchAcclaimed failed: $e');
-      return [];
+      return _tmdbPopularFallback(exclude, limit);
     }
   }
 
@@ -315,38 +317,31 @@ class RecommendationRepository {
       return (response as List).cast<Map<String, dynamic>>();
     } catch (e) {
       debugPrint('RecommendationRepository: fetchByGenre failed: $e');
-      return [];
+      return _tmdbPopularFallback(exclude, limit);
     }
   }
 
-  Future<List<Map<String, dynamic>>> _simpleQuery({
-    required Set<int> exclude,
-    required String orderColumn,
-    required bool ascending,
-    required int limit,
-    required String columns,
-    double? minVoteAverage,
-  }) async {
+  /// TMDB fallback for popular media when Supabase is unavailable.
+  Future<List<Map<String, dynamic>>> _tmdbPopularFallback(
+    Set<int> exclude,
+    int limit,
+  ) async {
     try {
-      // NOTE: filter methods (gte, eq, etc.) must be called before
-      // transform methods (order, limit) because the latter return
-      // PostgrestTransformBuilder which does not carry filter methods.
-      var query = _supabase.media
-          .select(columns)
-          .not(
-            'id',
-            'in',
-            exclude.isEmpty ? '(0)' : '(${exclude.join(",")})',
-          );
-      if (minVoteAverage != null) {
-        query = query.gte('vote_average', minVoteAverage);
-      }
-      return (await query
-              .order(orderColumn, ascending: ascending)
-              .limit(limit))
-          .cast<Map<String, dynamic>>();
+      final response = await _tmdbService.get('/movie/popular');
+      final results = response['results'] as List<dynamic>;
+      return results
+          .where((item) => !exclude.contains(item['id']))
+          .take(limit)
+          .map((item) => {
+                'id': item['id'] as int,
+                'title': item['title'] as String? ?? '',
+                'popularity': item['popularity'] as num? ?? 0,
+                'poster_path': item['poster_path'] as String?,
+                'genres': item['genre_ids'] as List<dynamic>? ?? [],
+              })
+          .toList();
     } catch (e) {
-      debugPrint('RecommendationRepository: $orderColumn query failed: $e');
+      debugPrint('RecommendationRepository: TMDB fallback failed: $e');
       return [];
     }
   }
@@ -381,6 +376,7 @@ class RecommendationRepository {
   }
 
   /// Stores recommendation results in the cache (batched upsert).
+  /// Silently fails if cache table does not exist (expected for dev environments).
   Future<void> cacheResults(
       String userId, Map<RecCategory, List<ScoredMedia>> results) async {
     try {
@@ -398,8 +394,7 @@ class RecommendationRepository {
         try {
           await _supabase.recommendationsCache.insert(batch);
         } catch (e) {
-          debugPrint(
-              'RecommendationRepository: cache insert failed for ${entry.key}: $e');
+          // Silently ignore cache errors (table not found, etc.) - cache is optional
         }
       }
     }

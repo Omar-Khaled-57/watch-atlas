@@ -190,7 +190,7 @@ class _ReportCard extends ConsumerWidget {
                 borderRadius: BorderRadiusDirectional.all(Radius.circular(4)),
               ),
               child: Text(
-                report.status.toUpperCase(),
+                _localizedStatus(context, report.status),
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
@@ -201,7 +201,7 @@ class _ReportCard extends ConsumerWidget {
             const SizedBox(width: Spacing.sm),
             Expanded(
               child: Text(
-                _timeAgo(report.createdAt),
+                _timeAgo(context, report.createdAt),
                 style: tt.bodySmall,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -289,13 +289,26 @@ class _ReportCard extends ConsumerWidget {
     );
   }
 
-  String _timeAgo(DateTime date) {
+  String _localizedStatus(BuildContext context, String status) {
+    final l10n = context.l10n;
+    switch (status) {
+      case 'pending':
+        return l10n.reportPending;
+      case 'resolved':
+        return l10n.reportResolved;
+      default:
+        return status;
+    }
+  }
+
+  String _timeAgo(BuildContext context, DateTime date) {
+    final l10n = context.l10n;
     final now = DateTime.now();
     final diff = now.difference(date);
-    if (diff.inDays > 0) return '${diff.inDays}d ago';
-    if (diff.inHours > 0) return '${diff.inHours}h ago';
-    if (diff.inMinutes > 0) return '${diff.inMinutes}m ago';
-    return 'just now';
+    if (diff.inDays > 0) return l10n.daysAgo(diff.inDays.toDouble());
+    if (diff.inHours > 0) return l10n.hoursAgo(diff.inHours.toDouble());
+    if (diff.inMinutes > 0) return l10n.minutesAgo(diff.inMinutes.toDouble());
+    return l10n.justNow;
   }
 }
 
@@ -318,7 +331,7 @@ class _ActionSheet extends ConsumerWidget {
           Text(context.l10n.takeAction, style: tt.titleLarge),
           const SizedBox(height: Spacing.xs),
           Text(
-            '${report.reasonLabel} - ${report.mediaId != null ? "Content Report" : "User Report"}',
+            '${report.reasonLabel} - ${report.mediaId != null ? context.l10n.contentReport : context.l10n.userReport}',
             style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
           ),
           const SizedBox(height: Spacing.xl),

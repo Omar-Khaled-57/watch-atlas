@@ -9,6 +9,8 @@ import '../../core/providers/app_providers.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/models/gender.dart';
 import '../../core/services/behavior_service.dart';
+import '../../l10n/l10n.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/user_model.dart';
 import '../auth/providers/auth_providers.dart';
 import '../moderation/providers/moderation_providers.dart';
@@ -70,12 +72,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   const SizedBox(height: Spacing.sm),
                   Text(l10n.profileNotFound, style: textTheme.bodyLarge),
                   const SizedBox(height: Spacing.md),
-                  Text(
-                    'Make sure the database grants have been applied.\n'
-                    'Run supabase/grants.sql in your Supabase SQL editor.',
-                    style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
-                    textAlign: TextAlign.center,
-                  ),
+                    Text(
+                      context.l10n.profileDatabaseError,
+                      style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                      textAlign: TextAlign.center,
+                    ),
                   const SizedBox(height: Spacing.lg),
                   TextButton.icon(
                     onPressed: () => ref.invalidate(currentUserProfileProvider),
@@ -178,8 +179,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               icon: Icons.language_rounded,
               title: l10n.language,
               subtitle: switch (ref.watch(localeProvider).languageCode) {
-                'ar' => 'العربية',
-                _ => 'English',
+                'ar' => context.l10n.arabicLanguage,
+                _ => context.l10n.englishLanguage,
               },
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => _showLanguagePicker(context),
@@ -230,7 +231,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             _SettingsTile(
               icon: Icons.auto_awesome_rounded,
               title: l10n.personalizedRecommendations,
-              subtitle: 'Let your activity improve suggestions',
+              subtitle: context.l10n.activityImprovesSuggestions,
               trailing: Consumer(builder: (context, ref, _) {
                 return Switch(
                   value: ref.watch(recsEnabledProvider),
@@ -305,11 +306,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             icon: Icons.code_rounded,
             title: l10n.licenses,
             trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => showLicensePage(
-              context: context,
-              applicationName: 'WatchAtlas',
-              applicationVersion: '0.7.3',
-            ),
+            onTap: () => _showLicenses(context),
+          ),
+          _SettingsTile(
+            icon: Icons.attribution_rounded,
+            title: l10n.contentAndAttribution,
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => _showAttribution(context),
           ),
         ],
         colorScheme,
@@ -746,9 +749,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final l10n = AppLocalizations.of(context)!;
     showAboutDialog(
       context: context,
-      applicationName: 'WatchAtlas',
-      applicationVersion: '0.7.3',
-      applicationLegalese: '© 2026 WatchAtlas',
+              applicationName: l10n.appName,
+              applicationVersion: '0.7.3',
+              applicationLegalese: '© 2026 ${l10n.appName}',
       children: [
         const SizedBox(height: Spacing.lg),
         Text(l10n.aboutAppDescription),
@@ -757,35 +760,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   void _showTerms(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.termsOfServiceTitle),
-        content: SingleChildScrollView(
-          child: Text(l10n.termsOfServiceBody),
-        ),
-        actions: [
-          FilledButton(onPressed: () => Navigator.pop(context), child: Text(l10n.close)),
-        ],
-      ),
-    );
+    context.pushNamed('terms');
   }
 
   void _showPrivacy(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.privacyPolicy),
-        content: SingleChildScrollView(
-          child: Text(l10n.privacyPolicyBody),
-        ),
-        actions: [
-          FilledButton(onPressed: () => Navigator.pop(context), child: Text(l10n.close)),
-        ],
-      ),
-    );
+    context.pushNamed('privacy');
+  }
+
+  void _showLicenses(BuildContext context) {
+    context.pushNamed('licenses');
+  }
+
+  void _showAttribution(BuildContext context) {
+    context.pushNamed('attribution');
   }
 }
 

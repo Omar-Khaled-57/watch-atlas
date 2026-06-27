@@ -198,6 +198,7 @@
   "moderation": "Moderation",
   "recommendationsAndPrivacy": "Recommendations & Privacy",
   "personalizedRecommendations": "Personalized Recommendations",
+  "activityImprovesSuggestions": "Let your activity improve suggestions",
   "clearRecommendationHistory": "Clear Recommendation History",
   "removeAllBehavioralData": "Remove all behavioral data",
   "chooseTheme": "Choose Theme",
@@ -252,36 +253,79 @@
   "privacyPolicyBody": "Your privacy matters to us.\n\n[Full privacy policy would go here]",
   "lastUpdated": "Last updated: June 26, 2026",
   "acceptanceOfTerms": "1. Acceptance of Terms",
-  "acceptanceOfTermsBody": "By accessing or using Watch Atlas, you agree to be bound by these Terms of Service. If you do not agree, do not use the service.",
+  "acceptanceOfTermsBody": "By accessing or using WatchAtlas, you agree to be bound by these Terms of Service. If you do not agree, do not use the service.",
   "descriptionOfService": "2. Description of Service",
-  "descriptionOfServiceBody": "Watch Atlas is a media tracking application that allows users to discover, track, and organize movies, TV shows, and anime. Users can rate, review, and maintain watch lists.",
+  "descriptionOfServiceBody": "WatchAtlas is a media tracking application that allows users to discover, track, and organize movies, TV shows, and anime. Users can rate, review, and maintain watch lists.",
   "userAccounts": "3. User Accounts",
   "userAccountsBody": "You must sign in via Google OAuth to use the service. You are responsible for maintaining the confidentiality of your account. You must be at least 13 years old to use this service.",
-  "userConduct": "4. User Conduct",
-  "userConductBody": "You agree not to: post abusive, harassing, or inappropriate content; impersonate others; attempt to circumvent security measures; use the service for any illegal purpose.",
-  "intellectualProperty": "5. Intellectual Property",
-  "intellectualPropertyBody": "Media metadata and images are provided by TMDB and AniList under their respective licenses. The Watch Atlas application and code are proprietary. User-generated content (reviews, ratings) remains owned by you, with a license granted to Watch Atlas to display it within the service.",
-  "limitationOfLiability": "6. Limitation of Liability",
-  "limitationOfLiabilityBody": "Watch Atlas is provided as is without warranties of any kind. We are not responsible for the accuracy of third-party metadata. We reserve the right to modify or discontinue the service at any time.",
-  "termination": "7. Termination",
-  "terminationBody": "We reserve the right to suspend or terminate accounts that violate these terms. You may delete your account at any time.",
-  "changesToTerms": "8. Changes to Terms",
+  "userResponsibilities": "4. User Responsibilities",
+  "userResponsibilitiesBody": "You agree not to post abusive, harassing, or inappropriate content; not to impersonate others; not to attempt to circumvent security measures; and not to use the service for any illegal purpose. You are responsible for all activity that occurs under your account.",
+  "acceptableUse": "5. Acceptable Use",
+  "acceptableUseBody": "You may use the service only for lawful purposes. You agree not to interfere with or disrupt the integrity or performance of the service, or attempt to gain unauthorized access to any portion of the service or related systems.",
+  "userGeneratedContent": "6. User-Generated Content",
+  "userGeneratedContentBody": "You retain ownership of content you create, including lists, ratings, reviews, notes, and profile information. By using the service, you grant WatchAtlas a worldwide, non-exclusive license to store, display, and distribute that content in connection with providing the service. You are solely responsible for content you submit.",
+  "intellectualProperty": "7. Intellectual Property",
+  "intellectualPropertyBody": "Media metadata and images are provided by TMDB and AniList under their respective licenses. The WatchAtlas application and code are proprietary. User-generated content (reviews, ratings, lists) remains owned by you, with a license granted to WatchAtlas to display it within the service.",
+  "thirdPartyServicesTerms": "8. Third-Party Services",
+  "thirdPartyServicesTermsBody": "The service may contain links to or integrate with third-party services, including TMDB, AniList, and Google OAuth. Your use of third-party services is governed by their respective terms and privacy policies. WatchAtlas is not responsible for the practices or content of third-party services.",
+  "externalLinks": "9. External Links",
+  "externalLinksBody": "The service may contain links to external websites or resources. WatchAtlas is not responsible for the availability or content of these external sites and does not endorse any content, products, or services available from them.",
+  "availabilityOfService": "10. Availability of Service",
+  "availabilityOfServiceBody": "We strive to keep the service available, secure, and up to date. However, we do not guarantee uninterrupted access. The service may be temporarily unavailable due to maintenance, updates, or factors beyond our control.",
+  "changesToFeatures": "11. Changes to Features",
+  "changesToFeaturesBody": "We may modify, update, or discontinue features of the service at any time, with or without notice. We are not liable to you or any third party for any modification, suspension, or discontinuance of the service or any part thereof.",
+  "accountSuspension": "12. Account Suspension or Termination",
+  "accountSuspensionBody": "We reserve the right to suspend or terminate accounts that violate these terms. You may delete your account and associated data at any time through the app settings or by contacting us.",
+  "disclaimers": "13. Disclaimers",
+  "disclaimersBody": "The service is provided on an as-is and as-available basis. We make no warranties, express or implied, regarding the accuracy, reliability, or availability of the service. We do not guarantee that metadata, recommendations, or search results will be error-free or meet your expectations.",
+  "privacyReference": "14. Privacy",
+  "privacyReferenceBody": "Your use of the service is also governed by our Privacy Policy. Please review our Privacy Policy to understand how we collect, use, and protect your personal information.",
+  "changesToTerms": "15. Changes to Terms",
   "changesToTermsBody": "We may update these terms at any time. Continued use after changes constitutes acceptance. Users will be notified of material changes via email or in-app notification.",
-  "contactSection": "9. Contact",
+  "contactSection": "16. Contact",
   "contactLegal": "For questions about these terms, contact: legal@watchatlas.app",
   "contactPrivacy": "For privacy-related inquiries, contact: privacy@watchatlas.app",
   "informationWeCollect": "1. Information We Collect",
-  "informationWeCollectBody": "When you sign in with Google OAuth, we collect your email address and display name. We also store media you track (movies, TV shows, anime) along with your watch status, ratings, and reviews. Profile avatars and display names are stored via Supabase storage.",
-  "howWeUseInfo": "2. How We Use Your Information",
-  "howWeUseInfoBody": "Your information is used to provide and improve the service: personalize your experience, maintain your watch lists and reviews, generate analytics based on your tracked media, and communicate service updates if necessary.",
-  "dataStorage": "3. Data Storage & Security",
-  "dataStorageBody": "Your data is stored securely on Supabase (PostgreSQL) and Google Cloud infrastructure. We use Row Level Security to ensure you can only access your own data. Passwords are never stored — authentication is handled entirely by Google OAuth.",
-  "thirdPartyServices": "4. Third-Party Services",
-  "thirdPartyServicesBody": "We use TMDB (The Movie Database) to fetch media metadata. Your searches and viewed media IDs are sent to TMDB's API. We also use AniList for anime metadata. Google OAuth is used for authentication.",
-  "dataRetention": "5. Data Retention",
-  "dataRetentionBody": "Your data is retained for as long as your account is active. You may delete your account and associated data at any time by contacting us.",
-  "yourRights": "6. Your Rights",
-  "yourRightsBody": "You may request a copy of your data, correction of inaccurate data, or deletion of your account and associated data. Contact us at the email below.",
+  "informationWeCollectBody": "When you sign in with Google OAuth, we collect your email address and display name. We also store media you track (movies, TV shows, anime) along with your watch status, ratings, and reviews. Profile avatars and display names are stored via Supabase storage.\n\nOptional information you may provide includes your date of birth and gender, which are used only to personalize your experience.",
+  "automaticallyCollectedData": "2. Automatically Collected Data",
+  "automaticallyCollectedDataBody": "We may automatically collect certain information when you use the app, including device type, app version, and crash reports if available. Authentication metadata is processed by our authentication provider (Google OAuth) to maintain your session securely.",
+  "howWeUseInfo": "3. How We Use Your Information",
+  "howWeUseInfoBody": "Your information is used to provide and improve the service: personalize your experience, maintain your watch lists and reviews, generate recommendations based on your activity, and communicate service updates if necessary.",
+  "dataStorage": "4. Data Storage & Security",
+  "dataStorageBody": "Your data is stored securely on Supabase (PostgreSQL) and Google Cloud infrastructure. We use Row Level Security to ensure you can only access your own data. Passwords are never stored — authentication is handled entirely by Google OAuth. All data transmission uses secure HTTPS connections.",
+  "thirdPartyServicesPrivacy": "5. Third-Party Services",
+  "thirdPartyServicesPrivacyBody": "We use TMDB (The Movie Database) to fetch media metadata. Your searches and viewed media IDs are sent to TMDB's API. We also use AniList for anime metadata. Google OAuth is used for authentication. Each third-party service processes data according to its own privacy policy.",
+  "cookiesLocalStorage": "6. Cookies & Local Storage",
+  "cookiesLocalStorageBody": "We use local storage to maintain your login session, remember your preferences (such as theme and language), and cache data to improve performance. We do not use tracking cookies or similar technologies for advertising purposes.",
+  "dataRetention": "7. Data Retention",
+  "dataRetentionBody": "Your data is retained for as long as your account is active. You may delete your account and associated data at any time by contacting us or using the delete account feature in the app.",
+  "yourRights": "8. Your Rights",
+  "yourRightsBody": "You may request a copy of your data, correction of inaccurate data, or deletion of your account and associated data at any time. You can update your profile information, manage your personalization preferences, change your language, or log out at any time through the app settings.",
+  "childrensPrivacy": "9. Children's Privacy",
+  "childrensPrivacyBody": "WatchAtlas is intended for users aged 13 and older. We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe your child has provided us with personal information, please contact us so we can take appropriate action.",
+  "policyUpdates": "10. Policy Updates",
+  "policyUpdatesBody": "We may update this privacy policy from time to time. We will notify you of any material changes by posting the updated policy in the app and updating the Last Updated date above. Your continued use of the service after changes constitutes acceptance of the updated policy.",
+  "openSourceNotice": "Open Source Notice",
+  "openSourceNoticeBody": "WatchAtlas uses various open-source libraries and frameworks. We gratefully acknowledge the contributions of the open-source community. The respective licenses for these libraries apply to their use within this application.",
+  "thirdPartyLibraries": "Third-Party Libraries",
+  "thirdPartyLibrariesBody": "This application includes open-source software components. License details for these components are available through the License page below.",
+  "mediaOwnership": "Media Ownership",
+  "mediaOwnershipBody": "Movie, TV, anime, and other media metadata, posters, backdrops, logos, and promotional artwork belong to their respective owners and copyright holders. WatchAtlas does not claim ownership of any third-party media assets. Such content is used for identification, cataloging, and informational purposes only.",
+  "aiGeneratedLogo": "AI-Generated Logo",
+  "aiGeneratedLogoBody": "The WatchAtlas application logo was created using AI-assisted design tools. The logo is used as the application's visual identity. WatchAtlas does not claim exclusive ownership over the underlying AI model, generated style, or training data used to create it. Any rights associated with the generated logo are subject to the terms of the AI service used to create it. The logo should not be interpreted as claiming ownership over AI-generated methodologies or third-party intellectual property.",
+  "trademarks": "Trademarks",
+  "trademarksBody": "Movie titles, TV series names, anime titles, studio names, streaming platform names, company names, and trademarks appearing in the application are the property of their respective owners. Their appearance within WatchAtlas is for identification, cataloging, and informational purposes only.",
+  "metadataAttribution": "Metadata",
+  "metadataAttributionBody": "Media information displayed in the app — including titles, descriptions, ratings, genres, release dates, cast, crew, runtime, and production information — is obtained from third-party providers, primarily TMDB (The Movie Database) and AniList. This data is provided for informational purposes and may occasionally contain inaccuracies or be out of date.",
+  "imagesAttribution": "Images",
+  "imagesAttributionBody": "Posters, backdrops, logos, and promotional artwork displayed in the app are the property of their respective copyright holders and are used under license or for identification purposes only. WatchAtlas does not claim ownership of any visual assets.",
+  "recommendationSystemInfo": "Recommendation System",
+  "recommendationSystemInfoBody": "Recommendations are generated automatically based on your activity and preferences, such as what you watch, rate, save, and search for. The goal is to improve content discovery. Recommendations are suggestions, not guarantees, and do not reflect any official endorsement by content creators or distributors.",
+  "userContentOwnership": "User Content",
+  "userContentOwnershipBody": "You retain ownership of the content you create in WatchAtlas, including lists, ratings, favorites, notes, and reviews. By using the service, you grant WatchAtlas the necessary rights to store, display, and process that content within the app. You are responsible for the content you submit and should respect the rights of others.",
+  "accuracyDisclaimer": "Accuracy",
+  "accuracyDisclaimerBody": "Although WatchAtlas strives to provide accurate and up-to-date information, metadata may occasionally contain inaccuracies or outdated information due to its reliance on third-party sources. We encourage users to verify important details through official sources.",
+  "contentAndAttribution": "Content & Attribution",
 
   "@_AuthExtra": {
     "description": "Additional authentication strings"
@@ -583,6 +627,107 @@
   "@ratedStars": {
     "placeholders": {
       "stars": { "type": "double" }
+    }
+  },
+  "allFilter": "All",
+  "listDeletedTitle": "Deleted \"{title}\"",
+  "@listDeletedTitle": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "episodeProgress": "{current}/{total}",
+  "@episodeProgress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "countryWithCode": "{name} ({code})",
+  "@countryWithCode": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "code": { "type": "String" }
+    }
+  },
+  "mediaWithId": "Media #{id}",
+  "@mediaWithId": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "unknownList": "Unknown List",
+  "profileDatabaseError": "Make sure the database grants have been applied.\nRun supabase/grants.sql in your Supabase SQL editor.",
+  "accountCreated": "Account created! Please check your email for a confirmation link before signing in.",
+  "notificationChannelDescription": "Notifications from WatchAtlas",
+  "anonymous": "Anonymous",
+  "contentReport": "Content Report",
+  "userReport": "User Report",
+  "reportPending": "Pending",
+  "reportResolved": "Resolved",
+  "continueWithApple": "Continue with Apple",
+  "continueWithGoogle": "Continue with Google",
+  "popularTrending": "Popular trending",
+  "recommendationBecauseYouSaved": "Because You Saved...",
+  "recommendationBecauseYouViewed": "Because You Viewed...",
+  "recommendationTrendingNearYou": "Trending Near You",
+  "recommendationPopularThisWeek": "Popular This Week",
+  "recommendationContinueExploring": "Continue Exploring",
+  "recommendationNewReleases": "New Releases",
+  "recommendationHiddenGems": "Hidden Gems",
+  "recommendationCriticallyAcclaimed": "Critically Acclaimed",
+  "recommendationTopRated": "Top Rated",
+  "recommendationSimilarToFavorites": "Similar to Your Favorites",
+  "recommendationBecauseYouLikeGenre": "Because You Like...",
+  "recommendationFriendsAlsoSaved": "Friends Also Saved",
+  "recommendationUsersLikeYou": "Users Like You Enjoyed",
+  "recommendationAwardWinners": "Award Winners",
+  "recommendationUnderratedClassics": "Underrated Classics",
+"recommendationUpcomingReleases": "Upcoming Releases",
+  "similarToSaved": "Similar to what you've saved",
+  "forYou": "For You",
+  "seeMore": "See More",
+  "allRecommendations": "All Recommendations",
+  "viewAllRecommendations": "View All Recommendations",
+  "recommendationCategories": "Recommendation Categories",
+  "failedToLoadRecommendations": "Failed to load recommendations",
+  "noRecommendationsYet": "No recommendations yet",
+  "navRecommendations": "Recommendations",
+  "similarToFavorites": "Similar to your favorites",
+  "usersLikeYouEnjoyed": "Users with similar taste enjoyed this",
+  "becauseYouEnjoyGenre": "Because you enjoy {genre}",
+  "@becauseYouEnjoyGenre": {
+    "placeholders": {
+      "genre": { "type": "String" }
+    }
+  },
+  "recentlyReleased": "Recently released",
+  "topRated": "Top rated",
+  "hiddenGem": "Hidden gem — highly rated but undiscovered",
+  "criticallyAcclaimed": "Critically acclaimed",
+  "justNow": "just now",
+  "minutesAgo": "{count}m ago",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": { "type": "double" }
+    }
+  },
+  "hoursAgo": "{count}h ago",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": { "type": "double" }
+    }
+  },
+  "daysAgo": "{count}d ago",
+  "@daysAgo": {
+    "placeholders": {
+      "count": { "type": "double" }
+    }
+  },
+  "monthsAgo": "{count}mo ago",
+  "@monthsAgo": {
+    "placeholders": {
+      "count": { "type": "double" }
     }
   }
 }

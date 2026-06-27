@@ -12,6 +12,7 @@ import '../../core/models/media_enums.dart';
 import '../../core/services/behavior_service.dart';
 import '../../core/shared/app_modal.dart';
 import '../../core/shared/expandable_text.dart';
+import '../../core/shared/horizontal_carousel.dart';
 import '../../models/media_model.dart';
 import '../../models/review_model.dart';
 import '../lists/providers/lists_providers.dart';
@@ -1359,22 +1360,19 @@ class _CastSection extends StatelessWidget {
           child: _SectionHeader(title: context.l10n.cast),
         ),
         SizedBox(height: Spacing.md),
-        SizedBox(
+        HorizontalCarousel(
           height: 150,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
-            itemCount: cast.length,
-            separatorBuilder: (_, _) => SizedBox(width: Spacing.md),
-            itemBuilder: (context, index) {
-              final person = cast[index] as Map<String, dynamic>;
-              return CastCard(
-                name: person['name'] as String? ?? '',
-                character: person['character'] as String?,
-                profilePath: person['profile_path'] as String?,
-              );
-            },
-          ),
+          itemCount: cast.length,
+          separatorWidth: Spacing.md,
+          padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+          itemBuilder: (context, index) {
+            final person = cast[index] as Map<String, dynamic>;
+            return CastCard(
+              name: person['name'] as String? ?? '',
+              character: person['character'] as String?,
+              profilePath: person['profile_path'] as String?,
+            );
+          },
         ),
       ],
     );
@@ -1474,51 +1472,48 @@ class _TrailersSection extends StatelessWidget {
           child: _SectionHeader(title: context.l10n.trailers),
         ),
         SizedBox(height: Spacing.md),
-        SizedBox(
+        HorizontalCarousel(
           height: 200,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
-            itemCount: trailers.length,
-            separatorBuilder: (_, _) => SizedBox(width: Spacing.md),
-            itemBuilder: ((context, index) {
-              final trailer = trailers[index];
-              final key = trailer['key'] as String? ?? '';
-              return GestureDetector(
-                onTap: () => launchUrl(Uri.parse('https://www.youtube.com/watch?v=$key')),
-                child: Container(
-                  width: 320,
-                  decoration: BoxDecoration(
-                    color: context.colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadiusDirectional.all(
-                      Radius.circular(Spacing.cardRadiusMd),
-                    ),
-                    image: DecorationImage(
-                      image: CachedNetworkImageProvider(
-                        'https://img.youtube.com/vi/$key/maxresdefault.jpg',
-                      ),
-                      fit: BoxFit.cover,
-                      onError: (_, _) {},
-                    ),
+          itemCount: trailers.length,
+          separatorWidth: Spacing.md,
+          padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+          itemBuilder: (context, index) {
+            final trailer = trailers[index];
+            final key = trailer['key'] as String? ?? '';
+            return GestureDetector(
+              onTap: () => launchUrl(Uri.parse('https://www.youtube.com/watch?v=$key')),
+              child: Container(
+                width: 320,
+                decoration: BoxDecoration(
+                  color: context.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadiusDirectional.all(
+                    Radius.circular(Spacing.cardRadiusMd),
                   ),
-                  child: Center(
-                    child: Container(
-                      padding: EdgeInsetsDirectional.all(Spacing.lg),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.5),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.play_arrow_rounded,
-                        size: 40,
-                        color: Colors.white,
-                      ),
+                  image: DecorationImage(
+                    image: CachedNetworkImageProvider(
+                      'https://img.youtube.com/vi/$key/maxresdefault.jpg',
+                    ),
+                    fit: BoxFit.cover,
+                    onError: (_, _) {},
+                  ),
+                ),
+                child: Center(
+                  child: Container(
+                    padding: EdgeInsetsDirectional.all(Spacing.lg),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.play_arrow_rounded,
+                      size: 40,
+                      color: Colors.white,
                     ),
                   ),
                 ),
-              );
-            }),
-          ),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -1547,54 +1542,51 @@ class _MediaRowSection extends StatelessWidget {
           child: _SectionHeader(title: title),
         ),
         SizedBox(height: Spacing.md),
-        SizedBox(
+        HorizontalCarousel(
           height: 210,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
-            itemCount: items.length,
-            separatorBuilder: (_, _) => SizedBox(width: Spacing.sm),
-            itemBuilder: (context, index) {
-              final item = items[index] as MediaModel;
-              final mediaTypeStr = item.mediaType == MediaType.tv ? 'tv' : 'movie';
-              return SizedBox(
-                width: AppConstants.posterWidth,
-                child: GestureDetector(
-                  onTap: () => context.navigateToMedia(mediaTypeStr, item.id.toString()),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadiusDirectional.all(
-                            Radius.circular(Spacing.cardRadiusSm),
-                          ),
-                          child: item.posterPath != null
-                              ? CachedNetworkImage(
-                                  imageUrl: '${AppConstants.tmdbImageBaseUrl}/w342${item.posterPath}',
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  placeholder: (_, _) => _itemPlaceholder(context),
-                                  errorWidget: (_, _, _) => _itemPlaceholder(context),
-                                )
-                              : _itemPlaceholder(context),
+          itemCount: items.length,
+          separatorWidth: Spacing.sm,
+          padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
+          itemBuilder: (context, index) {
+            final item = items[index] as MediaModel;
+            final mediaTypeStr = item.mediaType == MediaType.tv ? 'tv' : 'movie';
+            return SizedBox(
+              width: AppConstants.posterWidth,
+              child: GestureDetector(
+                onTap: () => context.navigateToMedia(mediaTypeStr, item.id.toString()),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadiusDirectional.all(
+                          Radius.circular(Spacing.cardRadiusSm),
                         ),
+                        child: item.posterPath != null
+                            ? CachedNetworkImage(
+                                imageUrl: '${AppConstants.tmdbImageBaseUrl}/w342${item.posterPath}',
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                placeholder: (_, _) => _itemPlaceholder(context),
+                                errorWidget: (_, _, _) => _itemPlaceholder(context),
+                              )
+                            : _itemPlaceholder(context),
                       ),
-                      SizedBox(height: Spacing.xs),
-                      Text(
-                        item.title,
-                        style: context.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: Spacing.xs),
+                    Text(
+                      item.title,
+                      style: context.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w500,
                       ),
-                    ],
-                  ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ],
     );

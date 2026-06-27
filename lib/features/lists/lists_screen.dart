@@ -225,7 +225,7 @@ class _ListsScreenState extends ConsumerState<ListsScreen> {
               ref.read(userListsProvider.notifier).deleteList(list);
               if (_selectedListId == list.id) setState(() => _selectedListId = null);
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${context.l10n.listDeleted}: ${list.title}')));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.listDeletedTitle(list.title))));
             },
             child: Text(context.l10n.delete),
           ),
@@ -480,7 +480,7 @@ class _ListDetailItems extends ConsumerWidget {
             final item = items[index];
             final mediaId = item['media_id'] as int;
             final mediaData = item['media'] as Map<String, dynamic>?;
-            final title = mediaData?['title'] as String? ?? 'ID: $mediaId';
+            final title = mediaData?['title'] as String? ?? context.l10n.mediaWithId(mediaId.toString());
             final posterPath = mediaData?['poster_path'] as String?;
             final mediaType = mediaData?['media_type'] as String? ?? item['media_type'] as String? ?? 'movie';
             final um = userMedia.where((u) => u.mediaId == mediaId).firstOrNull;
@@ -539,7 +539,15 @@ class _ListDetailItems extends ConsumerWidget {
                                   const SizedBox(width: Spacing.xs),
                                   Flexible(
                                     child: Text(
-                                      um.status.name[0].toUpperCase() + um.status.name.substring(1).replaceAllMapped(RegExp(r'[A-Z]'), (m) => ' ${m.group(0)}'),
+                                      switch (um.status.name) {
+                                        'watching' => context.l10n.watching,
+                                        'completed' => context.l10n.completed,
+                                        'planToWatch' => context.l10n.planToWatch,
+                                        'onHold' => context.l10n.onHold,
+                                        'dropped' => context.l10n.dropped,
+                                        'rewatching' => context.l10n.rewatching,
+                                        _ => um.status.name,
+                                      },
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: textTheme.labelSmall?.copyWith(color: _statusColor(um.status.name, colorScheme)),
@@ -725,7 +733,15 @@ class _LandscapeGridTile extends StatelessWidget {
                       const SizedBox(width: Spacing.xs),
                       Expanded(
                         child: Text(
-                          um.status.name[0].toUpperCase() + um.status.name.substring(1).replaceAllMapped(RegExp(r'[A-Z]'), (m) => ' ${m.group(0)}'),
+                          switch (um.status.name) {
+                            'watching' => context.l10n.watching,
+                            'completed' => context.l10n.completed,
+                            'planToWatch' => context.l10n.planToWatch,
+                            'onHold' => context.l10n.onHold,
+                            'dropped' => context.l10n.dropped,
+                            'rewatching' => context.l10n.rewatching,
+                            _ => um.status.name,
+                          },
                           style: textTheme.labelSmall?.copyWith(fontSize: 9),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

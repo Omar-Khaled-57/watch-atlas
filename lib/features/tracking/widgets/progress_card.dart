@@ -92,7 +92,7 @@ class ProgressCard extends StatelessWidget {
                     ),
                     const SizedBox(height: Spacing.xs),
                     Text(
-                      '${userMedia.episodeProgress} / ${userMedia.totalEpisodes}',
+                      context.l10n.episodeProgress(userMedia.episodeProgress, userMedia.totalEpisodes),
                       style: textTheme.labelSmall?.copyWith(fontSize: 10),
                     ),
                   ],

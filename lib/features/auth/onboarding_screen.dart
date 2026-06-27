@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
@@ -81,7 +82,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
             const SizedBox(height: Spacing.xxl),
             Text(
-              'Date of Birth',
+              context.l10n.dateOfBirth,
               style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: Spacing.md),
@@ -94,7 +95,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
                 child: Text(
                   _dateOfBirth != null
-                      ? '${_dateOfBirth!.month}/${_dateOfBirth!.day}/${_dateOfBirth!.year}'
+                      ? DateFormat.yMd().format(_dateOfBirth!)
                       : context.l10n.selectDateOfBirth,
                   style: textTheme.bodyLarge?.copyWith(
                     color: _dateOfBirth != null ? null : colorScheme.onSurfaceVariant,

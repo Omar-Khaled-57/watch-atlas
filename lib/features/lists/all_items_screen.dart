@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/extensions/string_extensions.dart';
+import '../../core/shared/horizontal_carousel.dart';
 import '../../models/user_media_model.dart';
 import '../tracking/providers/tracking_providers.dart';
 import '../../l10n/l10n.dart';
@@ -141,15 +142,16 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
       padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 0, 4),
       child: SizedBox(
         height: 36,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
+        child: HorizontalCarousel(
+          height: 36,
           itemCount: all.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 6),
+          separatorWidth: 6,
+          padding: EdgeInsets.zero,
           itemBuilder: (context, index) {
             final c = all[index];
             final isSelected = _categoryFilter == c;
             return FilterChip(
-              label: Text(c == 'all' ? 'All' : c, style: textTheme.labelMedium?.copyWith(fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400)),
+              label: Text(c == 'all' ? context.l10n.allFilter : c, style: textTheme.labelMedium?.copyWith(fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400)),
               selected: isSelected,
               onSelected: (_) => setState(() => _categoryFilter = c),
               showCheckmark: false,
@@ -167,14 +169,23 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
       padding: const EdgeInsetsDirectional.fromSTEB(20, 8, 0, 0),
       child: SizedBox(
         height: 32,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
+        child: HorizontalCarousel(
+          height: 32,
           itemCount: _statuses.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 6),
+          separatorWidth: 6,
+          padding: EdgeInsets.zero,
           itemBuilder: (context, index) {
             final s = _statuses[index];
             final isSelected = _statusFilter == s;
-            final label = s == 'all' ? 'All' : s[0].toUpperCase() + s.substring(1).replaceAllMapped(RegExp(r'[A-Z]'), (m) => ' ${m.group(0)}');
+            final label = s == 'all' ? context.l10n.allFilter : switch (s) {
+              'watching' => context.l10n.watching,
+              'completed' => context.l10n.completed,
+              'planToWatch' => context.l10n.planToWatch,
+              'onHold' => context.l10n.onHold,
+              'dropped' => context.l10n.dropped,
+              'rewatching' => context.l10n.rewatching,
+              _ => s,
+            };
             return FilterChip(
               label: Text(label, style: textTheme.labelSmall?.copyWith(fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400)),
               selected: isSelected,
@@ -339,7 +350,7 @@ class _GridTile extends StatelessWidget {
     final mediaId = item['media_id'] as int;
     final um = userMedia.where((u) => u.mediaId == mediaId).firstOrNull;
     final mediaData = item['media'] as Map<String, dynamic>?;
-    final title = mediaData?['title'] as String? ?? 'ID: $mediaId';
+    final title = mediaData?['title'] as String? ?? context.l10n.mediaWithId(mediaId.toString());
     final posterPath = mediaData?['poster_path'] as String?;
 
     return Card(
@@ -388,8 +399,15 @@ class _GridTile extends StatelessWidget {
                     const SizedBox(width: Spacing.xs),
                     Expanded(
                       child: Text(
-                        um.status.name[0].toUpperCase() + um.status.name.substring(1).replaceAllMapped(
-                          RegExp(r'[A-Z]'), (m) => ' ${m.group(0)}'),
+                        switch (um.status.name) {
+                          'watching' => context.l10n.watching,
+                          'completed' => context.l10n.completed,
+                          'planToWatch' => context.l10n.planToWatch,
+                          'onHold' => context.l10n.onHold,
+                          'dropped' => context.l10n.dropped,
+                          'rewatching' => context.l10n.rewatching,
+                          _ => um.status.name,
+                        },
                         style: textTheme.labelSmall?.copyWith(fontSize: 9),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -438,7 +456,7 @@ class _ListTile extends StatelessWidget {
     final note = item['note'] as String?;
     final um = userMedia.where((u) => u.mediaId == mediaId).firstOrNull;
     final mediaData = item['media'] as Map<String, dynamic>?;
-    final title = mediaData?['title'] as String? ?? 'ID: $mediaId';
+    final title = mediaData?['title'] as String? ?? context.l10n.mediaWithId(mediaId.toString());
     final posterPath = mediaData?['poster_path'] as String?;
     final mediaType = mediaData?['media_type'] as String? ?? item['media_type'] as String? ?? 'movie';
 
@@ -497,11 +515,19 @@ class _ListTile extends StatelessWidget {
                           _statusDot(um.status.name),
                           const SizedBox(width: Spacing.xs),
                           Text(
-                            um.status.name[0].toUpperCase() + um.status.name.substring(1).replaceAllMapped(RegExp(r'[A-Z]'), (m) => ' ${m.group(0)}'),
+                            switch (um.status.name) {
+                              'watching' => context.l10n.watching,
+                              'completed' => context.l10n.completed,
+                              'planToWatch' => context.l10n.planToWatch,
+                              'onHold' => context.l10n.onHold,
+                              'dropped' => context.l10n.dropped,
+                              'rewatching' => context.l10n.rewatching,
+                              _ => um.status.name,
+                            },
                             style: textTheme.labelSmall?.copyWith(color: _statusColor(um.status.name)),
                           ),
                           if (um.episodeProgress > 0)
-                            Text(' \u2022 ${um.episodeProgress}/${um.totalEpisodes}', style: textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+                            Text(context.l10n.episodeProgress(um.episodeProgress, um.totalEpisodes), style: textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
                         ],
                       ],
                     ),

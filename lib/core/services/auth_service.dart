@@ -49,9 +49,7 @@ class AuthService {
       password: password,
     );
     if (response.session == null) {
-      throw Exception(
-        'Account created! Please check your email for a confirmation link before signing in.',
-      );
+      throw Exception('accountCreated');
     }
     // If a session was returned, the user is auto-confirmed. Wait briefly for
     // the auth state to propagate.

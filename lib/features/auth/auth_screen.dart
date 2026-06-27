@@ -466,6 +466,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
   }
 
   Widget _buildErrorBanner(String error, ColorScheme colorScheme) {
+    final l10n = context.l10n;
+    final localizedError = switch (error) {
+      'invalidEmailOrPassword' => l10n.invalidEmailOrPassword,
+      'pleaseConfirmEmail' => l10n.pleaseConfirmEmail,
+      'accountAlreadyExists' => l10n.accountAlreadyExists,
+      'passwordMinLength' => l10n.passwordMinLength,
+      'accountCreated' => l10n.accountCreated,
+      _ => error,
+    };
     return Container(
       padding: const EdgeInsetsDirectional.all(Spacing.md),
       decoration: BoxDecoration(
@@ -477,7 +486,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
           Icon(Icons.error_outline, color: colorScheme.onErrorContainer, size: 20),
           const SizedBox(width: Spacing.sm),
           Expanded(
-            child: Text(error, style: TextStyle(color: colorScheme.onErrorContainer)),
+            child: Text(localizedError, style: TextStyle(color: colorScheme.onErrorContainer)),
           ),
           GestureDetector(
             onTap: () => ref.read(authNotifierProvider.notifier).clearError(),

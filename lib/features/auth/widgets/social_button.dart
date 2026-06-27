@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/l10n.dart';
+
 enum SocialButtonType { google, apple }
 
 class SocialButton extends StatelessWidget {
@@ -35,8 +37,8 @@ class SocialButton extends StatelessWidget {
             : _buildIcon(),
         label: Text(
           type == SocialButtonType.apple
-              ? 'Continue with Apple'
-              : 'Continue with Google',
+              ? context.l10n.continueWithApple
+              : context.l10n.continueWithGoogle,
         ),
         style: OutlinedButton.styleFrom(
           padding: const EdgeInsetsDirectional.symmetric(vertical: 14),

@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/media_enums.dart';
 import '../../../core/models/recommendation_models.dart';
 import '../../../core/providers/app_providers.dart';
+import '../../../core/services/tmdb_service.dart';
 import '../../../core/shared/media_card.dart';
+import '../../../l10n/l10n.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/media_model.dart';
 
 /// Displays a single recommendation result as a [MediaCard] with an optional
@@ -21,6 +24,8 @@ class RecommendationCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mediaAsync = ref.watch(_mediaByIdProvider(scoredMedia.mediaId));
+    final l10n = context.l10n;
+    final localizedReason = _localizedReason(scoredMedia.reason, l10n);
 
     return SizedBox(
       width: 150,
@@ -46,9 +51,9 @@ class RecommendationCard extends ConsumerWidget {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Semantics(
-                      label: context.l10n.recommendationReason(scoredMedia.reason),
+                      label: context.l10n.recommendationReason(localizedReason),
                       child: Text(
-                        scoredMedia.reason!,
+                        localizedReason,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
@@ -74,9 +79,39 @@ class RecommendationCard extends ConsumerWidget {
   }
 }
 
-/// Fetches a [MediaModel] by its integer ID via Supabase (cached per ID).
+String _localizedReason(String? reason, AppLocalizations l10n) {
+  if (reason == null) return '';
+  if (reason.startsWith('Because you enjoy ')) {
+    final genre = reason.replaceFirst('Because you enjoy ', '');
+    return l10n.becauseYouEnjoyGenre(genre);
+  }
+  switch (reason) {
+    case 'Popular trending':
+      return l10n.popularTrending;
+    case 'Similar to what you\'ve saved':
+      return l10n.similarToSaved;
+    case 'Similar to your favorites':
+      return l10n.similarToFavorites;
+    case 'Users with similar taste enjoyed this':
+      return l10n.usersLikeYouEnjoyed;
+    case 'Recently released':
+      return l10n.recentlyReleased;
+    case 'Top rated':
+      return l10n.topRated;
+    case 'Hidden gem — highly rated but undiscovered':
+      return l10n.hiddenGem;
+    case 'Critically acclaimed':
+      return l10n.criticallyAcclaimed;
+    default:
+      return reason;
+  }
+}
+
+/// Fetches a [MediaModel] by its integer ID via Supabase or TMDB API.
+/// Falls back to TMDB when Supabase media table is unavailable.
 final _mediaByIdProvider = FutureProvider.family<MediaModel?, int>((ref, id) async {
   final supabase = ref.watch(supabaseServiceProvider);
+  final tmdb = TmdbService.instance;
   try {
     final Map<String, dynamic> data = await supabase.media
         .select('id, title, poster_path, vote_average, media_type')
@@ -90,8 +125,30 @@ final _mediaByIdProvider = FutureProvider.family<MediaModel?, int>((ref, id) asy
       mediaType: _parseMediaType(data['media_type'] as String?),
     );
   } catch (e) {
-    debugPrint('Failed to fetch media $id: $e');
-    return null;
+    try {
+      final Map<String, dynamic> data = await tmdb.movieDetails(id);
+      return MediaModel(
+        id: data['id'] as int,
+        title: data['title'] as String? ?? '',
+        posterPath: data['poster_path'] as String?,
+        voteAverage: (data['vote_average'] as num?)?.toDouble(),
+        mediaType: MediaType.movie,
+      );
+    } catch (movieError) {
+      try {
+        final Map<String, dynamic> data = await tmdb.tvDetails(id);
+        return MediaModel(
+          id: data['id'] as int,
+          title: data['name'] as String? ?? '',
+          posterPath: data['poster_path'] as String?,
+          voteAverage: (data['vote_average'] as num?)?.toDouble(),
+          mediaType: MediaType.tv,
+        );
+      } catch (tmdbError) {
+        debugPrint('Failed to fetch media $id from both Supabase and TMDB: $tmdbError');
+        return null;
+      }
+    }
   }
 });
 

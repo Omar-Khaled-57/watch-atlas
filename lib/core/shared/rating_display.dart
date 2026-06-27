@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/dimensions.dart';
+import '../../l10n/l10n.dart';
 
 class RatingDisplay extends StatelessWidget {
   final double rating;

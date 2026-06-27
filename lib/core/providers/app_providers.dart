@@ -113,3 +113,5 @@ class LocaleNotifier extends StateNotifier<Locale> {
     await prefs.setString('locale', locale.languageCode);
   }
 }
+
+final showForYouSectionProvider = StateProvider<bool>((ref) => true);

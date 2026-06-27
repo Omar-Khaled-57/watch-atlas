@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
+import '../../core/extensions/datetime_extensions.dart';
 import '../../core/shared/user_avatar.dart';
 import '../../core/shared/empty_state.dart';
 import '../../core/shared/loading_widget.dart';
@@ -314,12 +315,6 @@ class _SocialScreenState extends ConsumerState<SocialScreen>
   String _formatTime(String isoDate) {
     final dateTime = DateTime.tryParse(isoDate);
     if (dateTime == null) return '';
-    final now = DateTime.now();
-    final diff = now.difference(dateTime);
-    if (diff.inMinutes < 1) return context.l10n.justNow;
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return '${diff.inDays}d ago';
+    return dateTime.timeAgo(context);
   }
 }

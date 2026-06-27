@@ -469,6 +469,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get personalizedRecommendations => 'توصيات مخصصة';
 
   @override
+  String get activityImprovesSuggestions => 'اجعل نشاطك يحسن التوصيات';
+
+  @override
   String get clearRecommendationHistory => 'مسح سجل التوصيات';
 
   @override
@@ -559,18 +562,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get justNow => 'الآن';
 
   @override
-  String minutesAgo(Object minutes) {
-    return 'منذ $minutes د';
+  String minutesAgo(double count) {
+    return '$count دقيقة مضت';
   }
 
   @override
-  String hoursAgo(Object hours) {
-    return 'منذ $hours س';
+  String hoursAgo(double count) {
+    return '$count ساعة مضت';
   }
 
   @override
-  String daysAgo(Object days) {
-    return 'منذ $days ي';
+  String daysAgo(double count) {
+    return '$count يوم مضت';
   }
 
   @override
@@ -579,8 +582,8 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String monthsAgo(Object months) {
-    return 'منذ $months ش';
+  String monthsAgo(double count) {
+    return '$count شهر مضى';
   }
 
   @override
@@ -610,7 +613,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get acceptanceOfTermsBody =>
-      'باستخدامك واتش أطلس، فإنك توافق على الالتزام بشروط الخدمة هذه. إذا كنت لا توافق، فلا تستخدم الخدمة.';
+      'باستخدامك أو الوصول إلى واتش أطلس، فإنك توافق على الالتزام بشروط الخدمة هذه. إذا كنت لا توافق، فلا تستخدم الخدمة.';
 
   @override
   String get descriptionOfService => '2. وصف الخدمة';
@@ -627,42 +630,91 @@ class AppLocalizationsAr extends AppLocalizations {
       'يجب تسجيل الدخول عبر Google OAuth لاستخدام الخدمة. أنت مسؤول عن الحفاظ على سرية حسابك. يجب أن يكون عمرك 13 عامًا على الأقل لاستخدام هذه الخدمة.';
 
   @override
-  String get userConduct => '4. سلوك المستخدم';
+  String get userResponsibilities => '4. مسؤوليات المستخدم';
 
   @override
-  String get userConductBody =>
-      'توافق على عدم: نشر محتوى مسيء أو مضايق أو غير لائق؛ انتحال شخصية الآخرين؛ محاولة التحايل على إجراءات الأمان؛ استخدام الخدمة لأي غرض غير قانوني.';
+  String get userResponsibilitiesBody =>
+      'توافق على عدم نشر محتوى مسيء أو مضايق أو غير لائق؛ عدم انتحال شخصية الآخرين؛ عدم محاولة التحايل على إجراءات الأمان؛ وعدم استخدام الخدمة لأي غرض غير قانوني. أنت مسؤول عن جميع الأنشطة التي تحدث تحت حسابك.';
 
   @override
-  String get intellectualProperty => '5. الملكية الفكرية';
+  String get acceptableUse => '5. الاستخدام المقبول';
+
+  @override
+  String get acceptableUseBody =>
+      'يجوز لك استخدام الخدمة لأغراض قانونية فقط. توافق على عدم التداخل مع سلامة أو أداء الخدمة أو محاولة الوصول غير المصرح به إلى أي جزء من الخدمة أو الأنظمة ذات الصلة.';
+
+  @override
+  String get userGeneratedContent => '6. المحتوى الذي ينشئه المستخدم';
+
+  @override
+  String get userGeneratedContentBody =>
+      'أنت تحتفظ بملكية المحتوى الذي تنشئه، بما في ذلك القوائم والتقييمات والمراجعات والملاحظات ومعلومات الملف الشخصي. باستخدامك الخدمة، فإنك تمنح واتش أطلس ترخيصًا عالميًا غير حصري لتخزين وعرض وتوزيع هذا المحتوى في connection with تقديم الخدمة. أنت المسول الوحيد عن المحتوى الذي ترسله.';
+
+  @override
+  String get intellectualProperty => '7. الملكية الفكرية';
 
   @override
   String get intellectualPropertyBody =>
-      'يتم توفير بيانات الوسائط والصور بواسطة TMDB وAniList بموجب تراخيص كل منهما. تطبيق واتش أطلس والكود مملوك. المحتوى الذي ينشئه المستخدم يظل ملكًا لك، مع ترخيص لواتش أطلس لعرضه داخل الخدمة.';
+      'يتم توفير بيانات الوسائط والصور بواسطة TMDB وAniList بموجب تراخيص كل منهما. تطبيق واتش أطلس والكود مملوك. المحتوى الذي ينشئه المستخدم (المراجعات، التقييمات، القوائم) يظل ملكًا لك، مع ترخيص لواتش أطلس لعرضه داخل الخدمة.';
 
   @override
-  String get limitationOfLiability => '6. تحديد المسؤولية';
+  String get thirdPartyServicesTerms => '8. خدمات الطرف الثالث';
 
   @override
-  String get limitationOfLiabilityBody =>
-      'يتم توفير واتش أطلس كما هو دون أي ضمانات. لسنا مسؤولين عن دقة بيانات الوسائط من الأطراف الثالثة. نحتفظ بالحق في تعديل الخدمة أو إيقافها في أي وقت.';
+  String get thirdPartyServicesTermsBody =>
+      'قد تحتوي الخدمة على روابط أو تدمج مع خدمات طرف ثالث، بما في ذلك TMDB وAniList وGoogle OAuth. يحكم استخدامك لخدمات الطرف الثالث شروطها وسياسات الخصوصية الخاصة بها. واتش أطلس غير مسؤول عن ممارسات أو محتوى خدمات الطرف الثالث.';
 
   @override
-  String get termination => '7. إنهاء الخدمة';
+  String get externalLinks => '9. الروابط الخارجية';
 
   @override
-  String get terminationBody =>
-      'نحتفظ بالحق في تعليق أو إنهاء الحسابات التي تنتهك هذه الشروط. يمكنك حذف حسابك في أي وقت.';
+  String get externalLinksBody =>
+      'قد تحتوي الخدمة على روابط لمواقع أو موارد خارجية. واتش أطلس غير مسؤول عن توفر أو محتوى هذه المواقع الخارجية ولا ي Endorse أي محتوى أو منتجات أو خدمات متاحة منها.';
 
   @override
-  String get changesToTerms => '8. التغييرات على الشروط';
+  String get availabilityOfService => '10. توفر الخدمة';
+
+  @override
+  String get availabilityOfServiceBody =>
+      'نسعى للحفاظ على الخدمة متاحة وآمنة ومحدثة. ومع ذلك، لا نضمن وصولًا غير منقطع. قد تكون الخدمة غير متاحة مؤقتًا بسبب الصيانة أو التحديثات أو عوامل خارجة عن سيطرتنا.';
+
+  @override
+  String get changesToFeatures => '11. التغييرات على الميزات';
+
+  @override
+  String get changesToFeaturesBody =>
+      'قد نقوم بتعديل أو تحديث أو إيقاف ميزات الخدمة في أي وقت، مع أو بدون إشعار. لسنا مسؤولين تجاهك أو أي طرف ثالث عن أي تعديل أو تعليق أو إيقاف للخدمة أو أي جزء منها.';
+
+  @override
+  String get accountSuspension => '12. تعليق أو إنهاء الحساب';
+
+  @override
+  String get accountSuspensionBody =>
+      'نحتفظ بالحق في تعليق أو إنهاء الحسابات التي تنتهك هذه الشروط. يمكنك حذف حسابك والبيانات المرتبطة به في أي وقت من خلال إعدادات التطبيق أو عن طريق الاتصال بنا.';
+
+  @override
+  String get disclaimers => '13. إخلاء المسؤولية';
+
+  @override
+  String get disclaimersBody =>
+      'يتم توفير الخدمة كما هي وكما هي متاحة. لا نقدم أي ضمانات، صريحة أو ضمنية، بشأن دقة أو موثوقية أو توفر الخدمة. لا نضمن أن بيانات الوسائط أو التوصيات أو نتائج البحث ستكون خالية من الأخطاء أو تلبي توقعاتك.';
+
+  @override
+  String get privacyReference => '14. الخصوصية';
+
+  @override
+  String get privacyReferenceBody =>
+      'استخدامك للخدمة يحكمه أيضًا سياسة الخصوصية الخاصة بنا. يرجى مراجعة سياسة الخصوصية الخاصة بنا لفهم كيفية جمع واستخدام وحماية معلوماتك الشخصية.';
+
+  @override
+  String get changesToTerms => '15. التغييرات على الشروط';
 
   @override
   String get changesToTermsBody =>
       'قد نقوم بتحديث هذه الشروط في أي وقت. الاستمرار في الاستخدام بعد التغييرات يعتبر قبولًا. سيتم إخطار المستخدمين بالتغييرات الجوهرية عبر البريد الإلكتروني أو الإشعار داخل التطبيق.';
 
   @override
-  String get contactSection => '9. الاتصال';
+  String get contactSection => '16. الاتصال';
 
   @override
   String get contactLegal =>
@@ -677,42 +729,143 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get informationWeCollectBody =>
-      'عند تسجيل الدخول عبر Google OAuth، نجمع عنوان بريدك الإلكتروني واسم العرض. نقوم أيضًا بتخزين الوسائط التي تتابعها مع حالة المشاهدة والتقييمات والمراجعات.';
+      'عند تسجيل الدخول عبر Google OAuth، نجمع عنوان بريدك الإلكتروني واسم العرض. نقوم أيضًا بتخزين الوسائط التي تتابعها (أفلام، مسلسلات، أنمي) مع حالة المشاهدة والتقييمات والمراجعات. الصور الرمزية وأسماء العرض مخزنة عبر Supabase storage.\n\nالمعلومات الاختيارية التي قد تقدمها تشمل تاريخ الميلاد والجنس، وتُستخدم فقط لتخصيص تجربتك.';
 
   @override
-  String get howWeUseInfo => '2. كيف نستخدم معلوماتك';
+  String get automaticallyCollectedData => '2. البيانات المجمعة تلقائيًا';
+
+  @override
+  String get automaticallyCollectedDataBody =>
+      'قد نجمع تلقائيًا معلومات معينة عند استخدامك للتطبيق، بما في ذلك نوع الجهاز وإصخدام التطبيق وتقارير الأعطال إن وجدت. تتم معالجة بيانات المصادقة بواسطة موفر المصادقة لدينا (Google OAuth) للحفاظ على جلستك بأمان.';
+
+  @override
+  String get howWeUseInfo => '3. كيف نستخدم معلوماتك';
 
   @override
   String get howWeUseInfoBody =>
-      'تُستخدم معلوماتك لتقديم الخدمة وتحسينها: تخصيص تجربتك، والحفاظ على قوائم المشاهدة والمراجعات، وإنشاء تحليلات بناءً على الوسائط المتتبعة، وإبلاغك بتحديثات الخدمة.';
+      'تُستخدم معلوماتك لتقديم الخدمة وتحسينها: تخصيص تجربتك، والحفاظ على قوائم المشاهدة والمراجعات، وإنشاء توصيات بناءً على نشاطك، وإبلاغك بتحديثات الخدمة إذا لزم الأمر.';
 
   @override
-  String get dataStorage => '3. تخزين البيانات والأمان';
+  String get dataStorage => '4. تخزين البيانات والأمان';
 
   @override
   String get dataStorageBody =>
-      'يتم تخزين بياناتك بشكل آمن على Supabase وGoogle Cloud. نستخدم أمان مستوى الصف لضمان وصولك إلى بياناتك فقط. لا يتم تخزين كلمات المرور مطلقًا.';
+      'يتم تخزين بياناتك بشكل آمن على Supabase وGoogle Cloud. نستخدم أمان مستوى الصف لضمان وصولك إلى بياناتك فقط. لا يتم تخزين كلمات المرور مطلقًا — تتم المصادقة بالكامل عبر Google OAuth. جميع عمليات نقل البيانات تستخدم اتصالات HTTPS آمنة.';
 
   @override
-  String get thirdPartyServices => '4. خدمات الطرف الثالث';
+  String get thirdPartyServicesPrivacy => '5. خدمات الطرف الثالث';
 
   @override
-  String get thirdPartyServicesBody =>
-      'نستخدم TMDB لجلب بيانات الوسائط. يتم إرسال عمليات البحث ومعرفات الوسائط التي تعرضتها إلى API الخاص بـ TMDB. نستخدم أيضًا AniList لبيانات الأنمي. Google OAuth يُستخدم للمصادقة.';
+  String get thirdPartyServicesPrivacyBody =>
+      'نستخدم TMDB لجلب بيانات الوسائط. يتم إرسال عمليات البحث ومعرفات الوسائط التي تعرضها إلى API الخاص بـ TMDB. نستخدم أيضًا AniList لبيانات الأنمي. Google OAuth يُستخدم للمصادقة. كل خدمة طرف ثالث تعالج البيانات وفقًا لسياسة الخصوصية الخاصة بها.';
 
   @override
-  String get dataRetention => '5. الاحتفاظ بالبيانات';
+  String get cookiesLocalStorage => '6. ملفات تعريف الارتباط والتخزين المحلي';
+
+  @override
+  String get cookiesLocalStorageBody =>
+      'نستخدم التخزين المحلي للحفاظ على جلستك، وتذكر تفضيلاتك (مثل المظهر واللغة)، وتخزين البيانات مؤقتًا لتحسين الأداء. لا نستخدم ملفات تعريف الارتباط للتتبع أو تقنيات مماثلة لأغراض إعلانية.';
+
+  @override
+  String get dataRetention => '7. الاحتفاظ بالبيانات';
 
   @override
   String get dataRetentionBody =>
-      'يتم الاحتفاظ ببياناتك طالما أن حسابك نشط. يمكنك حذف حسابك والبيانات المرتبطة به في أي وقت عن طريق الاتصال بنا.';
+      'يتم الاحتفاظ ببياناتك طالما أن حسابك نشط. يمكنك حذف حسابك والبيانات المرتبطة به في أي وقت عن طريق الاتصال بنا أو استخدام ميزة حذف الحساب في التطبيق.';
 
   @override
-  String get yourRights => '6. حقوقك';
+  String get yourRights => '8. حقوقك';
 
   @override
   String get yourRightsBody =>
-      'يحق لك طلب نسخة من بياناتك، أو تصحيح البيانات غير الدقيقة، أو حذف حسابك والبيانات المرتبطة به. اتصل بنا على البريد الإلكتروني أدناه.';
+      'يحق لك طلب نسخة من بياناتك، أو تصحيح البيانات غير الدقيقة، أو حذف حسابك والبيانات المرتبطة به في أي وقت. يمكنك تحديث معلومات ملفك الشخصي، وإدارة تفضيلات التخصيص، وتغيير لغتك، أو تسجيل الخروج في أي وقت من خلال إعدادات التطبيق.';
+
+  @override
+  String get childrensPrivacy => '9. خصوصية الأطفال';
+
+  @override
+  String get childrensPrivacyBody =>
+      'واتش أطلس مخصص للمستخدمين من عمر 13 عامًا فما فوق. لا نجمع عن علم معلومات شخصية من الأطفال دون سن 13. إذا كنت والدًا أو وصياً وتعتقد أن طفلك قدم لنا معلومات شخصية، فيرجى الاتصال بنا لنتخذ الإجراء المناسب.';
+
+  @override
+  String get policyUpdates => '10. تحديثات السياسة';
+
+  @override
+  String get policyUpdatesBody =>
+      'قد نقوم بتحديث سياسة الخصوصية هذه من وقت لآخر. سنقوم بإعلامك بأي تغييرات جوهرية عن طريق نشر السياسة المحدثة في التطبيق وتحديث تاريخ آخر تحديث أعلاه. استمرارك في استخدام الخدمة بعد التغييرات يعتبر قبولًا للسياسة المحدثة.';
+
+  @override
+  String get openSourceNotice => 'إشعار المصدر المفتوح';
+
+  @override
+  String get openSourceNoticeBody =>
+      'واتش أطلس يستخدم مكتبات وأطر عمل مفتوحة المصدر المختلفة. نعترم بامتنان بمساهمات مجتمع المصادر المفتوحة. تطبق التراخيص الخاصة بهذه المكتبات على استخدامها داخل هذا التطبيق.';
+
+  @override
+  String get thirdPartyLibraries => 'مكتبات الطرف الثالث';
+
+  @override
+  String get thirdPartyLibrariesBody =>
+      'يتضمن هذا التطبيق مكونات برمجية مفتوحة المصدر. تتوفر تفاصيل الترخيص لهذه المكونات من خلال صفحة الترخيص أدناه.';
+
+  @override
+  String get mediaOwnership => 'ملكية الوسائط';
+
+  @override
+  String get mediaOwnershipBody =>
+      'بيانات الوسائط والملصقات والصور الخلفية والشعارات والأعمال الفنية الترويجية الخاصة بالأفلام والمسلسلات والأنمي والوسائط الأخرى هي ملك لأصحابها وحاملي حقوق الطبع والنشر. واتش أطلس لا يدعي ملكية أي أصول وسائط طرف ثالث. يُستخدم هذا المحتوى لأغراض التعريف والتصنيف والمعلومات فقط.';
+
+  @override
+  String get aiGeneratedLogo => 'الشعار المُنشأ بالذكاء الاصطناعي';
+
+  @override
+  String get aiGeneratedLogoBody =>
+      'تم إنشاء شعار تطبيق واتش أطلس باستخدام أدوات تصميم بمساعدة الذكاء الاصطناعي. الشعار يستخدم كهوية بصرية للتطبيق. واتش أطلس لا يدعي ملكية حصرية للنموذج الأساسي للذكاء الاصطناعي أو الأسلوب المُنشأ أو البيانات التدريبية المستخدمة في إنشائه. أي حقوق مرتبطة بالشعار المُنشأ تخضع لشروط خدمة الذكاء الاصطناعي المستخدمة في إنشائه. يجب عدم تفسير الشعار على أنه يدعي ملكية منهجيات الذكاء الاصطناعي المُنشأة أو الملكية الفكرية الطرف الثالث.';
+
+  @override
+  String get trademarks => 'العلامات التجارية';
+
+  @override
+  String get trademarksBody =>
+      'عناوين الأفلام والمسلسلات والأنمي وأسماء الاستوديوهات ومنصات البث وأسماء الشركات والعلامات التجارية الظاهرة في التطبيق هي ملك لأصحابها. ظهورها داخل واتش أطلس لأغراض التعريف والتصنيف والمعلومات فقط.';
+
+  @override
+  String get metadataAttribution => 'البيانات الوصفية';
+
+  @override
+  String get metadataAttributionBody =>
+      'معلومات الوسائط المعروضة في التطبيق — بما في ذلك العناوين والأوصاف والتقييمات والأنواع وتواريخ الإصدار وطاقم التمثيل والإنتاج والمدة — يتم الحصول عليها من موفرين طرف ثالث، chiefly TMDB و AniList. يتم توفير هذه البيانات لأغراض إعلامية وقد تحتوي أحيانًا على أخطاء أو تكون قديمة.';
+
+  @override
+  String get imagesAttribution => 'الصور';
+
+  @override
+  String get imagesAttributionBody =>
+      'الملصقات والصور الخلفية والشعارات والأعمال الفنية الترويجية المعروضة في التطبيق هي ملك لأصحاب حقوق الطبع والنشرrespective وتُستخدم بموجب ترخيص أو لأغراق التعريف فقط. واتش أطلس لا يدعي ملكية أي أصول بصرية.';
+
+  @override
+  String get recommendationSystemInfo => 'نظام التوصيات';
+
+  @override
+  String get recommendationSystemInfoBody =>
+      'يتم إنشاء التوصيات تلقائيًا بناءً على نشاطك وتفضيلاتك، مثل ما تشاهده وتقيّمه وتحفظه وتبحث عنه. الهدف هو تحسين اكتشاف المحتوى. التوصيات هي اقتراحات وليست ضمانات، ولا تعكس أي تأييد رسمي من منشئي المحتوى أو الموزعين.';
+
+  @override
+  String get userContentOwnership => 'محتوى المستخدم';
+
+  @override
+  String get userContentOwnershipBody =>
+      'أنت تحتفظ بملكية المحتوى الذي تنشئه في واتش أطلس، بما في ذلك القوائم والتقييمات والملاحظات. باستخدامك الخدمة، فإنك تمنح واتش أطلس الحقوق اللازمة لتخزين وعرض ومعالجة هذا المحتوى داخل التطبيق. أنت مسؤول عن المحتوى الذي ترسله ويجب أن تحترم حقوق الآخرين.';
+
+  @override
+  String get accuracyDisclaimer => 'الدقة';
+
+  @override
+  String get accuracyDisclaimerBody =>
+      'على الرغم من سعي واتش أطلس لتقديم معلومات دقيقة ومحدثة، قد تحتوي البيانات الوصفية أحيانًا على أخطاء أو معلومات قديمة بسبب اعتمادها على مصادر طرف ثالث. نشجع المستخدمين على التحقق من التفاصيل المهمة من خلال المصادر الرسمية.';
+
+  @override
+  String get contentAndAttribution => 'المحتوى والنسب';
 
   @override
   String get confirmPassword => 'تأكيد كلمة المرور';
@@ -1361,4 +1514,157 @@ class AppLocalizationsAr extends AppLocalizations {
   String ratedStars(double stars) {
     return 'مُقيم بـ $stars نجوم';
   }
+
+  @override
+  String get allFilter => 'الكل';
+
+  @override
+  String listDeletedTitle(String title) {
+    return 'تم حذف \"$title\"';
+  }
+
+  @override
+  String episodeProgress(int current, int total) {
+    return '$current‏/‏$total';
+  }
+
+  @override
+  String countryWithCode(String name, String code) {
+    return '$name ($code)';
+  }
+
+  @override
+  String mediaWithId(String id) {
+    return 'وسائط #$id';
+  }
+
+  @override
+  String get unknownList => 'قائمة غير معروفة';
+
+  @override
+  String get profileDatabaseError =>
+      'تأكد من تطبيق منح قاعدة البيانات.\nقم بتشغيل supabase/grants.sql في محرر SQL الخاص بـ Supabase.';
+
+  @override
+  String get accountCreated =>
+      'تم إنشاء الحساب! تحقق من بريدك الإلكتروني للحصول على رابط التأكيد قبل تسجيل الدخول.';
+
+  @override
+  String get notificationChannelDescription => 'إشعارات من واتش أطلس';
+
+  @override
+  String get anonymous => 'مجهول';
+
+  @override
+  String get contentReport => 'تقرير محتوى';
+
+  @override
+  String get userReport => 'تقرير مستخدم';
+
+  @override
+  String get reportPending => 'معلق';
+
+  @override
+  String get reportResolved => 'تم الحل';
+
+  @override
+  String get continueWithApple => 'المتابعة عبر Apple';
+
+  @override
+  String get popularTrending => 'رائج';
+
+  @override
+  String get recommendationBecauseYouSaved => 'لأنك حفظت...';
+
+  @override
+  String get recommendationBecauseYouViewed => 'لأنك شاهدت...';
+
+  @override
+  String get recommendationTrendingNearYou => 'رائع بالقرب منك';
+
+  @override
+  String get recommendationPopularThisWeek => 'الأكثر شعبية هذا الأسبوع';
+
+  @override
+  String get recommendationContinueExploring => 'متابعة الاستكشاف';
+
+  @override
+  String get recommendationNewReleases => 'إصدارات حديثة';
+
+  @override
+  String get recommendationHiddenGems => 'جوهرة مخفية';
+
+  @override
+  String get recommendationCriticallyAcclaimed => 'مشهور نقديًا';
+
+  @override
+  String get recommendationTopRated => 'الأعلى تقييمًا';
+
+  @override
+  String get recommendationSimilarToFavorites => 'مشابه لتفضيلاتك';
+
+  @override
+  String get recommendationBecauseYouLikeGenre => 'لأنك تحب...';
+
+  @override
+  String get recommendationFriendsAlsoSaved => 'أصدقاؤك حفظوها أيضًا';
+
+  @override
+  String get recommendationUsersLikeYou => 'مستخدمون مثلك استمتعوا بهذا';
+
+  @override
+  String get recommendationAwardWinners => 'فائزون بجوائز';
+
+  @override
+  String get recommendationUnderratedClassics => 'كلاسيكيات غير معترف بها';
+
+  @override
+  String get recommendationUpcomingReleases => 'إصدارات قادمة';
+
+  @override
+  String get similarToSaved => 'مشابه لما حفظته';
+
+  @override
+  String get forYou => 'لك';
+
+  @override
+  String get seeMore => 'عرض المزيد';
+
+  @override
+  String get allRecommendations => 'جميع التوصيات';
+
+  @override
+  String get viewAllRecommendations => 'عرض جميع التوصيات';
+
+  @override
+  String get recommendationCategories => 'فئات التوصيات';
+
+  @override
+  String get failedToLoadRecommendations => 'فشل تحميل التوصيات';
+
+  @override
+  String get noRecommendationsYet => 'لا توجد توصيات بعد';
+
+  @override
+  String get navRecommendations => 'التوصيات';
+
+  @override
+  String get similarToFavorites => 'مشابه لتفضيلاتك';
+
+  @override
+  String get usersLikeYouEnjoyed => 'مستخدمون بذوق مشابه استمتعوا بهذا';
+
+  @override
+  String becauseYouEnjoyGenre(String genre) {
+    return 'لأنك تحب $genre';
+  }
+
+  @override
+  String get recentlyReleased => 'أُصدِر مؤخرًا';
+
+  @override
+  String get hiddenGem => 'جوهرة مخفية — تقييم عالي وغير معروف';
+
+  @override
+  String get criticallyAcclaimed => 'مشهور نقديًا';
 }

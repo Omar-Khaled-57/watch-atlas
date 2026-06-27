@@ -962,6 +962,12 @@ abstract class AppLocalizations {
   /// **'Personalized Recommendations'**
   String get personalizedRecommendations;
 
+  /// No description provided for @activityImprovesSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Let your activity improve suggestions'**
+  String get activityImprovesSuggestions;
+
   /// No description provided for @clearRecommendationHistory.
   ///
   /// In en, this message translates to:
@@ -1127,7 +1133,7 @@ abstract class AppLocalizations {
   /// No description provided for @topRated.
   ///
   /// In en, this message translates to:
-  /// **'Top Rated'**
+  /// **'Top rated'**
   String get topRated;
 
   /// No description provided for @recentActivity.
@@ -1139,26 +1145,26 @@ abstract class AppLocalizations {
   /// No description provided for @justNow.
   ///
   /// In en, this message translates to:
-  /// **'Just now'**
+  /// **'just now'**
   String get justNow;
 
   /// No description provided for @minutesAgo.
   ///
   /// In en, this message translates to:
-  /// **'{minutes}m ago'**
-  String minutesAgo(Object minutes);
+  /// **'{count}m ago'**
+  String minutesAgo(double count);
 
   /// No description provided for @hoursAgo.
   ///
   /// In en, this message translates to:
-  /// **'{hours}h ago'**
-  String hoursAgo(Object hours);
+  /// **'{count}h ago'**
+  String hoursAgo(double count);
 
   /// No description provided for @daysAgo.
   ///
   /// In en, this message translates to:
-  /// **'{days}d ago'**
-  String daysAgo(Object days);
+  /// **'{count}d ago'**
+  String daysAgo(double count);
 
   /// No description provided for @weeksAgo.
   ///
@@ -1169,8 +1175,8 @@ abstract class AppLocalizations {
   /// No description provided for @monthsAgo.
   ///
   /// In en, this message translates to:
-  /// **'{months}mo ago'**
-  String monthsAgo(Object months);
+  /// **'{count}mo ago'**
+  String monthsAgo(double count);
 
   /// No description provided for @yearsAgo.
   ///
@@ -1217,7 +1223,7 @@ abstract class AppLocalizations {
   /// No description provided for @acceptanceOfTermsBody.
   ///
   /// In en, this message translates to:
-  /// **'By accessing or using Watch Atlas, you agree to be bound by these Terms of Service. If you do not agree, do not use the service.'**
+  /// **'By accessing or using WatchAtlas, you agree to be bound by these Terms of Service. If you do not agree, do not use the service.'**
   String get acceptanceOfTermsBody;
 
   /// No description provided for @descriptionOfService.
@@ -1229,7 +1235,7 @@ abstract class AppLocalizations {
   /// No description provided for @descriptionOfServiceBody.
   ///
   /// In en, this message translates to:
-  /// **'Watch Atlas is a media tracking application that allows users to discover, track, and organize movies, TV shows, and anime. Users can rate, review, and maintain watch lists.'**
+  /// **'WatchAtlas is a media tracking application that allows users to discover, track, and organize movies, TV shows, and anime. Users can rate, review, and maintain watch lists.'**
   String get descriptionOfServiceBody;
 
   /// No description provided for @userAccounts.
@@ -1244,58 +1250,142 @@ abstract class AppLocalizations {
   /// **'You must sign in via Google OAuth to use the service. You are responsible for maintaining the confidentiality of your account. You must be at least 13 years old to use this service.'**
   String get userAccountsBody;
 
-  /// No description provided for @userConduct.
+  /// No description provided for @userResponsibilities.
   ///
   /// In en, this message translates to:
-  /// **'4. User Conduct'**
-  String get userConduct;
+  /// **'4. User Responsibilities'**
+  String get userResponsibilities;
 
-  /// No description provided for @userConductBody.
+  /// No description provided for @userResponsibilitiesBody.
   ///
   /// In en, this message translates to:
-  /// **'You agree not to: post abusive, harassing, or inappropriate content; impersonate others; attempt to circumvent security measures; use the service for any illegal purpose.'**
-  String get userConductBody;
+  /// **'You agree not to post abusive, harassing, or inappropriate content; not to impersonate others; not to attempt to circumvent security measures; and not to use the service for any illegal purpose. You are responsible for all activity that occurs under your account.'**
+  String get userResponsibilitiesBody;
+
+  /// No description provided for @acceptableUse.
+  ///
+  /// In en, this message translates to:
+  /// **'5. Acceptable Use'**
+  String get acceptableUse;
+
+  /// No description provided for @acceptableUseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You may use the service only for lawful purposes. You agree not to interfere with or disrupt the integrity or performance of the service, or attempt to gain unauthorized access to any portion of the service or related systems.'**
+  String get acceptableUseBody;
+
+  /// No description provided for @userGeneratedContent.
+  ///
+  /// In en, this message translates to:
+  /// **'6. User-Generated Content'**
+  String get userGeneratedContent;
+
+  /// No description provided for @userGeneratedContentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You retain ownership of content you create, including lists, ratings, reviews, notes, and profile information. By using the service, you grant WatchAtlas a worldwide, non-exclusive license to store, display, and distribute that content in connection with providing the service. You are solely responsible for content you submit.'**
+  String get userGeneratedContentBody;
 
   /// No description provided for @intellectualProperty.
   ///
   /// In en, this message translates to:
-  /// **'5. Intellectual Property'**
+  /// **'7. Intellectual Property'**
   String get intellectualProperty;
 
   /// No description provided for @intellectualPropertyBody.
   ///
   /// In en, this message translates to:
-  /// **'Media metadata and images are provided by TMDB and AniList under their respective licenses. The Watch Atlas application and code are proprietary. User-generated content (reviews, ratings) remains owned by you, with a license granted to Watch Atlas to display it within the service.'**
+  /// **'Media metadata and images are provided by TMDB and AniList under their respective licenses. The WatchAtlas application and code are proprietary. User-generated content (reviews, ratings, lists) remains owned by you, with a license granted to WatchAtlas to display it within the service.'**
   String get intellectualPropertyBody;
 
-  /// No description provided for @limitationOfLiability.
+  /// No description provided for @thirdPartyServicesTerms.
   ///
   /// In en, this message translates to:
-  /// **'6. Limitation of Liability'**
-  String get limitationOfLiability;
+  /// **'8. Third-Party Services'**
+  String get thirdPartyServicesTerms;
 
-  /// No description provided for @limitationOfLiabilityBody.
+  /// No description provided for @thirdPartyServicesTermsBody.
   ///
   /// In en, this message translates to:
-  /// **'Watch Atlas is provided as is without warranties of any kind. We are not responsible for the accuracy of third-party metadata. We reserve the right to modify or discontinue the service at any time.'**
-  String get limitationOfLiabilityBody;
+  /// **'The service may contain links to or integrate with third-party services, including TMDB, AniList, and Google OAuth. Your use of third-party services is governed by their respective terms and privacy policies. WatchAtlas is not responsible for the practices or content of third-party services.'**
+  String get thirdPartyServicesTermsBody;
 
-  /// No description provided for @termination.
+  /// No description provided for @externalLinks.
   ///
   /// In en, this message translates to:
-  /// **'7. Termination'**
-  String get termination;
+  /// **'9. External Links'**
+  String get externalLinks;
 
-  /// No description provided for @terminationBody.
+  /// No description provided for @externalLinksBody.
   ///
   /// In en, this message translates to:
-  /// **'We reserve the right to suspend or terminate accounts that violate these terms. You may delete your account at any time.'**
-  String get terminationBody;
+  /// **'The service may contain links to external websites or resources. WatchAtlas is not responsible for the availability or content of these external sites and does not endorse any content, products, or services available from them.'**
+  String get externalLinksBody;
+
+  /// No description provided for @availabilityOfService.
+  ///
+  /// In en, this message translates to:
+  /// **'10. Availability of Service'**
+  String get availabilityOfService;
+
+  /// No description provided for @availabilityOfServiceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We strive to keep the service available, secure, and up to date. However, we do not guarantee uninterrupted access. The service may be temporarily unavailable due to maintenance, updates, or factors beyond our control.'**
+  String get availabilityOfServiceBody;
+
+  /// No description provided for @changesToFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'11. Changes to Features'**
+  String get changesToFeatures;
+
+  /// No description provided for @changesToFeaturesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We may modify, update, or discontinue features of the service at any time, with or without notice. We are not liable to you or any third party for any modification, suspension, or discontinuance of the service or any part thereof.'**
+  String get changesToFeaturesBody;
+
+  /// No description provided for @accountSuspension.
+  ///
+  /// In en, this message translates to:
+  /// **'12. Account Suspension or Termination'**
+  String get accountSuspension;
+
+  /// No description provided for @accountSuspensionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We reserve the right to suspend or terminate accounts that violate these terms. You may delete your account and associated data at any time through the app settings or by contacting us.'**
+  String get accountSuspensionBody;
+
+  /// No description provided for @disclaimers.
+  ///
+  /// In en, this message translates to:
+  /// **'13. Disclaimers'**
+  String get disclaimers;
+
+  /// No description provided for @disclaimersBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The service is provided on an as-is and as-available basis. We make no warranties, express or implied, regarding the accuracy, reliability, or availability of the service. We do not guarantee that metadata, recommendations, or search results will be error-free or meet your expectations.'**
+  String get disclaimersBody;
+
+  /// No description provided for @privacyReference.
+  ///
+  /// In en, this message translates to:
+  /// **'14. Privacy'**
+  String get privacyReference;
+
+  /// No description provided for @privacyReferenceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your use of the service is also governed by our Privacy Policy. Please review our Privacy Policy to understand how we collect, use, and protect your personal information.'**
+  String get privacyReferenceBody;
 
   /// No description provided for @changesToTerms.
   ///
   /// In en, this message translates to:
-  /// **'8. Changes to Terms'**
+  /// **'15. Changes to Terms'**
   String get changesToTerms;
 
   /// No description provided for @changesToTermsBody.
@@ -1307,7 +1397,7 @@ abstract class AppLocalizations {
   /// No description provided for @contactSection.
   ///
   /// In en, this message translates to:
-  /// **'9. Contact'**
+  /// **'16. Contact'**
   String get contactSection;
 
   /// No description provided for @contactLegal.
@@ -1331,68 +1421,242 @@ abstract class AppLocalizations {
   /// No description provided for @informationWeCollectBody.
   ///
   /// In en, this message translates to:
-  /// **'When you sign in with Google OAuth, we collect your email address and display name. We also store media you track (movies, TV shows, anime) along with your watch status, ratings, and reviews. Profile avatars and display names are stored via Supabase storage.'**
+  /// **'When you sign in with Google OAuth, we collect your email address and display name. We also store media you track (movies, TV shows, anime) along with your watch status, ratings, and reviews. Profile avatars and display names are stored via Supabase storage.\n\nOptional information you may provide includes your date of birth and gender, which are used only to personalize your experience.'**
   String get informationWeCollectBody;
+
+  /// No description provided for @automaticallyCollectedData.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Automatically Collected Data'**
+  String get automaticallyCollectedData;
+
+  /// No description provided for @automaticallyCollectedDataBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We may automatically collect certain information when you use the app, including device type, app version, and crash reports if available. Authentication metadata is processed by our authentication provider (Google OAuth) to maintain your session securely.'**
+  String get automaticallyCollectedDataBody;
 
   /// No description provided for @howWeUseInfo.
   ///
   /// In en, this message translates to:
-  /// **'2. How We Use Your Information'**
+  /// **'3. How We Use Your Information'**
   String get howWeUseInfo;
 
   /// No description provided for @howWeUseInfoBody.
   ///
   /// In en, this message translates to:
-  /// **'Your information is used to provide and improve the service: personalize your experience, maintain your watch lists and reviews, generate analytics based on your tracked media, and communicate service updates if necessary.'**
+  /// **'Your information is used to provide and improve the service: personalize your experience, maintain your watch lists and reviews, generate recommendations based on your activity, and communicate service updates if necessary.'**
   String get howWeUseInfoBody;
 
   /// No description provided for @dataStorage.
   ///
   /// In en, this message translates to:
-  /// **'3. Data Storage & Security'**
+  /// **'4. Data Storage & Security'**
   String get dataStorage;
 
   /// No description provided for @dataStorageBody.
   ///
   /// In en, this message translates to:
-  /// **'Your data is stored securely on Supabase (PostgreSQL) and Google Cloud infrastructure. We use Row Level Security to ensure you can only access your own data. Passwords are never stored — authentication is handled entirely by Google OAuth.'**
+  /// **'Your data is stored securely on Supabase (PostgreSQL) and Google Cloud infrastructure. We use Row Level Security to ensure you can only access your own data. Passwords are never stored — authentication is handled entirely by Google OAuth. All data transmission uses secure HTTPS connections.'**
   String get dataStorageBody;
 
-  /// No description provided for @thirdPartyServices.
+  /// No description provided for @thirdPartyServicesPrivacy.
   ///
   /// In en, this message translates to:
-  /// **'4. Third-Party Services'**
-  String get thirdPartyServices;
+  /// **'5. Third-Party Services'**
+  String get thirdPartyServicesPrivacy;
 
-  /// No description provided for @thirdPartyServicesBody.
+  /// No description provided for @thirdPartyServicesPrivacyBody.
   ///
   /// In en, this message translates to:
-  /// **'We use TMDB (The Movie Database) to fetch media metadata. Your searches and viewed media IDs are sent to TMDB\'s API. We also use AniList for anime metadata. Google OAuth is used for authentication.'**
-  String get thirdPartyServicesBody;
+  /// **'We use TMDB (The Movie Database) to fetch media metadata. Your searches and viewed media IDs are sent to TMDB\'s API. We also use AniList for anime metadata. Google OAuth is used for authentication. Each third-party service processes data according to its own privacy policy.'**
+  String get thirdPartyServicesPrivacyBody;
+
+  /// No description provided for @cookiesLocalStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'6. Cookies & Local Storage'**
+  String get cookiesLocalStorage;
+
+  /// No description provided for @cookiesLocalStorageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We use local storage to maintain your login session, remember your preferences (such as theme and language), and cache data to improve performance. We do not use tracking cookies or similar technologies for advertising purposes.'**
+  String get cookiesLocalStorageBody;
 
   /// No description provided for @dataRetention.
   ///
   /// In en, this message translates to:
-  /// **'5. Data Retention'**
+  /// **'7. Data Retention'**
   String get dataRetention;
 
   /// No description provided for @dataRetentionBody.
   ///
   /// In en, this message translates to:
-  /// **'Your data is retained for as long as your account is active. You may delete your account and associated data at any time by contacting us.'**
+  /// **'Your data is retained for as long as your account is active. You may delete your account and associated data at any time by contacting us or using the delete account feature in the app.'**
   String get dataRetentionBody;
 
   /// No description provided for @yourRights.
   ///
   /// In en, this message translates to:
-  /// **'6. Your Rights'**
+  /// **'8. Your Rights'**
   String get yourRights;
 
   /// No description provided for @yourRightsBody.
   ///
   /// In en, this message translates to:
-  /// **'You may request a copy of your data, correction of inaccurate data, or deletion of your account and associated data. Contact us at the email below.'**
+  /// **'You may request a copy of your data, correction of inaccurate data, or deletion of your account and associated data at any time. You can update your profile information, manage your personalization preferences, change your language, or log out at any time through the app settings.'**
   String get yourRightsBody;
+
+  /// No description provided for @childrensPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'9. Children\'s Privacy'**
+  String get childrensPrivacy;
+
+  /// No description provided for @childrensPrivacyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'WatchAtlas is intended for users aged 13 and older. We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe your child has provided us with personal information, please contact us so we can take appropriate action.'**
+  String get childrensPrivacyBody;
+
+  /// No description provided for @policyUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'10. Policy Updates'**
+  String get policyUpdates;
+
+  /// No description provided for @policyUpdatesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We may update this privacy policy from time to time. We will notify you of any material changes by posting the updated policy in the app and updating the Last Updated date above. Your continued use of the service after changes constitutes acceptance of the updated policy.'**
+  String get policyUpdatesBody;
+
+  /// No description provided for @openSourceNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Source Notice'**
+  String get openSourceNotice;
+
+  /// No description provided for @openSourceNoticeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'WatchAtlas uses various open-source libraries and frameworks. We gratefully acknowledge the contributions of the open-source community. The respective licenses for these libraries apply to their use within this application.'**
+  String get openSourceNoticeBody;
+
+  /// No description provided for @thirdPartyLibraries.
+  ///
+  /// In en, this message translates to:
+  /// **'Third-Party Libraries'**
+  String get thirdPartyLibraries;
+
+  /// No description provided for @thirdPartyLibrariesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This application includes open-source software components. License details for these components are available through the License page below.'**
+  String get thirdPartyLibrariesBody;
+
+  /// No description provided for @mediaOwnership.
+  ///
+  /// In en, this message translates to:
+  /// **'Media Ownership'**
+  String get mediaOwnership;
+
+  /// No description provided for @mediaOwnershipBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Movie, TV, anime, and other media metadata, posters, backdrops, logos, and promotional artwork belong to their respective owners and copyright holders. WatchAtlas does not claim ownership of any third-party media assets. Such content is used for identification, cataloging, and informational purposes only.'**
+  String get mediaOwnershipBody;
+
+  /// No description provided for @aiGeneratedLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'AI-Generated Logo'**
+  String get aiGeneratedLogo;
+
+  /// No description provided for @aiGeneratedLogoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The WatchAtlas application logo was created using AI-assisted design tools. The logo is used as the application\'s visual identity. WatchAtlas does not claim exclusive ownership over the underlying AI model, generated style, or training data used to create it. Any rights associated with the generated logo are subject to the terms of the AI service used to create it. The logo should not be interpreted as claiming ownership over AI-generated methodologies or third-party intellectual property.'**
+  String get aiGeneratedLogoBody;
+
+  /// No description provided for @trademarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Trademarks'**
+  String get trademarks;
+
+  /// No description provided for @trademarksBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Movie titles, TV series names, anime titles, studio names, streaming platform names, company names, and trademarks appearing in the application are the property of their respective owners. Their appearance within WatchAtlas is for identification, cataloging, and informational purposes only.'**
+  String get trademarksBody;
+
+  /// No description provided for @metadataAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Metadata'**
+  String get metadataAttribution;
+
+  /// No description provided for @metadataAttributionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Media information displayed in the app — including titles, descriptions, ratings, genres, release dates, cast, crew, runtime, and production information — is obtained from third-party providers, primarily TMDB (The Movie Database) and AniList. This data is provided for informational purposes and may occasionally contain inaccuracies or be out of date.'**
+  String get metadataAttributionBody;
+
+  /// No description provided for @imagesAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get imagesAttribution;
+
+  /// No description provided for @imagesAttributionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Posters, backdrops, logos, and promotional artwork displayed in the app are the property of their respective copyright holders and are used under license or for identification purposes only. WatchAtlas does not claim ownership of any visual assets.'**
+  String get imagesAttributionBody;
+
+  /// No description provided for @recommendationSystemInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommendation System'**
+  String get recommendationSystemInfo;
+
+  /// No description provided for @recommendationSystemInfoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommendations are generated automatically based on your activity and preferences, such as what you watch, rate, save, and search for. The goal is to improve content discovery. Recommendations are suggestions, not guarantees, and do not reflect any official endorsement by content creators or distributors.'**
+  String get recommendationSystemInfoBody;
+
+  /// No description provided for @userContentOwnership.
+  ///
+  /// In en, this message translates to:
+  /// **'User Content'**
+  String get userContentOwnership;
+
+  /// No description provided for @userContentOwnershipBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You retain ownership of the content you create in WatchAtlas, including lists, ratings, favorites, notes, and reviews. By using the service, you grant WatchAtlas the necessary rights to store, display, and process that content within the app. You are responsible for the content you submit and should respect the rights of others.'**
+  String get userContentOwnershipBody;
+
+  /// No description provided for @accuracyDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Accuracy'**
+  String get accuracyDisclaimer;
+
+  /// No description provided for @accuracyDisclaimerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Although WatchAtlas strives to provide accurate and up-to-date information, metadata may occasionally contain inaccuracies or outdated information due to its reliance on third-party sources. We encourage users to verify important details through official sources.'**
+  String get accuracyDisclaimerBody;
+
+  /// No description provided for @contentAndAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Content & Attribution'**
+  String get contentAndAttribution;
 
   /// No description provided for @confirmPassword.
   ///
@@ -2605,6 +2869,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rated: {stars} stars'**
   String ratedStars(double stars);
+
+  /// No description provided for @allFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get allFilter;
+
+  /// No description provided for @listDeletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted \"{title}\"'**
+  String listDeletedTitle(String title);
+
+  /// No description provided for @episodeProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{current}/{total}'**
+  String episodeProgress(int current, int total);
+
+  /// No description provided for @countryWithCode.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} ({code})'**
+  String countryWithCode(String name, String code);
+
+  /// No description provided for @mediaWithId.
+  ///
+  /// In en, this message translates to:
+  /// **'Media #{id}'**
+  String mediaWithId(String id);
+
+  /// No description provided for @unknownList.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown List'**
+  String get unknownList;
+
+  /// No description provided for @profileDatabaseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure the database grants have been applied.\nRun supabase/grants.sql in your Supabase SQL editor.'**
+  String get profileDatabaseError;
+
+  /// No description provided for @accountCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Account created! Please check your email for a confirmation link before signing in.'**
+  String get accountCreated;
+
+  /// No description provided for @notificationChannelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications from WatchAtlas'**
+  String get notificationChannelDescription;
+
+  /// No description provided for @anonymous.
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous'**
+  String get anonymous;
+
+  /// No description provided for @contentReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Content Report'**
+  String get contentReport;
+
+  /// No description provided for @userReport.
+  ///
+  /// In en, this message translates to:
+  /// **'User Report'**
+  String get userReport;
+
+  /// No description provided for @reportPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get reportPending;
+
+  /// No description provided for @reportResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get reportResolved;
+
+  /// No description provided for @continueWithApple.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Apple'**
+  String get continueWithApple;
+
+  /// No description provided for @popularTrending.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular trending'**
+  String get popularTrending;
+
+  /// No description provided for @recommendationBecauseYouSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Because You Saved...'**
+  String get recommendationBecauseYouSaved;
+
+  /// No description provided for @recommendationBecauseYouViewed.
+  ///
+  /// In en, this message translates to:
+  /// **'Because You Viewed...'**
+  String get recommendationBecauseYouViewed;
+
+  /// No description provided for @recommendationTrendingNearYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Trending Near You'**
+  String get recommendationTrendingNearYou;
+
+  /// No description provided for @recommendationPopularThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular This Week'**
+  String get recommendationPopularThisWeek;
+
+  /// No description provided for @recommendationContinueExploring.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Exploring'**
+  String get recommendationContinueExploring;
+
+  /// No description provided for @recommendationNewReleases.
+  ///
+  /// In en, this message translates to:
+  /// **'New Releases'**
+  String get recommendationNewReleases;
+
+  /// No description provided for @recommendationHiddenGems.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden Gems'**
+  String get recommendationHiddenGems;
+
+  /// No description provided for @recommendationCriticallyAcclaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'Critically Acclaimed'**
+  String get recommendationCriticallyAcclaimed;
+
+  /// No description provided for @recommendationTopRated.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Rated'**
+  String get recommendationTopRated;
+
+  /// No description provided for @recommendationSimilarToFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Similar to Your Favorites'**
+  String get recommendationSimilarToFavorites;
+
+  /// No description provided for @recommendationBecauseYouLikeGenre.
+  ///
+  /// In en, this message translates to:
+  /// **'Because You Like...'**
+  String get recommendationBecauseYouLikeGenre;
+
+  /// No description provided for @recommendationFriendsAlsoSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Friends Also Saved'**
+  String get recommendationFriendsAlsoSaved;
+
+  /// No description provided for @recommendationUsersLikeYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Users Like You Enjoyed'**
+  String get recommendationUsersLikeYou;
+
+  /// No description provided for @recommendationAwardWinners.
+  ///
+  /// In en, this message translates to:
+  /// **'Award Winners'**
+  String get recommendationAwardWinners;
+
+  /// No description provided for @recommendationUnderratedClassics.
+  ///
+  /// In en, this message translates to:
+  /// **'Underrated Classics'**
+  String get recommendationUnderratedClassics;
+
+  /// No description provided for @recommendationUpcomingReleases.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming Releases'**
+  String get recommendationUpcomingReleases;
+
+  /// No description provided for @similarToSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Similar to what you\'ve saved'**
+  String get similarToSaved;
+
+  /// No description provided for @forYou.
+  ///
+  /// In en, this message translates to:
+  /// **'For You'**
+  String get forYou;
+
+  /// No description provided for @seeMore.
+  ///
+  /// In en, this message translates to:
+  /// **'See More'**
+  String get seeMore;
+
+  /// No description provided for @allRecommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'All Recommendations'**
+  String get allRecommendations;
+
+  /// No description provided for @viewAllRecommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'View All Recommendations'**
+  String get viewAllRecommendations;
+
+  /// No description provided for @recommendationCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommendation Categories'**
+  String get recommendationCategories;
+
+  /// No description provided for @failedToLoadRecommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load recommendations'**
+  String get failedToLoadRecommendations;
+
+  /// No description provided for @noRecommendationsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No recommendations yet'**
+  String get noRecommendationsYet;
+
+  /// No description provided for @navRecommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommendations'**
+  String get navRecommendations;
+
+  /// No description provided for @similarToFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Similar to your favorites'**
+  String get similarToFavorites;
+
+  /// No description provided for @usersLikeYouEnjoyed.
+  ///
+  /// In en, this message translates to:
+  /// **'Users with similar taste enjoyed this'**
+  String get usersLikeYouEnjoyed;
+
+  /// No description provided for @becauseYouEnjoyGenre.
+  ///
+  /// In en, this message translates to:
+  /// **'Because you enjoy {genre}'**
+  String becauseYouEnjoyGenre(String genre);
+
+  /// No description provided for @recentlyReleased.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently released'**
+  String get recentlyReleased;
+
+  /// No description provided for @hiddenGem.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden gem — highly rated but undiscovered'**
+  String get hiddenGem;
+
+  /// No description provided for @criticallyAcclaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'Critically acclaimed'**
+  String get criticallyAcclaimed;
 }
 
 class _AppLocalizationsDelegate

@@ -136,12 +136,13 @@ class ActivityTile extends StatelessWidget {
   }
 
   String _formatTime(DateTime dateTime, BuildContext context) {
+    final l10n = context.l10n;
     final now = DateTime.now();
     final diff = now.difference(dateTime);
-    if (diff.inMinutes < 1) return context.l10n.justNow;
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return DateFormat('MMM d').format(dateTime);
+    if (diff.inMinutes < 1) return l10n.justNow;
+    if (diff.inMinutes < 60) return l10n.minutesAgo(diff.inMinutes.toDouble());
+    if (diff.inHours < 24) return l10n.hoursAgo(diff.inHours.toDouble());
+    if (diff.inDays < 7) return l10n.daysAgo(diff.inDays.toDouble());
+    return DateFormat.yMd(Localizations.localeOf(context).toString()).format(dateTime);
   }
 }

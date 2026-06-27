@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/recommendation_models.dart';
 import '../../../core/providers/app_providers.dart';
+import '../../../core/services/tmdb_service.dart';
 import '../../../core/repositories/recommendation_repository.dart';
 import '../../../core/services/behavior_service.dart';
 import '../../../core/services/recommendation_engine.dart';
@@ -37,7 +38,7 @@ final recommendationEngineProvider =
 final recommendationsProvider =
     FutureProvider<Map<RecCategory, List<ScoredMedia>>>((ref) async {
   final uid = ref.watch(authServiceProvider).userId;
-  if (uid == null || uid.isEmpty) return {};
+  if (uid.isEmpty) return {};
 
   final engine = ref.read(recommendationEngineProvider);
   final recs = await engine.generateAll(uid);
@@ -53,17 +54,14 @@ final recommendationCategoryProvider =
 });
 
 /// Fallback non-personalised recommendations for new users with no history.
+/// Uses TMDB API when Supabase media table is unavailable.
 final coldStartRecommendationsProvider =
     FutureProvider<List<ScoredMedia>>((ref) async {
+  final tmdb = TmdbService.instance;
   try {
-    final supabase = SupabaseService.instance;
-    final response = await supabase.media
-        .select('id, title, vote_average, popularity, genres, poster_path')
-        .order('popularity', ascending: false)
-        .limit(30);
-
-    final list = response as List;
-    return list.map((item) {
+    final response = await tmdb.get('/movie/popular');
+    final results = response['results'] as List<dynamic>;
+    return results.map((item) {
       final map = item as Map<String, dynamic>;
       return ScoredMedia(
         mediaId: map['id'] as int,

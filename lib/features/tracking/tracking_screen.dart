@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../l10n/l10n.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/dimensions.dart';
+import '../../core/shared/horizontal_carousel.dart';
+import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/models/media_enums.dart';
 import '../../models/user_media_model.dart';
@@ -76,25 +78,22 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen>
               ),
             if (recentlyUpdated.isNotEmpty)
               SliverToBoxAdapter(
-                child: SizedBox(
+                child: HorizontalCarousel(
                   height: 180,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsetsDirectional.fromSTEB(12, 0, 12, 8),
-                    itemCount: recentlyUpdated.length,
-                    separatorBuilder: (context, index) => const SizedBox(width: Spacing.sm),
-                    itemBuilder: (context, index) {
-                      final item = recentlyUpdated[index];
-                      return SizedBox(
-                        width: 120,
-                        child: _MediaTile(
-                          userMedia: item,
-                          onTap: () => _navigateToDetail(item.mediaId, item.mediaType),
-                          onLongPress: () => _showQuickStatus(context, item),
-                        ),
-                      );
-                    },
-                  ),
+                  itemCount: recentlyUpdated.length,
+                  separatorWidth: Spacing.sm,
+                  padding: const EdgeInsetsDirectional.fromSTEB(12, 0, 12, 8),
+                  itemBuilder: (context, index) {
+                    final item = recentlyUpdated[index];
+                    return SizedBox(
+                      width: 120,
+                      child: _MediaTile(
+                        userMedia: item,
+                        onTap: () => _navigateToDetail(item.mediaId, item.mediaType),
+                        onLongPress: () => _showQuickStatus(context, item),
+                      ),
+                    );
+                  },
                 ),
               ),
             SliverToBoxAdapter(
@@ -334,7 +333,7 @@ class _MediaTile extends ConsumerWidget {
       ),
       error: (_, __) => ProgressCard(
         userMedia: userMedia,
-        title: 'Media #${userMedia.mediaId}',
+        title: context.l10n.mediaWithId(userMedia.mediaId.toString()),
         onTap: onTap,
         onLongPress: onLongPress,
       ),
@@ -344,7 +343,7 @@ class _MediaTile extends ConsumerWidget {
             : null;
         return ProgressCard(
           userMedia: userMedia,
-          title: media?.title ?? 'Media #${userMedia.mediaId}',
+          title: media?.title ?? context.l10n.mediaWithId(userMedia.mediaId.toString()),
           posterUrl: posterUrl,
           onTap: onTap,
           onLongPress: onLongPress,

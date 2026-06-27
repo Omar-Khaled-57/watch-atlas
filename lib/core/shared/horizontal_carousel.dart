@@ -50,7 +50,10 @@ class _HorizontalCarouselState extends State<HorizontalCarousel> {
   }
 
   void _onDragUpdate(DragUpdateDetails details) {
-    final delta = _dragStartGlobalX - details.globalPosition.dx;
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final delta = isRtl
+        ? details.globalPosition.dx - _dragStartGlobalX
+        : _dragStartGlobalX - details.globalPosition.dx;
     if (!_isDragging && delta.abs() > 6) {
       setState(() => _isDragging = true);
     }

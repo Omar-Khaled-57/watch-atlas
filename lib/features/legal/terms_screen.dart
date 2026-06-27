@@ -12,13 +12,9 @@ class TermsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.termsOfService),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(24),
+        padding: EdgeInsetsDirectional.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -31,24 +27,31 @@ class TermsScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 24),
-            _section(theme, l10n.acceptanceOfTerms, l10n.acceptanceOfTermsBody),
-            _section(theme, l10n.descriptionOfService, l10n.descriptionOfServiceBody),
-            _section(theme, l10n.userAccounts, l10n.userAccountsBody),
-            _section(theme, l10n.userConduct, l10n.userConductBody),
-            _section(theme, l10n.intellectualProperty, l10n.intellectualPropertyBody),
-            _section(theme, l10n.limitationOfLiability, l10n.limitationOfLiabilityBody),
-            _section(theme, l10n.termination, l10n.terminationBody),
-            _section(theme, l10n.changesToTerms, l10n.changesToTermsBody),
-            _section(theme, l10n.contactSection, l10n.contactLegal),
+            _section(context, theme, l10n.acceptanceOfTerms, l10n.acceptanceOfTermsBody),
+            _section(context, theme, l10n.descriptionOfService, l10n.descriptionOfServiceBody),
+            _section(context, theme, l10n.userAccounts, l10n.userAccountsBody),
+            _section(context, theme, l10n.userResponsibilities, l10n.userResponsibilitiesBody),
+            _section(context, theme, l10n.acceptableUse, l10n.acceptableUseBody),
+            _section(context, theme, l10n.userGeneratedContent, l10n.userGeneratedContentBody),
+            _section(context, theme, l10n.intellectualProperty, l10n.intellectualPropertyBody),
+            _section(context, theme, l10n.thirdPartyServicesTerms, l10n.thirdPartyServicesTermsBody),
+            _section(context, theme, l10n.externalLinks, l10n.externalLinksBody),
+            _section(context, theme, l10n.availabilityOfService, l10n.availabilityOfServiceBody),
+            _section(context, theme, l10n.changesToFeatures, l10n.changesToFeaturesBody),
+            _section(context, theme, l10n.accountSuspension, l10n.accountSuspensionBody),
+            _section(context, theme, l10n.disclaimers, l10n.disclaimersBody),
+            _section(context, theme, l10n.privacyReference, l10n.privacyReferenceBody),
+            _section(context, theme, l10n.changesToTerms, l10n.changesToTermsBody),
+            _section(context, theme, l10n.contactSection, l10n.contactLegal),
           ],
         ),
       ),
     );
   }
 
-  Widget _section(ThemeData theme, String title, String body) {
+  Widget _section(BuildContext context, ThemeData theme, String title, String body) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 20),
+      padding: EdgeInsetsDirectional.only(bottom: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

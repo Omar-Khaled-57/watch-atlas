@@ -98,7 +98,7 @@ class ListCard extends StatelessWidget {
                     Icon(Icons.access_time_rounded, size: 12, color: colorScheme.onSurfaceVariant),
                     const SizedBox(width: Spacing.xs),
                     Text(
-                      'Updated ${listData.updatedAt!.timeAgo}',
+                      'Updated ${listData.updatedAt!.timeAgo(context)}',
                       style: textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant, fontSize: 10),
                     ),
                     const SizedBox(width: 10),

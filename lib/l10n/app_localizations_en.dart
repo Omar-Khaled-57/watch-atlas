@@ -469,6 +469,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get personalizedRecommendations => 'Personalized Recommendations';
 
   @override
+  String get activityImprovesSuggestions =>
+      'Let your activity improve suggestions';
+
+  @override
   String get clearRecommendationHistory => 'Clear Recommendation History';
 
   @override
@@ -550,27 +554,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mostWatchedGenre => 'Most Watched Genre';
 
   @override
-  String get topRated => 'Top Rated';
+  String get topRated => 'Top rated';
 
   @override
   String get recentActivity => 'Recent Activity';
 
   @override
-  String get justNow => 'Just now';
+  String get justNow => 'just now';
 
   @override
-  String minutesAgo(Object minutes) {
-    return '${minutes}m ago';
+  String minutesAgo(double count) {
+    return '${count}m ago';
   }
 
   @override
-  String hoursAgo(Object hours) {
-    return '${hours}h ago';
+  String hoursAgo(double count) {
+    return '${count}h ago';
   }
 
   @override
-  String daysAgo(Object days) {
-    return '${days}d ago';
+  String daysAgo(double count) {
+    return '${count}d ago';
   }
 
   @override
@@ -579,8 +583,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String monthsAgo(Object months) {
-    return '${months}mo ago';
+  String monthsAgo(double count) {
+    return '${count}mo ago';
   }
 
   @override
@@ -610,14 +614,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get acceptanceOfTermsBody =>
-      'By accessing or using Watch Atlas, you agree to be bound by these Terms of Service. If you do not agree, do not use the service.';
+      'By accessing or using WatchAtlas, you agree to be bound by these Terms of Service. If you do not agree, do not use the service.';
 
   @override
   String get descriptionOfService => '2. Description of Service';
 
   @override
   String get descriptionOfServiceBody =>
-      'Watch Atlas is a media tracking application that allows users to discover, track, and organize movies, TV shows, and anime. Users can rate, review, and maintain watch lists.';
+      'WatchAtlas is a media tracking application that allows users to discover, track, and organize movies, TV shows, and anime. Users can rate, review, and maintain watch lists.';
 
   @override
   String get userAccounts => '3. User Accounts';
@@ -627,42 +631,91 @@ class AppLocalizationsEn extends AppLocalizations {
       'You must sign in via Google OAuth to use the service. You are responsible for maintaining the confidentiality of your account. You must be at least 13 years old to use this service.';
 
   @override
-  String get userConduct => '4. User Conduct';
+  String get userResponsibilities => '4. User Responsibilities';
 
   @override
-  String get userConductBody =>
-      'You agree not to: post abusive, harassing, or inappropriate content; impersonate others; attempt to circumvent security measures; use the service for any illegal purpose.';
+  String get userResponsibilitiesBody =>
+      'You agree not to post abusive, harassing, or inappropriate content; not to impersonate others; not to attempt to circumvent security measures; and not to use the service for any illegal purpose. You are responsible for all activity that occurs under your account.';
 
   @override
-  String get intellectualProperty => '5. Intellectual Property';
+  String get acceptableUse => '5. Acceptable Use';
+
+  @override
+  String get acceptableUseBody =>
+      'You may use the service only for lawful purposes. You agree not to interfere with or disrupt the integrity or performance of the service, or attempt to gain unauthorized access to any portion of the service or related systems.';
+
+  @override
+  String get userGeneratedContent => '6. User-Generated Content';
+
+  @override
+  String get userGeneratedContentBody =>
+      'You retain ownership of content you create, including lists, ratings, reviews, notes, and profile information. By using the service, you grant WatchAtlas a worldwide, non-exclusive license to store, display, and distribute that content in connection with providing the service. You are solely responsible for content you submit.';
+
+  @override
+  String get intellectualProperty => '7. Intellectual Property';
 
   @override
   String get intellectualPropertyBody =>
-      'Media metadata and images are provided by TMDB and AniList under their respective licenses. The Watch Atlas application and code are proprietary. User-generated content (reviews, ratings) remains owned by you, with a license granted to Watch Atlas to display it within the service.';
+      'Media metadata and images are provided by TMDB and AniList under their respective licenses. The WatchAtlas application and code are proprietary. User-generated content (reviews, ratings, lists) remains owned by you, with a license granted to WatchAtlas to display it within the service.';
 
   @override
-  String get limitationOfLiability => '6. Limitation of Liability';
+  String get thirdPartyServicesTerms => '8. Third-Party Services';
 
   @override
-  String get limitationOfLiabilityBody =>
-      'Watch Atlas is provided as is without warranties of any kind. We are not responsible for the accuracy of third-party metadata. We reserve the right to modify or discontinue the service at any time.';
+  String get thirdPartyServicesTermsBody =>
+      'The service may contain links to or integrate with third-party services, including TMDB, AniList, and Google OAuth. Your use of third-party services is governed by their respective terms and privacy policies. WatchAtlas is not responsible for the practices or content of third-party services.';
 
   @override
-  String get termination => '7. Termination';
+  String get externalLinks => '9. External Links';
 
   @override
-  String get terminationBody =>
-      'We reserve the right to suspend or terminate accounts that violate these terms. You may delete your account at any time.';
+  String get externalLinksBody =>
+      'The service may contain links to external websites or resources. WatchAtlas is not responsible for the availability or content of these external sites and does not endorse any content, products, or services available from them.';
 
   @override
-  String get changesToTerms => '8. Changes to Terms';
+  String get availabilityOfService => '10. Availability of Service';
+
+  @override
+  String get availabilityOfServiceBody =>
+      'We strive to keep the service available, secure, and up to date. However, we do not guarantee uninterrupted access. The service may be temporarily unavailable due to maintenance, updates, or factors beyond our control.';
+
+  @override
+  String get changesToFeatures => '11. Changes to Features';
+
+  @override
+  String get changesToFeaturesBody =>
+      'We may modify, update, or discontinue features of the service at any time, with or without notice. We are not liable to you or any third party for any modification, suspension, or discontinuance of the service or any part thereof.';
+
+  @override
+  String get accountSuspension => '12. Account Suspension or Termination';
+
+  @override
+  String get accountSuspensionBody =>
+      'We reserve the right to suspend or terminate accounts that violate these terms. You may delete your account and associated data at any time through the app settings or by contacting us.';
+
+  @override
+  String get disclaimers => '13. Disclaimers';
+
+  @override
+  String get disclaimersBody =>
+      'The service is provided on an as-is and as-available basis. We make no warranties, express or implied, regarding the accuracy, reliability, or availability of the service. We do not guarantee that metadata, recommendations, or search results will be error-free or meet your expectations.';
+
+  @override
+  String get privacyReference => '14. Privacy';
+
+  @override
+  String get privacyReferenceBody =>
+      'Your use of the service is also governed by our Privacy Policy. Please review our Privacy Policy to understand how we collect, use, and protect your personal information.';
+
+  @override
+  String get changesToTerms => '15. Changes to Terms';
 
   @override
   String get changesToTermsBody =>
       'We may update these terms at any time. Continued use after changes constitutes acceptance. Users will be notified of material changes via email or in-app notification.';
 
   @override
-  String get contactSection => '9. Contact';
+  String get contactSection => '16. Contact';
 
   @override
   String get contactLegal =>
@@ -677,42 +730,143 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get informationWeCollectBody =>
-      'When you sign in with Google OAuth, we collect your email address and display name. We also store media you track (movies, TV shows, anime) along with your watch status, ratings, and reviews. Profile avatars and display names are stored via Supabase storage.';
+      'When you sign in with Google OAuth, we collect your email address and display name. We also store media you track (movies, TV shows, anime) along with your watch status, ratings, and reviews. Profile avatars and display names are stored via Supabase storage.\n\nOptional information you may provide includes your date of birth and gender, which are used only to personalize your experience.';
 
   @override
-  String get howWeUseInfo => '2. How We Use Your Information';
+  String get automaticallyCollectedData => '2. Automatically Collected Data';
+
+  @override
+  String get automaticallyCollectedDataBody =>
+      'We may automatically collect certain information when you use the app, including device type, app version, and crash reports if available. Authentication metadata is processed by our authentication provider (Google OAuth) to maintain your session securely.';
+
+  @override
+  String get howWeUseInfo => '3. How We Use Your Information';
 
   @override
   String get howWeUseInfoBody =>
-      'Your information is used to provide and improve the service: personalize your experience, maintain your watch lists and reviews, generate analytics based on your tracked media, and communicate service updates if necessary.';
+      'Your information is used to provide and improve the service: personalize your experience, maintain your watch lists and reviews, generate recommendations based on your activity, and communicate service updates if necessary.';
 
   @override
-  String get dataStorage => '3. Data Storage & Security';
+  String get dataStorage => '4. Data Storage & Security';
 
   @override
   String get dataStorageBody =>
-      'Your data is stored securely on Supabase (PostgreSQL) and Google Cloud infrastructure. We use Row Level Security to ensure you can only access your own data. Passwords are never stored — authentication is handled entirely by Google OAuth.';
+      'Your data is stored securely on Supabase (PostgreSQL) and Google Cloud infrastructure. We use Row Level Security to ensure you can only access your own data. Passwords are never stored — authentication is handled entirely by Google OAuth. All data transmission uses secure HTTPS connections.';
 
   @override
-  String get thirdPartyServices => '4. Third-Party Services';
+  String get thirdPartyServicesPrivacy => '5. Third-Party Services';
 
   @override
-  String get thirdPartyServicesBody =>
-      'We use TMDB (The Movie Database) to fetch media metadata. Your searches and viewed media IDs are sent to TMDB\'s API. We also use AniList for anime metadata. Google OAuth is used for authentication.';
+  String get thirdPartyServicesPrivacyBody =>
+      'We use TMDB (The Movie Database) to fetch media metadata. Your searches and viewed media IDs are sent to TMDB\'s API. We also use AniList for anime metadata. Google OAuth is used for authentication. Each third-party service processes data according to its own privacy policy.';
 
   @override
-  String get dataRetention => '5. Data Retention';
+  String get cookiesLocalStorage => '6. Cookies & Local Storage';
+
+  @override
+  String get cookiesLocalStorageBody =>
+      'We use local storage to maintain your login session, remember your preferences (such as theme and language), and cache data to improve performance. We do not use tracking cookies or similar technologies for advertising purposes.';
+
+  @override
+  String get dataRetention => '7. Data Retention';
 
   @override
   String get dataRetentionBody =>
-      'Your data is retained for as long as your account is active. You may delete your account and associated data at any time by contacting us.';
+      'Your data is retained for as long as your account is active. You may delete your account and associated data at any time by contacting us or using the delete account feature in the app.';
 
   @override
-  String get yourRights => '6. Your Rights';
+  String get yourRights => '8. Your Rights';
 
   @override
   String get yourRightsBody =>
-      'You may request a copy of your data, correction of inaccurate data, or deletion of your account and associated data. Contact us at the email below.';
+      'You may request a copy of your data, correction of inaccurate data, or deletion of your account and associated data at any time. You can update your profile information, manage your personalization preferences, change your language, or log out at any time through the app settings.';
+
+  @override
+  String get childrensPrivacy => '9. Children\'s Privacy';
+
+  @override
+  String get childrensPrivacyBody =>
+      'WatchAtlas is intended for users aged 13 and older. We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe your child has provided us with personal information, please contact us so we can take appropriate action.';
+
+  @override
+  String get policyUpdates => '10. Policy Updates';
+
+  @override
+  String get policyUpdatesBody =>
+      'We may update this privacy policy from time to time. We will notify you of any material changes by posting the updated policy in the app and updating the Last Updated date above. Your continued use of the service after changes constitutes acceptance of the updated policy.';
+
+  @override
+  String get openSourceNotice => 'Open Source Notice';
+
+  @override
+  String get openSourceNoticeBody =>
+      'WatchAtlas uses various open-source libraries and frameworks. We gratefully acknowledge the contributions of the open-source community. The respective licenses for these libraries apply to their use within this application.';
+
+  @override
+  String get thirdPartyLibraries => 'Third-Party Libraries';
+
+  @override
+  String get thirdPartyLibrariesBody =>
+      'This application includes open-source software components. License details for these components are available through the License page below.';
+
+  @override
+  String get mediaOwnership => 'Media Ownership';
+
+  @override
+  String get mediaOwnershipBody =>
+      'Movie, TV, anime, and other media metadata, posters, backdrops, logos, and promotional artwork belong to their respective owners and copyright holders. WatchAtlas does not claim ownership of any third-party media assets. Such content is used for identification, cataloging, and informational purposes only.';
+
+  @override
+  String get aiGeneratedLogo => 'AI-Generated Logo';
+
+  @override
+  String get aiGeneratedLogoBody =>
+      'The WatchAtlas application logo was created using AI-assisted design tools. The logo is used as the application\'s visual identity. WatchAtlas does not claim exclusive ownership over the underlying AI model, generated style, or training data used to create it. Any rights associated with the generated logo are subject to the terms of the AI service used to create it. The logo should not be interpreted as claiming ownership over AI-generated methodologies or third-party intellectual property.';
+
+  @override
+  String get trademarks => 'Trademarks';
+
+  @override
+  String get trademarksBody =>
+      'Movie titles, TV series names, anime titles, studio names, streaming platform names, company names, and trademarks appearing in the application are the property of their respective owners. Their appearance within WatchAtlas is for identification, cataloging, and informational purposes only.';
+
+  @override
+  String get metadataAttribution => 'Metadata';
+
+  @override
+  String get metadataAttributionBody =>
+      'Media information displayed in the app — including titles, descriptions, ratings, genres, release dates, cast, crew, runtime, and production information — is obtained from third-party providers, primarily TMDB (The Movie Database) and AniList. This data is provided for informational purposes and may occasionally contain inaccuracies or be out of date.';
+
+  @override
+  String get imagesAttribution => 'Images';
+
+  @override
+  String get imagesAttributionBody =>
+      'Posters, backdrops, logos, and promotional artwork displayed in the app are the property of their respective copyright holders and are used under license or for identification purposes only. WatchAtlas does not claim ownership of any visual assets.';
+
+  @override
+  String get recommendationSystemInfo => 'Recommendation System';
+
+  @override
+  String get recommendationSystemInfoBody =>
+      'Recommendations are generated automatically based on your activity and preferences, such as what you watch, rate, save, and search for. The goal is to improve content discovery. Recommendations are suggestions, not guarantees, and do not reflect any official endorsement by content creators or distributors.';
+
+  @override
+  String get userContentOwnership => 'User Content';
+
+  @override
+  String get userContentOwnershipBody =>
+      'You retain ownership of the content you create in WatchAtlas, including lists, ratings, favorites, notes, and reviews. By using the service, you grant WatchAtlas the necessary rights to store, display, and process that content within the app. You are responsible for the content you submit and should respect the rights of others.';
+
+  @override
+  String get accuracyDisclaimer => 'Accuracy';
+
+  @override
+  String get accuracyDisclaimerBody =>
+      'Although WatchAtlas strives to provide accurate and up-to-date information, metadata may occasionally contain inaccuracies or outdated information due to its reliance on third-party sources. We encourage users to verify important details through official sources.';
+
+  @override
+  String get contentAndAttribution => 'Content & Attribution';
 
   @override
   String get confirmPassword => 'Confirm Password';
@@ -1361,4 +1515,157 @@ class AppLocalizationsEn extends AppLocalizations {
   String ratedStars(double stars) {
     return 'Rated: $stars stars';
   }
+
+  @override
+  String get allFilter => 'All';
+
+  @override
+  String listDeletedTitle(String title) {
+    return 'Deleted \"$title\"';
+  }
+
+  @override
+  String episodeProgress(int current, int total) {
+    return '$current/$total';
+  }
+
+  @override
+  String countryWithCode(String name, String code) {
+    return '$name ($code)';
+  }
+
+  @override
+  String mediaWithId(String id) {
+    return 'Media #$id';
+  }
+
+  @override
+  String get unknownList => 'Unknown List';
+
+  @override
+  String get profileDatabaseError =>
+      'Make sure the database grants have been applied.\nRun supabase/grants.sql in your Supabase SQL editor.';
+
+  @override
+  String get accountCreated =>
+      'Account created! Please check your email for a confirmation link before signing in.';
+
+  @override
+  String get notificationChannelDescription => 'Notifications from WatchAtlas';
+
+  @override
+  String get anonymous => 'Anonymous';
+
+  @override
+  String get contentReport => 'Content Report';
+
+  @override
+  String get userReport => 'User Report';
+
+  @override
+  String get reportPending => 'Pending';
+
+  @override
+  String get reportResolved => 'Resolved';
+
+  @override
+  String get continueWithApple => 'Continue with Apple';
+
+  @override
+  String get popularTrending => 'Popular trending';
+
+  @override
+  String get recommendationBecauseYouSaved => 'Because You Saved...';
+
+  @override
+  String get recommendationBecauseYouViewed => 'Because You Viewed...';
+
+  @override
+  String get recommendationTrendingNearYou => 'Trending Near You';
+
+  @override
+  String get recommendationPopularThisWeek => 'Popular This Week';
+
+  @override
+  String get recommendationContinueExploring => 'Continue Exploring';
+
+  @override
+  String get recommendationNewReleases => 'New Releases';
+
+  @override
+  String get recommendationHiddenGems => 'Hidden Gems';
+
+  @override
+  String get recommendationCriticallyAcclaimed => 'Critically Acclaimed';
+
+  @override
+  String get recommendationTopRated => 'Top Rated';
+
+  @override
+  String get recommendationSimilarToFavorites => 'Similar to Your Favorites';
+
+  @override
+  String get recommendationBecauseYouLikeGenre => 'Because You Like...';
+
+  @override
+  String get recommendationFriendsAlsoSaved => 'Friends Also Saved';
+
+  @override
+  String get recommendationUsersLikeYou => 'Users Like You Enjoyed';
+
+  @override
+  String get recommendationAwardWinners => 'Award Winners';
+
+  @override
+  String get recommendationUnderratedClassics => 'Underrated Classics';
+
+  @override
+  String get recommendationUpcomingReleases => 'Upcoming Releases';
+
+  @override
+  String get similarToSaved => 'Similar to what you\'ve saved';
+
+  @override
+  String get forYou => 'For You';
+
+  @override
+  String get seeMore => 'See More';
+
+  @override
+  String get allRecommendations => 'All Recommendations';
+
+  @override
+  String get viewAllRecommendations => 'View All Recommendations';
+
+  @override
+  String get recommendationCategories => 'Recommendation Categories';
+
+  @override
+  String get failedToLoadRecommendations => 'Failed to load recommendations';
+
+  @override
+  String get noRecommendationsYet => 'No recommendations yet';
+
+  @override
+  String get navRecommendations => 'Recommendations';
+
+  @override
+  String get similarToFavorites => 'Similar to your favorites';
+
+  @override
+  String get usersLikeYouEnjoyed => 'Users with similar taste enjoyed this';
+
+  @override
+  String becauseYouEnjoyGenre(String genre) {
+    return 'Because you enjoy $genre';
+  }
+
+  @override
+  String get recentlyReleased => 'Recently released';
+
+  @override
+  String get hiddenGem => 'Hidden gem — highly rated but undiscovered';
+
+  @override
+  String get criticallyAcclaimed => 'Critically acclaimed';
 }

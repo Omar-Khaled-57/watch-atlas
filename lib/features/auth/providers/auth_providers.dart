@@ -192,16 +192,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
   String _formatError(Object error) {
     final message = error.toString();
     if (message.contains('Invalid login credentials')) {
-      return 'Invalid email or password';
+      return 'invalidEmailOrPassword';
     }
     if (message.contains('Email not confirmed')) {
-      return 'Please confirm your email address';
+      return 'pleaseConfirmEmail';
     }
     if (message.contains('User already registered')) {
-      return 'An account with this email already exists';
+      return 'accountAlreadyExists';
     }
     if (message.contains('Password should be')) {
-      return 'Password must be at least 6 characters';
+      return 'passwordMinLength';
+    }
+    if (message.contains('Account created!')) {
+      return 'accountCreated';
     }
     return message.replaceAll('Exception: ', '');
   }

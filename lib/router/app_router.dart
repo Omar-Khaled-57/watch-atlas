@@ -22,6 +22,9 @@ import '../features/auth/onboarding_screen.dart';
 import '../features/tracking/tracking_screen.dart';
 import '../features/legal/privacy_screen.dart';
 import '../features/legal/terms_screen.dart';
+import '../features/legal/licenses_screen.dart';
+import '../features/legal/attribution_screen.dart';
+import '../features/recommendations/recommendations_screen.dart';
 
 class _RouterRefreshNotifier extends ChangeNotifier {
   void requestRefresh() {
@@ -217,6 +220,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
+        path: '/recommendations',
+        name: 'recommendations',
+        pageBuilder: (context, state) => _buildPageTransition(
+          child: const RecommendationsScreen(),
+          state: state,
+        ),
+      ),
+      GoRoute(
         path: '/privacy',
         name: 'privacy',
         builder: (context, state) => const PrivacyScreen(),
@@ -225,6 +236,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/terms',
         name: 'terms',
         builder: (context, state) => const TermsScreen(),
+      ),
+      GoRoute(
+        path: '/licenses',
+        name: 'licenses',
+        builder: (context, state) => const LicensesScreen(),
+      ),
+      GoRoute(
+        path: '/attribution',
+        name: 'attribution',
+        builder: (context, state) => const AttributionScreen(),
       ),
     ],
   );
@@ -274,7 +295,7 @@ Page<T> _buildTabTransition<T>({
   );
 }
 
-class ShellScaffold extends StatelessWidget {
+class ShellScaffold extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
 
   const ShellScaffold({super.key, required this.navigationShell});
@@ -290,7 +311,7 @@ class ShellScaffold extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth >= 1024) {
@@ -385,7 +406,7 @@ class _DesktopShell extends StatelessWidget {
                 ),
               ),
             ),
-              trailing: Padding(
+            trailing: Padding(
               padding: const EdgeInsetsDirectional.only(top: 16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
