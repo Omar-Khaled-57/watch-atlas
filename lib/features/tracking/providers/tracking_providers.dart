@@ -8,15 +8,23 @@ import '../../../core/services/supabase_service.dart';
 import '../../../models/user_media_model.dart';
 import '../../../models/media_model.dart';
 
-final trackingStatusFilterProvider = StateProvider<WatchStatus>((ref) => WatchStatus.watching);
+class _TrackingStatusFilterNotifier extends Notifier<WatchStatus> {
+  @override
+  WatchStatus build() => WatchStatus.watching;
+}
 
-class UserMediaNotifier extends StateNotifier<AsyncValue<List<UserMediaModel>>> {
-  final SupabaseService _supabase;
-  final String _userId;
+final trackingStatusFilterProvider = NotifierProvider<_TrackingStatusFilterNotifier, WatchStatus>(_TrackingStatusFilterNotifier.new);
 
-  UserMediaNotifier(this._supabase, this._userId)
-    : super(const AsyncValue.loading()) {
+class UserMediaNotifier extends Notifier<AsyncValue<List<UserMediaModel>>> {
+  late final SupabaseService _supabase;
+  late final String _userId;
+
+  @override
+  AsyncValue<List<UserMediaModel>> build() {
+    _supabase = ref.read(supabaseServiceProvider);
+    _userId = ref.read(authServiceProvider).userId;
     _load();
+    return const AsyncValue.loading();
   }
 
   Future<void> _load() async {
@@ -131,11 +139,7 @@ class UserMediaNotifier extends StateNotifier<AsyncValue<List<UserMediaModel>>> 
   }
 }
 
-final userMediaProvider = StateNotifierProvider<UserMediaNotifier, AsyncValue<List<UserMediaModel>>>((ref) {
-  final supabase = ref.watch(supabaseServiceProvider);
-  final userId = ref.watch(authServiceProvider).userId;
-  return UserMediaNotifier(supabase, userId);
-});
+final userMediaProvider = NotifierProvider<UserMediaNotifier, AsyncValue<List<UserMediaModel>>>(UserMediaNotifier.new);
 
 final userMediaByStatusProvider = Provider.family<List<UserMediaModel>, WatchStatus>((ref, status) {
   final mediaAsync = ref.watch(userMediaProvider);

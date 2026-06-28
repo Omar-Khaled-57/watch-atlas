@@ -34,7 +34,7 @@ class _ListsScreenState extends ConsumerState<ListsScreen> {
     final textTheme = Theme.of(context).textTheme;
     final listsAsync = ref.watch(userListsProvider);
     final totalTitles = ref.watch(totalTitlesProvider);
-    final lists = listsAsync.valueOrNull ?? [];
+    final lists = listsAsync.value ?? [];
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.myCollections)),
@@ -55,7 +55,7 @@ class _ListsScreenState extends ConsumerState<ListsScreen> {
       onRefresh: () async => ref.invalidate(userListsProvider),
       child: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child: _buildHero(totalTitles, listsAsync.valueOrNull?.length ?? 0, colorScheme, textTheme)),
+          SliverToBoxAdapter(child: _buildHero(totalTitles, listsAsync.value?.length ?? 0, colorScheme, textTheme)),
           listsAsync.when(
             loading: () => const SliverFillRemaining(child: FullScreenLoader()),
             error: (error, _) => SliverFillRemaining(
@@ -378,10 +378,10 @@ class _ListDetailPanelState extends ConsumerState<_ListDetailPanel> {
     final textTheme = Theme.of(context).textTheme;
     final listsAsync = ref.watch(userListsProvider);
     final itemsAsync = ref.watch(listItemsProvider(widget.listId));
-    final list = listsAsync.valueOrNull?.where((l) => l.id == widget.listId).firstOrNull;
+    final list = listsAsync.value?.where((l) => l.id == widget.listId).firstOrNull;
     if (list == null) return const SizedBox.shrink();
 
-    final itemCount = itemsAsync.valueOrNull?.length ?? list.itemCount;
+    final itemCount = itemsAsync.value?.length ?? list.itemCount;
 
     return Column(
       children: [
@@ -445,7 +445,7 @@ class _ListDetailItems extends ConsumerWidget {
             subtitle: context.l10n.addMediaFromDetails,
           );
         }
-        final userMedia = userMediaAsync.valueOrNull ?? [];
+        final userMedia = userMediaAsync.value ?? [];
 
         if (viewMode == MasterDetailViewMode.grid) {
           return GridView.builder(
@@ -621,7 +621,7 @@ class _ListDetailItems extends ConsumerWidget {
 
   void _showMoveCopyDialog(BuildContext context, WidgetRef ref, Map<String, dynamic> item, {required bool move}) {
     final mediaId = item['media_id'] as int;
-    final lists = ref.read(userListsProvider).valueOrNull ?? [];
+    final lists = ref.read(userListsProvider).value ?? [];
     final otherLists = lists.where((l) => l.id != listId).toList();
 
     if (otherLists.isEmpty) {

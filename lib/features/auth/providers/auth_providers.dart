@@ -38,17 +38,13 @@ class AuthState {
   }
 }
 
-class AuthNotifier extends StateNotifier<AuthState> {
-  final AuthService _authService;
+class AuthNotifier extends Notifier<AuthState> {
+  late final AuthService _authService;
   StreamSubscription? _authSub;
 
-  AuthNotifier(this._authService)
-    : super(const AuthState(status: AuthStatus.initial)) {
-    // Subscribe to real-time auth state changes from Supabase.
-    // This handles:
-    //   1. Session restore on startup (initialSession → authenticated)
-    //   2. Session expiry or revocation (SIGNED_OUT → unauthenticated)
-    //   3. External sign-out from other tabs/devices
+  @override
+  AuthState build() {
+    _authService = ref.read(authServiceProvider);
     _authSub = _authService.authStateChanges.listen((supabaseAuth) {
       if (supabaseAuth.session != null) {
         state = AuthState(status: AuthStatus.authenticated);
@@ -56,17 +52,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = const AuthState(status: AuthStatus.unauthenticated);
       }
     });
-    // Also check the current session synchronously in case the stream's
-    // initialSession event was already emitted before we subscribed.
     if (_authService.isAuthenticated) {
       state = AuthState(status: AuthStatus.authenticated);
     }
-  }
-
-  @override
-  void dispose() {
-    _authSub?.cancel();
-    super.dispose();
+    ref.onDispose(() => _authSub?.cancel());
+    return const AuthState(status: AuthStatus.initial);
   }
 
   Future<void> signIn(String email, String password) async {
@@ -189,6 +179,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(errorMessage: null);
   }
 
+  void forceUnauthenticated() {
+    state = const AuthState(status: AuthStatus.unauthenticated);
+  }
+
   String _formatError(Object error) {
     final message = error.toString();
     if (message.contains('Invalid login credentials')) {
@@ -210,9 +204,4 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 }
 
-final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((
-  ref,
-) {
-  final authService = ref.watch(authServiceProvider);
-  return AuthNotifier(authService);
-});
+final authNotifierProvider = NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);

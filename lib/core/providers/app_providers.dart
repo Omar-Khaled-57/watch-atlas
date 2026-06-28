@@ -58,13 +58,13 @@ final appInitializationProvider = FutureProvider<void>((ref) async {
   try { SyncService.instance.init(); } catch (_) {}
 });
 
-final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
-  return ThemeModeNotifier();
-});
+final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);
 
-class ThemeModeNotifier extends StateNotifier<ThemeMode> {
-  ThemeModeNotifier() : super(ThemeMode.system) {
+class ThemeModeNotifier extends Notifier<ThemeMode> {
+  @override
+  ThemeMode build() {
     _load();
+    return ThemeMode.system;
   }
 
   Future<void> _load() async {
@@ -89,13 +89,13 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
   }
 }
 
-final localeProvider = StateNotifierProvider<LocaleNotifier, Locale>((ref) {
-  return LocaleNotifier();
-});
+final localeProvider = NotifierProvider<LocaleNotifier, Locale>(LocaleNotifier.new);
 
-class LocaleNotifier extends StateNotifier<Locale> {
-  LocaleNotifier() : super(const Locale('en')) {
+class LocaleNotifier extends Notifier<Locale> {
+  @override
+  Locale build() {
     _load();
+    return const Locale('en');
   }
 
   Future<void> _load() async {
@@ -114,4 +114,9 @@ class LocaleNotifier extends StateNotifier<Locale> {
   }
 }
 
-final showForYouSectionProvider = StateProvider<bool>((ref) => true);
+class _ShowForYouNotifier extends Notifier<bool> {
+  @override
+  bool build() => true;
+}
+
+final showForYouSectionProvider = NotifierProvider<_ShowForYouNotifier, bool>(_ShowForYouNotifier.new);

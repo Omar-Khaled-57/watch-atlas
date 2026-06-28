@@ -6,13 +6,16 @@ import '../../../core/services/supabase_service.dart';
 import '../../../models/media_model.dart';
 import '../../../models/user_list_model.dart';
 
-class UserListsNotifier extends StateNotifier<AsyncValue<List<UserListModel>>> {
-  final SupabaseService _supabase;
-  final String _userId;
-  final Ref _ref;
+class UserListsNotifier extends Notifier<AsyncValue<List<UserListModel>>> {
+  late final SupabaseService _supabase;
+  late final String _userId;
 
-  UserListsNotifier(this._supabase, this._userId, this._ref) : super(const AsyncValue.loading()) {
+  @override
+  AsyncValue<List<UserListModel>> build() {
+    _supabase = ref.read(supabaseServiceProvider);
+    _userId = ref.read(authServiceProvider).userId;
     _load();
+    return const AsyncValue.loading();
   }
 
   Future<void> _load() async {
@@ -177,7 +180,7 @@ class UserListsNotifier extends StateNotifier<AsyncValue<List<UserListModel>>> {
         current[index] = updated;
         state = AsyncValue.data(List.from(current));
       }
-      _ref.invalidate(mediaListMembershipProvider(media.id));
+      ref.invalidate(mediaListMembershipProvider(media.id));
       _syncItemCount(listId);
     } catch (e) {
       debugPrint('Failed to add item to list: $e');
@@ -197,7 +200,7 @@ class UserListsNotifier extends StateNotifier<AsyncValue<List<UserListModel>>> {
         current[index] = updated;
         state = AsyncValue.data(List.from(current));
       }
-      _ref.invalidate(mediaListMembershipProvider(mediaId));
+      ref.invalidate(mediaListMembershipProvider(mediaId));
       _syncItemCount(listId);
     } catch (_) {}
   }
@@ -227,7 +230,7 @@ class UserListsNotifier extends StateNotifier<AsyncValue<List<UserListModel>>> {
         );
       }
       state = AsyncValue.data(List.from(current));
-      _ref.invalidate(mediaListMembershipProvider(mediaId));
+      ref.invalidate(mediaListMembershipProvider(mediaId));
       _syncItemCount(fromListId);
       _syncItemCount(toListId);
     } catch (e) {
@@ -252,7 +255,7 @@ class UserListsNotifier extends StateNotifier<AsyncValue<List<UserListModel>>> {
         );
       }
       state = AsyncValue.data(List.from(current));
-      _ref.invalidate(mediaListMembershipProvider(mediaId));
+      ref.invalidate(mediaListMembershipProvider(mediaId));
       _syncItemCount(toListId);
     } catch (e) {
       debugPrint('Failed to copy item: $e');
@@ -289,11 +292,7 @@ class UserListsNotifier extends StateNotifier<AsyncValue<List<UserListModel>>> {
   }
 }
 
-final userListsProvider = StateNotifierProvider<UserListsNotifier, AsyncValue<List<UserListModel>>>((ref) {
-  final supabase = ref.watch(supabaseServiceProvider);
-  final userId = ref.watch(authServiceProvider).userId;
-  return UserListsNotifier(supabase, userId, ref);
-});
+final userListsProvider = NotifierProvider<UserListsNotifier, AsyncValue<List<UserListModel>>>(UserListsNotifier.new);
 
 final pinnedListsProvider = Provider<List<UserListModel>>((ref) {
   final notifier = ref.watch(userListsProvider.notifier);
@@ -313,7 +312,12 @@ final listItemsProvider = FutureProvider.family<List<Map<String, dynamic>>, Stri
   }
 });
 
-final listsSearchProvider = StateProvider<String>((ref) => '');
+class _ListsSearchNotifier extends Notifier<String> {
+  @override
+  String build() => '';
+}
+
+final listsSearchProvider = NotifierProvider<_ListsSearchNotifier, String>(_ListsSearchNotifier.new);
 
 final allListItemsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final supabase = ref.watch(supabaseServiceProvider);
@@ -339,7 +343,7 @@ final allListItemsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) as
 });
 
 final totalTitlesProvider = Provider<int>((ref) {
-  final lists = ref.watch(userListsProvider).valueOrNull ?? [];
+  final lists = ref.watch(userListsProvider).value ?? [];
   return lists.fold(0, (sum, l) => sum + l.itemCount);
 });
 

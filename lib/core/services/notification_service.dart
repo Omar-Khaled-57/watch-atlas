@@ -23,7 +23,7 @@ class NotificationService {
       android: androidSettings,
       iOS: iosSettings,
     );
-    await _localNotifications.initialize(initSettings);
+    await _localNotifications.initialize(settings: initSettings);
 
     final settings = await _messaging.requestPermission(
       alert: true,
@@ -69,10 +69,10 @@ class NotificationService {
       iOS: iosDetails,
     );
     await _localNotifications.show(
-      notification.hashCode,
-      notification.title,
-      notification.body,
-      details,
+      id: notification.hashCode,
+      title: notification.title,
+      body: notification.body,
+      notificationDetails: details,
     );
   }
 
@@ -94,6 +94,12 @@ class NotificationService {
       android: androidDetails,
       iOS: iosDetails,
     );
-    await _localNotifications.show(id, title, body, details, payload: payload);
+    await _localNotifications.show(
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: details,
+      payload: payload,
+    );
   }
 }

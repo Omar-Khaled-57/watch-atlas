@@ -40,6 +40,9 @@ final recommendationsProvider =
   final uid = ref.watch(authServiceProvider).userId;
   if (uid.isEmpty) return {};
 
+  final recsEnabled = ref.watch(recsEnabledProvider).value ?? true;
+  if (!recsEnabled) return {};
+
   final engine = ref.read(recommendationEngineProvider);
   final recs = await engine.generateAll(uid);
   return recs;
@@ -49,7 +52,7 @@ final recommendationsProvider =
 final recommendationCategoryProvider =
     FutureProvider.family<List<ScoredMedia>, RecCategory>(
         (ref, category) async {
-  final all = ref.watch(recommendationsProvider).valueOrNull ?? {};
+  final all = ref.watch(recommendationsProvider).value ?? {};
   return all[category] ?? [];
 });
 
@@ -81,7 +84,37 @@ final coldStartRecommendationsProvider =
 // Privacy / toggle
 // ---------------------------------------------------------------------------
 
-/// Client-side state mirror of `profiles.recs_enabled`.
+/// Loads `profiles.recs_enabled` from Supabase for the current user.
 ///
-/// Initialised to `true`; synced to the DB when toggled via [BehaviorService].
-final recsEnabledProvider = StateProvider<bool>((ref) => true);
+/// Returns `true` as default when the user is unauthenticated or the query
+/// fails, so the recommendation system is never accidentally blocked.
+final recsEnabledProvider = FutureProvider<bool>((ref) async {
+  final uid = ref.watch(authServiceProvider).userId;
+  if (uid.isEmpty) return true;
+  try {
+    return await BehaviorService.instance.isRecsEnabled();
+  } catch (_) {
+    return true;
+  }
+});
+
+/// Writable counterpart that toggles recommendations in Supabase
+/// and invalidates [recsEnabledProvider] so the UI and data layer react.
+final recsEnabledActionsProvider = Provider<RecsEnabledActions>((ref) {
+  return RecsEnabledActions(ref);
+});
+
+class RecsEnabledActions {
+  final Ref _ref;
+  RecsEnabledActions(this._ref);
+
+  Future<void> setEnabled(bool enabled) async {
+    if (enabled) {
+      await BehaviorService.instance.enableRecommendations();
+    } else {
+      await BehaviorService.instance.disableRecommendations();
+    }
+    _ref.invalidate(recsEnabledProvider);
+    _ref.invalidate(recommendationsProvider);
+  }
+}

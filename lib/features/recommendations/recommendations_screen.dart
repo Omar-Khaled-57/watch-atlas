@@ -9,6 +9,15 @@ import '../../core/models/recommendation_models.dart';
 import '../recommendations/providers/recommendation_providers.dart';
 import 'widgets/recommendation_card.dart';
 
+class _SelectedCategoryNotifier extends Notifier<RecCategory> {
+  @override
+  RecCategory build() => RecCategory.trendingNearYou;
+
+  void select(RecCategory cat) => state = cat;
+}
+
+final _selectedCategoryProvider = NotifierProvider<_SelectedCategoryNotifier, RecCategory>(_SelectedCategoryNotifier.new);
+
 class RecommendationsScreen extends ConsumerWidget {
   const RecommendationsScreen({super.key});
 
@@ -19,8 +28,8 @@ class RecommendationsScreen extends ConsumerWidget {
     final textTheme = context.textTheme;
 
     final recommendationsAsync = ref.watch(recommendationsProvider);
-    final category = RecCategory.trendingNearYou;
-    final categoryItemsAsync = ref.watch(recommendationCategoryProvider(category));
+    final selectedCategory = ref.watch(_selectedCategoryProvider);
+    final categoryItemsAsync = ref.watch(recommendationCategoryProvider(selectedCategory));
 
     return Scaffold(
       appBar: AppBar(
@@ -34,6 +43,7 @@ class RecommendationsScreen extends ConsumerWidget {
               ref,
               recommendationsAsync,
               categoryItemsAsync,
+              selectedCategory,
               colorScheme,
               textTheme,
               l10n,
@@ -156,6 +166,7 @@ class RecommendationsScreen extends ConsumerWidget {
     WidgetRef ref,
     AsyncValue<Map<RecCategory, List<ScoredMedia>>> recommendationsAsync,
     AsyncValue<List<ScoredMedia>> categoryItemsAsync,
+    RecCategory selectedCategory,
     ColorScheme colorScheme,
     TextTheme textTheme,
     AppLocalizations l10n,
@@ -215,30 +226,30 @@ class RecommendationsScreen extends ConsumerWidget {
                         ),
                       );
                     }
-return GridView.builder(
-                       shrinkWrap: true,
-                       physics: const NeverScrollableScrollPhysics(),
-                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                         crossAxisCount: MediaQuery.of(context).size.width >= 1440 ? 5 : 4,
-                         childAspectRatio: 0.65,
-                         crossAxisSpacing: Spacing.md,
-                         mainAxisSpacing: Spacing.md,
-                       ),
-                       itemCount: items.length,
-                       itemBuilder: (context, index) {
-                         final item = items[index];
-                         return RecommendationCard(
-                           scoredMedia: item,
-                           onTap: () {
-                             ref.read(behaviorServiceProvider).trackRecommendationClick(
-                                   item.mediaId,
-                                   item.category.dbValue,
-                                 );
-                             context.navigateToMedia('movie', item.mediaId.toString());
-                           },
-                         );
-                       },
-                     );
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: MediaQuery.of(context).size.width >= 1440 ? 5 : 4,
+                        childAspectRatio: 0.65,
+                        crossAxisSpacing: Spacing.md,
+                        mainAxisSpacing: Spacing.md,
+                      ),
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        return RecommendationCard(
+                          scoredMedia: item,
+                          onTap: () {
+                            ref.read(behaviorServiceProvider).trackRecommendationClick(
+                                  item.mediaId,
+                                  item.category.dbValue,
+                                );
+                            context.navigateToMedia('movie', item.mediaId.toString());
+                          },
+                        );
+                      },
+                    );
                   },
                 ),
               ],
@@ -264,9 +275,9 @@ return GridView.builder(
                   ),
                 ),
                 SizedBox(height: Spacing.md),
-                ..._buildCategoryTiles(context, ref, l10n, colorScheme, textTheme),
+                ..._buildCategoryTiles(context, ref, selectedCategory, l10n, colorScheme, textTheme),
                 SizedBox(height: Spacing.lg),
-FilledButton.icon(
+                FilledButton.icon(
                     onPressed: () => _showAllRecommendations(context, ref, recommendationsAsync, l10n),
                     icon: Icon(Icons.grid_view_rounded),
                     label: Text(l10n.viewAllRecommendations),
@@ -282,6 +293,7 @@ FilledButton.icon(
   List<Widget> _buildCategoryTiles(
     BuildContext context,
     WidgetRef ref,
+    RecCategory selectedCategory,
     AppLocalizations l10n,
     ColorScheme colorScheme,
     TextTheme textTheme,
@@ -289,9 +301,8 @@ FilledButton.icon(
     return RecCategory.values.map((cat) {
       return _CategoryTile(
         category: cat,
-        onTap: () {
-          ref.invalidate(recommendationCategoryProvider(cat));
-        },
+        isSelected: cat == selectedCategory,
+        onTap: () => ref.read(_selectedCategoryProvider.notifier).select(cat),
       );
     }).toList();
   }
@@ -303,6 +314,7 @@ FilledButton.icon(
     ColorScheme colorScheme,
     TextTheme textTheme,
   ) {
+    final selectedCategory = ref.watch(_selectedCategoryProvider);
     final categories = RecCategory.values;
     return SizedBox(
       height: 40,
@@ -313,10 +325,12 @@ FilledButton.icon(
         padding: EdgeInsets.zero,
         itemBuilder: (context, index) {
           final cat = categories[index];
+          final isSelected = cat == selectedCategory;
           return FilterChip(
             label: Text(_getCategoryLabel(cat, l10n)),
-            selected: false,
+            selected: isSelected,
             onSelected: (_) {
+              ref.read(_selectedCategoryProvider.notifier).select(cat);
               ref.invalidate(recommendationCategoryProvider(cat));
             },
             backgroundColor: colorScheme.surfaceContainerHighest,
@@ -466,10 +480,12 @@ FilledButton.icon(
 
 class _CategoryTile extends StatelessWidget {
   final RecCategory category;
+  final bool isSelected;
   final VoidCallback onTap;
 
   const _CategoryTile({
     required this.category,
+    required this.isSelected,
     required this.onTap,
   });
 
@@ -531,30 +547,40 @@ class _CategoryTile extends StatelessWidget {
         break;
     }
 
+    final backgroundColor = isSelected
+        ? colorScheme.primaryContainer
+        : Colors.transparent;
+
     return InkWell(
       onTap: onTap,
-      child: Padding(
+      borderRadius: BorderRadius.all(Radius.circular(8)),
+      child: Container(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
         padding: EdgeInsetsDirectional.symmetric(vertical: Spacing.sm, horizontal: Spacing.xs),
         child: Row(
           children: [
             Icon(
               Icons.auto_awesome_rounded,
               size: 20,
-              color: colorScheme.primary,
+              color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.primary,
             ),
             SizedBox(width: Spacing.sm),
             Expanded(
               child: Text(
                 label,
                 style: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface,
+                  color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurface,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
             ),
             Icon(
-              Icons.chevron_right_rounded,
+              isSelected ? Icons.check_rounded : Icons.chevron_right_rounded,
               size: 20,
-              color: colorScheme.onSurfaceVariant,
+              color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant,
             ),
           ],
         ),

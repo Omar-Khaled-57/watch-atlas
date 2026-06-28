@@ -10,7 +10,6 @@ import '../../l10n/app_localizations.dart';
 import '../../core/models/gender.dart';
 import '../../core/services/behavior_service.dart';
 import '../../l10n/l10n.dart';
-import '../../l10n/app_localizations.dart';
 import '../../models/user_model.dart';
 import '../auth/providers/auth_providers.dart';
 import '../moderation/providers/moderation_providers.dart';
@@ -233,16 +232,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               title: l10n.personalizedRecommendations,
               subtitle: context.l10n.activityImprovesSuggestions,
               trailing: Consumer(builder: (context, ref, _) {
-                return Switch(
-                  value: ref.watch(recsEnabledProvider),
-                  onChanged: (enabled) async {
-                    if (enabled) {
-                      await BehaviorService.instance.enableRecommendations();
-                    } else {
-                      await BehaviorService.instance.disableRecommendations();
-                    }
-                    ref.read(recsEnabledProvider.notifier).state = enabled;
-                  },
+                final recsAsync = ref.watch(recsEnabledProvider);
+                return recsAsync.when(
+                  loading: () => const SizedBox(
+                    width: 48,
+                    height: 28,
+                    child: Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))),
+                  ),
+                  error: (_, __) => const SizedBox(width: 48, height: 28),
+                  data: (enabled) => Switch(
+                    value: enabled,
+                    onChanged: (value) => ref.read(recsEnabledActionsProvider).setEnabled(value),
+                  ),
                 );
               }),
             ),
@@ -265,6 +266,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 );
                 if (confirmed == true) {
                   await BehaviorService.instance.clearAllEvents();
+                  ref.invalidate(recommendationsProvider);
+                  ref.invalidate(recsEnabledProvider);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(l10n.clearHistory)),
@@ -287,7 +290,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _SettingsTile(
             icon: Icons.info_outline_rounded,
             title: l10n.appVersion,
-            subtitle: '0.7.3',
+            subtitle: '0.9.0',
             onTap: () => _showVersionDialog(context),
           ),
           _SettingsTile(
@@ -676,17 +679,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Navigator.pop(dialogContext);
               try {
                 await ref.read(authServiceProvider).deleteAccount();
-                if (parentContext.mounted) {
-                  ScaffoldMessenger.of(parentContext).showSnackBar(
-                    SnackBar(content: Text(l10n.deleteAccount)),
-                  );
-                  ref.read(authNotifierProvider.notifier).signOut();
-                }
               } catch (e) {
                 if (parentContext.mounted) {
-                  ScaffoldMessenger.of(parentContext).showSnackBar(SnackBar(content: Text(l10n.errorWithDetails(e.toString()))));
+                  ScaffoldMessenger.of(parentContext).showSnackBar(
+                    SnackBar(content: Text(l10n.errorWithDetails(e.toString()))),
+                  );
                 }
+                return;
               }
+              if (!parentContext.mounted) return;
+              ScaffoldMessenger.of(parentContext).showSnackBar(
+                SnackBar(content: Text(l10n.deleteAccount)),
+              );
+              ref.read(authNotifierProvider.notifier).forceUnauthenticated();
             },
             child: Text(l10n.delete),
           ),
@@ -695,10 +700,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  void _showChangePasswordDialog(BuildContext parentContext, WidgetRef ref) {
+  Future<void> _showChangePasswordDialog(BuildContext parentContext, WidgetRef ref) async {
     final l10n = AppLocalizations.of(parentContext)!;
     final emailController = TextEditingController();
-    showDialog(
+    await showDialog(
       context: parentContext,
       builder: (dialogContext) => AlertDialog(
         title: Text(l10n.changePassword),
@@ -743,6 +748,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ],
       ),
     );
+    emailController.dispose();
   }
 
   void _showVersionDialog(BuildContext context) {
@@ -750,7 +756,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     showAboutDialog(
       context: context,
               applicationName: l10n.appName,
-              applicationVersion: '0.7.3',
+              applicationVersion: '0.9.0',
               applicationLegalese: '© 2026 ${l10n.appName}',
       children: [
         const SizedBox(height: Spacing.lg),

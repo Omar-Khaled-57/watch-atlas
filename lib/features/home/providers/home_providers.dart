@@ -1,10 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/services/tmdb_service.dart';
+import '../../../core/models/recommendation_models.dart';
+import '../../../core/models/media_enums.dart';
+import '../../../core/providers/app_providers.dart';
 import '../../../models/media_model.dart';
 import '../../../models/user_media_model.dart';
-import '../../../core/models/media_enums.dart';
 import '../../tracking/providers/tracking_providers.dart';
+import '../../recommendations/providers/recommendation_providers.dart';
 
 final _tmdbService = TmdbService.instance;
 
@@ -86,13 +90,69 @@ final upcomingReleasesProvider = FutureProvider<List<MediaModel>>((ref) async {
 });
 
 final recommendedProvider = FutureProvider<List<MediaModel>>((ref) async {
-  final json = await _tmdbService.popularTv();
+  final uid = ref.watch(authServiceProvider).userId;
+  if (uid.isEmpty) return [];
 
-  return _tmdbResultsToMediaModels(
-    json['results'] as List<dynamic>,
-    MediaType.tv,
-  );
+  try {
+    final recsAsync = ref.watch(recommendationsProvider);
+    final recsMap = recsAsync.value;
+    if (recsMap == null || recsMap.isEmpty) return [];
+
+    final seen = <int>{};
+    final allItems = <ScoredMedia>[];
+    for (final items in recsMap.values) {
+      for (final item in items) {
+        if (!item.isDismissed && seen.add(item.mediaId)) {
+          allItems.add(item);
+        }
+      }
+    }
+
+    allItems.sort((a, b) => b.score.compareTo(a.score));
+    final topItems = allItems.take(20).toList();
+    return _fetchMediaForScored(topItems);
+  } catch (e) {
+    debugPrint('recommendedProvider: $e');
+    return [];
+  }
 });
+
+Future<List<MediaModel>> _fetchMediaForScored(
+  List<ScoredMedia> items,
+) async {
+  final tmdb = TmdbService.instance;
+  final results = <MediaModel>[];
+  for (final item in items) {
+    try {
+      final json = await tmdb.movieDetails(item.mediaId);
+      results.add(MediaModel(
+        id: item.mediaId,
+        mediaType: MediaType.movie,
+        title: json['title'] as String? ?? '',
+        posterPath: json['poster_path'] as String?,
+        backdropPath: json['backdrop_path'] as String?,
+        voteAverage: (json['vote_average'] as num?)?.toDouble(),
+        popularity: (json['popularity'] as num?)?.toDouble() ?? 0,
+      ));
+    } catch (_) {
+      try {
+        final json = await tmdb.tvDetails(item.mediaId);
+        results.add(MediaModel(
+          id: item.mediaId,
+          mediaType: MediaType.tv,
+          title: json['name'] as String? ?? '',
+          posterPath: json['poster_path'] as String?,
+          backdropPath: json['backdrop_path'] as String?,
+          voteAverage: (json['vote_average'] as num?)?.toDouble(),
+          popularity: (json['popularity'] as num?)?.toDouble() ?? 0,
+        ));
+      } catch (_) {
+        continue;
+      }
+    }
+  }
+  return results;
+}
 
 List<MediaModel> _tmdbResultsToMediaModels(
   List<dynamic> results,
@@ -120,7 +180,14 @@ MediaModel _jsonToMediaModel(Map<String, dynamic> map, MediaType type) {
   );
 }
 
-final homeSearchQueryProvider = StateProvider<String>((ref) => '');
+class _HomeSearchQueryNotifier extends Notifier<String> {
+  @override
+  String build() => '';
+
+  void update(String value) => state = value;
+}
+
+final homeSearchQueryProvider = NotifierProvider<_HomeSearchQueryNotifier, String>(_HomeSearchQueryNotifier.new);
 
 final homeSearchResultsProvider = FutureProvider<List<MediaModel>>((ref) async {
   final query = ref.watch(homeSearchQueryProvider);

@@ -203,3 +203,27 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS recs_clear_requested BOOLEAN DEFAU
 -- Note: user_events, user_rec_profiles, media_similarity, recommendations_cache
 -- are defined in schema.sql. Run schema.sql in your Supabase SQL editor
 -- if you haven't already done so.
+
+-- ============================================================
+-- Account deletion RPC — deletes the calling user's auth record,
+-- which cascades to profiles and all child tables via FK constraints.
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION delete_my_account()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  uid uuid;
+BEGIN
+  uid := auth.uid();
+  IF uid IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+  DELETE FROM auth.users WHERE id = uid;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION delete_my_account TO authenticated;

@@ -43,8 +43,8 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, __) => Center(child: Text(context.l10n.failedToLoadItems, style: textTheme.bodyMedium?.copyWith(color: colorScheme.error))),
         data: (items) {
-          final userMedia = userMediaAsync.valueOrNull ?? [];
-          final lists = listsAsync.valueOrNull ?? [];
+          final userMedia = userMediaAsync.value ?? [];
+          final lists = listsAsync.value ?? [];
           final categories = _extractCategories(items);
 
           return CustomScrollView(

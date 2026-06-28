@@ -36,8 +36,14 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
   @override
   void initState() {
     super.initState();
-    _pagingController = PagingController<int, MediaModel>(firstPageKey: 1);
-    _pagingController.addPageRequestListener(_fetchPage);
+    _pagingController = PagingController<int, MediaModel>(
+      fetchPage: _fetchPage,
+      getNextPageKey: (state) {
+        final lastPage = state.pages?.lastOrNull;
+        if (lastPage != null && lastPage.length < 20) return null;
+        return (state.keys?.lastOrNull ?? 0) + 1;
+      },
+    );
   }
 
   @override
@@ -61,24 +67,14 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     });
   }
 
-  Future<void> _fetchPage(int pageKey) async {
-    try {
-      final filters = ref.read(discoverFilterProvider);
-      final anilist = ref.read(anilistServiceProvider);
-      final items = await fetchDiscoverPage(
-        page: pageKey,
-        filters: filters,
-        anilist: anilist,
-      );
-      final isLastPage = items.length < 20;
-      if (isLastPage) {
-        _pagingController.appendLastPage(items);
-      } else {
-        _pagingController.appendPage(items, pageKey + 1);
-      }
-    } catch (e) {
-      _pagingController.error = e;
-    }
+  Future<List<MediaModel>> _fetchPage(int pageKey) async {
+    final filters = ref.read(discoverFilterProvider);
+    final anilist = ref.read(anilistServiceProvider);
+    return fetchDiscoverPage(
+      page: pageKey,
+      filters: filters,
+      anilist: anilist,
+    );
   }
 
   void _onFilterChanged() {
@@ -147,69 +143,75 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
           ),
           SliverPadding(
             padding: EdgeInsetsDirectional.fromSTEB(Spacing.lg, 0, Spacing.lg, Spacing.lg),
-            sliver: PagedSliverGrid<int, MediaModel>(
-              pagingController: _pagingController,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: columns,
-                childAspectRatio: 0.65,
-                crossAxisSpacing: spacing,
-                mainAxisSpacing: spacing,
-              ),
-              builderDelegate: PagedChildBuilderDelegate<MediaModel>(
-                itemBuilder: (context, item, index) => MediaCard(
-                  id: item.id,
-                  title: item.title,
-                  posterUrl: AppConstants.mediaImageUrl(item.posterPath),
-                  voteAverage: item.voteAverage,
-                  mediaType: item.mediaType,
-                  width: cardWidth,
-                  onTap: () => _navigateToDetail(item),
-                ).animate().fadeIn(
-                      duration: 300.ms,
-                      delay: (index % 20 * 30).ms,
+            sliver: PagingListener<int, MediaModel>(
+              controller: _pagingController,
+              builder: (context, state, fetchNextPage) {
+                return PagedSliverGrid<int, MediaModel>(
+                  state: state,
+                  fetchNextPage: fetchNextPage,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columns,
+                    childAspectRatio: 0.65,
+                    crossAxisSpacing: spacing,
+                    mainAxisSpacing: spacing,
+                  ),
+                  builderDelegate: PagedChildBuilderDelegate<MediaModel>(
+                    itemBuilder: (context, item, index) => MediaCard(
+                      id: item.id,
+                      title: item.title,
+                      posterUrl: AppConstants.mediaImageUrl(item.posterPath),
+                      voteAverage: item.voteAverage,
+                      mediaType: item.mediaType,
+                      width: cardWidth,
+                      onTap: () => _navigateToDetail(item),
+                    ).animate().fadeIn(
+                          duration: 300.ms,
+                          delay: (index % 20 * 30).ms,
+                        ),
+                    firstPageProgressIndicatorBuilder: (_) =>
+                        const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(Spacing.xxl),
+                        child: CircularProgressIndicator(),
+                      ),
                     ),
-                firstPageProgressIndicatorBuilder: (_) =>
-                    const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(Spacing.xxl),
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-                newPageProgressIndicatorBuilder: (_) =>
-                    const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(Spacing.lg),
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-                noItemsFoundIndicatorBuilder: (_) => Center(
-                  child: Padding(
-                    padding: EdgeInsetsDirectional.all(Spacing.section),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.movie_filter_outlined,
-                          size: 64,
-                          color: context.colorScheme.onSurfaceVariant,
+                    newPageProgressIndicatorBuilder: (_) =>
+                        const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(Spacing.lg),
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                    noItemsFoundIndicatorBuilder: (_) => Center(
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.all(Spacing.section),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.movie_filter_outlined,
+                              size: 64,
+                              color: context.colorScheme.onSurfaceVariant,
+                            ),
+                            SizedBox(height: Spacing.lg),
+                            Text(
+                              context.l10n.noResults,
+                              style: context.textTheme.titleMedium,
+                            ),
+                            SizedBox(height: Spacing.sm),
+                            Text(
+                              context.l10n.tryAdjustingFilters,
+                              style: context.textTheme.bodyMedium?.copyWith(
+                                color: context.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
                         ),
-                        SizedBox(height: Spacing.lg),
-                        Text(
-                          context.l10n.noResults,
-                          style: context.textTheme.titleMedium,
-                        ),
-                        SizedBox(height: Spacing.sm),
-                        Text(
-                          context.l10n.tryAdjustingFilters,
-                          style: context.textTheme.bodyMedium?.copyWith(
-                            color: context.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
         ],
@@ -330,7 +332,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     final chips = <Widget>[];
 
     if (filters.genreId != null) {
-      final genres = ref.watch(genreListProvider).valueOrNull ?? [];
+      final genres = ref.watch(genreListProvider).value ?? [];
       final genre = genres.where((g) => g.id == filters.genreId).firstOrNull;
       chips.add(_buildActiveChip(
         genre != null ? 'Genre: ${genre.name}' : '#${filters.genreId}',

@@ -175,7 +175,7 @@ class _CreateListDialogState extends ConsumerState<CreateListDialog> {
     if (!_formKey.currentState!.validate()) return;
     final notifier = ref.read(userListsProvider.notifier);
     if (widget.editId != null) {
-      final current = ref.read(userListsProvider).valueOrNull ?? [];
+      final current = ref.read(userListsProvider).value ?? [];
       final existing = current.where((l) => l.id == widget.editId).firstOrNull;
       if (existing != null) {
         notifier.updateList(existing.copyWith(

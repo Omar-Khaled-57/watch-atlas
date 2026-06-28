@@ -116,7 +116,7 @@ class BehaviorService {
   // Privacy controls
   // ---------------------------------------------------------------
 
-  /// Deletes all behaviour events for the current user.
+  /// Deletes all behaviour events AND cached recommendations for the current user.
   Future<void> clearAllEvents() async {
     final uid = _auth.userId;
     if (uid.isEmpty) return;
@@ -124,6 +124,11 @@ class BehaviorService {
       await _supabase.userEvents.delete().eq('user_id', uid);
     } catch (e) {
       debugPrint('BehaviorService: clearAllEvents failed: $e');
+    }
+    try {
+      await _supabase.recommendationsCache.delete().eq('user_id', uid);
+    } catch (e) {
+      debugPrint('BehaviorService: clearRecommendationsCache failed: $e');
     }
   }
 

@@ -44,8 +44,8 @@ class _MediaDetailsScreenState extends ConsumerState<MediaDetailsScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final id = int.tryParse(widget.mediaId);
-      ref.read(mediaIdProvider.notifier).state = id;
-      ref.read(mediaTypeProvider.notifier).state = _parseMediaType(widget.mediaType);
+      ref.read(mediaIdProvider.notifier).update(id);
+      ref.read(mediaTypeProvider.notifier).update(_parseMediaType(widget.mediaType));
       if (id != null) {
         BehaviorService.instance.trackMediaView(id);
       }
@@ -937,7 +937,7 @@ class _ActionButtons extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userMediaList = ref.watch(userMediaProvider).valueOrNull ?? [];
+    final userMediaList = ref.watch(userMediaProvider).value ?? [];
     final currentUserMedia = userMediaList.where((m) => m.mediaId == media.id).firstOrNull;
     final currentStatus = currentUserMedia?.status ?? WatchStatus.planToWatch;
 
@@ -1055,7 +1055,7 @@ class _ActionButtons extends ConsumerWidget {
                 builder: (dialogContext) => const CreateListDialog(),
               );
               if (created == true && context.mounted) {
-                final updatedLists = ref.read(userListsProvider).valueOrNull ?? [];
+                final updatedLists = ref.read(userListsProvider).value ?? [];
                 final newList = updatedLists.isNotEmpty ? updatedLists.first : null;
                 if (newList != null) {
                   ref.read(userListsProvider.notifier).addItemToList(newList.id, media);
@@ -1114,7 +1114,7 @@ class _ListEntrySection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final userMediaList = ref.watch(userMediaProvider).valueOrNull ?? [];
+    final userMediaList = ref.watch(userMediaProvider).value ?? [];
     final entry = userMediaList.where((m) => m.mediaId == media.id).firstOrNull;
     if (entry == null) return SizedBox.shrink();
 
@@ -1219,7 +1219,7 @@ class _LibraryCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final membershipAsync = ref.watch(mediaListMembershipProvider(media.id));
-    final userMediaList = ref.watch(userMediaProvider).valueOrNull ?? [];
+    final userMediaList = ref.watch(userMediaProvider).value ?? [];
     final trackingEntry = userMediaList.where((m) => m.mediaId == media.id).firstOrNull;
 
     return membershipAsync.when(
@@ -1744,7 +1744,7 @@ class _SidePanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userMediaList = ref.watch(userMediaProvider).valueOrNull ?? [];
+    final userMediaList = ref.watch(userMediaProvider).value ?? [];
     final currentUserMedia = userMediaList.where((m) => m.mediaId == media.id).firstOrNull;
     final currentStatus = currentUserMedia?.status ?? WatchStatus.planToWatch;
 
@@ -1866,7 +1866,7 @@ class _SidePanel extends ConsumerWidget {
                 builder: (dialogContext) => const CreateListDialog(),
               );
               if (created == true && context.mounted) {
-                final updatedLists = ref.read(userListsProvider).valueOrNull ?? [];
+                final updatedLists = ref.read(userListsProvider).value ?? [];
                 final newList = updatedLists.isNotEmpty ? updatedLists.first : null;
                 if (newList != null) {
                   ref.read(userListsProvider.notifier).addItemToList(newList.id, media);

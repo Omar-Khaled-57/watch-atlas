@@ -210,7 +210,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         onChanged: (value) {
           _searchDebounce?.cancel();
           _searchDebounce = Timer(const Duration(milliseconds: 300), () {
-            ref.read(homeSearchQueryProvider.notifier).state = value;
+            ref.read(homeSearchQueryProvider.notifier).update(value);
           });
         },
         decoration: InputDecoration(
@@ -222,7 +222,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   icon: Icon(Icons.clear_rounded, color: colorScheme.onSurfaceVariant),
                   onPressed: () {
                     _searchController.clear();
-                    ref.read(homeSearchQueryProvider.notifier).state = '';
+                    ref.read(homeSearchQueryProvider.notifier).update('');
                   },
                 )
               : null,

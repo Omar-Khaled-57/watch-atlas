@@ -275,9 +275,11 @@ class AuthService {
   }
 
   Future<void> deleteAccount() async {
-    throw UnsupportedError(
-      'Account deletion requires a server-side function. '
-      'Contact support to delete your account.',
-    );
+    try {
+      await SupabaseService.instance.client.rpc('delete_my_account');
+    } catch (e) {
+      debugPrint('AuthService: deleteAccount failed: $e');
+      rethrow;
+    }
   }
 }

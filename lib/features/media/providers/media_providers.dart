@@ -5,8 +5,23 @@ import '../../../models/media_model.dart';
 import '../../../models/review_model.dart';
 import '../../../core/models/media_enums.dart';
 
-final mediaIdProvider = StateProvider<int?>((ref) => null);
-final mediaTypeProvider = StateProvider<MediaType>((ref) => MediaType.movie);
+class _MediaIdNotifier extends Notifier<int?> {
+  @override
+  int? build() => null;
+
+  void update(int? id) => state = id;
+}
+
+final mediaIdProvider = NotifierProvider<_MediaIdNotifier, int?>(_MediaIdNotifier.new);
+
+class _MediaTypeNotifier extends Notifier<MediaType> {
+  @override
+  MediaType build() => MediaType.movie;
+
+  void update(MediaType type) => state = type;
+}
+
+final mediaTypeProvider = NotifierProvider<_MediaTypeNotifier, MediaType>(_MediaTypeNotifier.new);
 
 final mediaDetailsProvider = FutureProvider<MediaModel>((ref) async {
   final mediaId = ref.watch(mediaIdProvider);

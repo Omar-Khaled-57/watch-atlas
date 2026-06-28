@@ -88,7 +88,7 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
               IconButton(
                 icon: const Icon(Icons.share_rounded),
                 tooltip: context.l10n.share,
-                onPressed: () => Share.share(context.l10n.checkOutMyList(listData.title)),
+                onPressed: () => SharePlus.instance.share(ShareParams(text: context.l10n.checkOutMyList(listData.title))),
               ),
             ],
           ),
@@ -96,7 +96,7 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (_, __) => Center(child: Text(context.l10n.failedToLoadItems, style: textTheme.bodyMedium?.copyWith(color: colorScheme.error))),
             data: (items) {
-              return _buildContent(listData, items, categoriesAsync.valueOrNull ?? [], userMediaAsync.valueOrNull ?? [], isDesktop, isTablet, colorScheme, textTheme);
+              return _buildContent(listData, items, categoriesAsync.value ?? [], userMediaAsync.value ?? [], isDesktop, isTablet, colorScheme, textTheme);
             },
           ),
         );
@@ -477,7 +477,7 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
 
   void _showMoveCopyDialog(Map<String, dynamic> item, {required bool move}) {
     final mediaId = item['media_id'] as int;
-    final lists = ref.read(userListsProvider).valueOrNull ?? [];
+    final lists = ref.read(userListsProvider).value ?? [];
     final otherLists = lists.where((l) => l.id != widget.listId).toList();
 
     if (otherLists.isEmpty) {
@@ -602,7 +602,7 @@ class _ListDetailScreenState extends ConsumerState<ListDetailScreen> {
   }
 
   int get _itemCount {
-    final items = ref.watch(listItemsProvider(widget.listId)).valueOrNull ?? [];
+    final items = ref.watch(listItemsProvider(widget.listId)).value ?? [];
     return _categoryFilter == 'all'
         ? items.length
         : items.where((i) => _matchesCategory(i, _categoryFilter)).length;
