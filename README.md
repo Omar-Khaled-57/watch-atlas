@@ -1,17 +1,17 @@
-<p align="center">
+<p>
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/images/logo/logo.png">
     <img src="assets/images/logo/logo.png" width="120" alt="WatchAtlas">
   </picture>
 </p>
 
-<h1 align="center">WatchAtlas</h1>
+<h1>WatchAtlas</h1>
 
-<p align="center">
+<p>
   <strong>Modern cross-platform media tracking with hybrid AI recommendations</strong>
 </p>
 
-<p align="center">
+<p>
   <img src="https://img.shields.io/badge/Flutter-3.11+-02569B?logo=flutter" alt="Flutter">
   <img src="https://img.shields.io/badge/Supabase-181818?logo=supabase" alt="Supabase">
   <img src="https://img.shields.io/badge/Riverpod-2.6+-blueviolet" alt="Riverpod">
