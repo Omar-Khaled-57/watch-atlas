@@ -10,8 +10,16 @@ import 'l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load();
-  await SupabaseService.instance.init();
+  try {
+    await dotenv.load();
+  } catch (e) {
+    print('dotenv.load error: $e');
+  }
+  try {
+    await SupabaseService.instance.init();
+  } catch (e) {
+    print('Supabase init error: $e');
+  }
   runApp(const ProviderScope(child: WatchAtlasApp()));
 }
 
