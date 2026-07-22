@@ -1,0 +1,1032 @@
+import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../core/constants/dimensions.dart';
+import '../../core/extensions/context_extensions.dart';
+import '../../core/providers/app_providers.dart';
+import '../../l10n/app_localizations.dart';
+import '../../core/models/gender.dart';
+import '../../core/services/behavior_service.dart';
+import '../../l10n/l10n.dart';
+import '../../models/user_model.dart';
+import '../auth/providers/auth_providers.dart';
+import '../moderation/providers/moderation_providers.dart';
+import '../recommendations/providers/recommendation_providers.dart';
+import '../social/providers/social_providers.dart';
+import 'providers/profile_providers.dart';
+
+class ProfileScreen extends ConsumerStatefulWidget {
+  final String? userId;
+
+  const ProfileScreen({super.key, this.userId});
+
+  @override
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
+    final isOwn = widget.userId == null;
+    final uid = widget.userId ?? ref.watch(authServiceProvider).userId;
+    final isModerator = ref.watch(isModeratorProvider);
+
+    final profileAsync = ref.watch(
+      isOwn ? currentUserProfileProvider : userProfileProvider(uid),
+    );
+
+    final l10n = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(isOwn ? l10n.navProfile : l10n.userProfile),
+      ),
+      body: profileAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline_rounded, size: 48, color: colorScheme.error),
+              const SizedBox(height: Spacing.sm),
+              Text(l10n.failedToLoadProfile, style: textTheme.bodyLarge),
+              const SizedBox(height: Spacing.sm),
+              TextButton(
+                onPressed: () => ref.invalidate(currentUserProfileProvider),
+                child: Text(l10n.retry),
+              ),
+            ],
+          ),
+        ),
+        data: (profile) {
+          if (profile == null) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.person_off_rounded, size: 48, color: colorScheme.onSurfaceVariant),
+                  const SizedBox(height: Spacing.sm),
+                  Text(l10n.profileNotFound, style: textTheme.bodyLarge),
+                  const SizedBox(height: Spacing.md),
+                    Text(
+                      context.l10n.profileDatabaseError,
+                      style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                      textAlign: TextAlign.center,
+                    ),
+                  const SizedBox(height: Spacing.lg),
+                  TextButton.icon(
+                    onPressed: () => ref.invalidate(currentUserProfileProvider),
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: Text(l10n.retry),
+                  ),
+                ],
+              ),
+            );
+          }
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final isLandscape = constraints.maxWidth > constraints.maxHeight;
+              const portraitPadding = Spacing.lg;
+              final hp = isLandscape ? Spacing.xxl : portraitPadding;
+
+              if (isLandscape) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 360,
+                      child: SingleChildScrollView(
+                        padding: EdgeInsetsDirectional.symmetric(horizontal: hp, vertical: Spacing.xl),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildProfileHeader(context, profile, isOwn, colorScheme, textTheme),
+                            if (isOwn) ...[
+                              const SizedBox(height: Spacing.lg),
+                              _buildSignOutButton(context, ref, colorScheme),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: Spacing.xl),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: EdgeInsetsDirectional.only(end: hp, top: Spacing.xl, bottom: Spacing.xl),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: _buildSettingsSections(context, profile, isOwn, colorScheme, textTheme, isModerator, ref),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+
+              return ListView(
+                padding: EdgeInsetsDirectional.symmetric(horizontal: hp, vertical: Spacing.md),
+                children: [
+                  _buildProfileHeader(context, profile, isOwn, colorScheme, textTheme),
+                  ..._buildSettingsSections(context, profile, isOwn, colorScheme, textTheme, isModerator, ref),
+                  if (isOwn) ...[
+                    const SizedBox(height: Spacing.sm),
+                    _buildSignOutButton(context, ref, colorScheme),
+                  ],
+                  const SizedBox(height: Spacing.xxl),
+                ],
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  List<Widget> _buildSettingsSections(
+    BuildContext context,
+    UserModel profile,
+    bool isOwn,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    bool isModerator,
+    WidgetRef ref,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final sections = <Widget>[];
+
+    if (isOwn) {
+      sections.addAll([
+        const SizedBox(height: Spacing.md),
+        _buildSection(
+          l10n.appearance,
+          [
+            _SettingsTile(
+              icon: Icons.palette_rounded,
+              title: l10n.theme,
+              subtitle: switch (ref.watch(themeModeProvider)) {
+                ThemeMode.light => l10n.lightMode,
+                ThemeMode.dark => l10n.darkMode,
+                _ => l10n.systemMode,
+              },
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => _showThemePicker(context),
+            ),
+            _SettingsTile(
+              icon: Icons.language_rounded,
+              title: l10n.language,
+              subtitle: switch (ref.watch(localeProvider).languageCode) {
+                'ar' => context.l10n.arabicLanguage,
+                _ => context.l10n.englishLanguage,
+              },
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => _showLanguagePicker(context),
+            ),
+          ],
+          colorScheme,
+          textTheme,
+        ),
+        _buildSection(
+          l10n.account,
+          [
+            _SettingsTile(
+              icon: Icons.person_rounded,
+              title: l10n.editProfile,
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.pushNamed('editProfile'),
+            ),
+            _SettingsTile(
+              icon: Icons.lock_rounded,
+              title: l10n.changePassword,
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => _showChangePasswordDialog(context, ref),
+            ),
+            if (isModerator)
+              _SettingsTile(
+                icon: Icons.shield_rounded,
+                title: l10n.moderation,
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => context.push('/moderation'),
+              ),
+            _SettingsTile(
+              icon: Icons.delete_forever_rounded,
+              title: l10n.deleteAccount,
+              titleColor: colorScheme.error,
+              trailing: Icon(
+                Icons.chevron_right_rounded,
+                color: colorScheme.error,
+              ),
+              onTap: () => _showDeleteAccountDialog(context, ref),
+            ),
+          ],
+          colorScheme,
+          textTheme,
+        ),
+        _buildSection(
+          l10n.recommendationsAndPrivacy,
+          [
+            _SettingsTile(
+              icon: Icons.auto_awesome_rounded,
+              title: l10n.personalizedRecommendations,
+              subtitle: context.l10n.activityImprovesSuggestions,
+              trailing: Consumer(builder: (context, ref, _) {
+                final recsAsync = ref.watch(recsEnabledProvider);
+                return recsAsync.when(
+                  loading: () => const SizedBox(
+                    width: 48,
+                    height: 28,
+                    child: Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))),
+                  ),
+                  error: (_, __) => const SizedBox(width: 48, height: 28),
+                  data: (enabled) => Switch(
+                    value: enabled,
+                    onChanged: (value) => ref.read(recsEnabledActionsProvider).setEnabled(value),
+                  ),
+                );
+              }),
+            ),
+            _SettingsTile(
+              icon: Icons.delete_sweep_rounded,
+              title: l10n.clearRecommendationHistory,
+              subtitle: l10n.removeAllBehavioralData,
+              onTap: () async {
+                final l10n = AppLocalizations.of(context)!;
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: Text(l10n.clearHistory),
+                    content: Text(l10n.clearActivityWarning),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+                      FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.delete)),
+                    ],
+                  ),
+                );
+                if (confirmed == true) {
+                  await BehaviorService.instance.clearAllEvents();
+                  ref.invalidate(recommendationsProvider);
+                  ref.invalidate(recsEnabledProvider);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.clearHistory)),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+          colorScheme,
+          textTheme,
+        ),
+      ]);
+    }
+
+    sections.addAll([
+      _buildSection(
+        l10n.about,
+        [
+          _SettingsTile(
+            icon: Icons.info_outline_rounded,
+            title: l10n.appVersion,
+            subtitle: '0.10.0',
+            onTap: () => _showVersionDialog(context),
+          ),
+          _SettingsTile(
+            icon: Icons.description_rounded,
+            title: l10n.termsOfService,
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => _showTerms(context),
+          ),
+          _SettingsTile(
+            icon: Icons.shield_rounded,
+            title: l10n.privacyPolicy,
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => _showPrivacy(context),
+          ),
+          _SettingsTile(
+            icon: Icons.code_rounded,
+            title: l10n.licenses,
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => _showLicenses(context),
+          ),
+          _SettingsTile(
+            icon: Icons.attribution_rounded,
+            title: l10n.contentAndAttribution,
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => _showAttribution(context),
+          ),
+        ],
+        colorScheme,
+        textTheme,
+      ),
+    ]);
+
+    return sections;
+  }
+
+  Widget _buildProfileHeader(
+    BuildContext context,
+    UserModel profile,
+    bool isOwn,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final initials = (profile.displayName ?? profile.username)[0].toUpperCase();
+
+    return Column(
+      children: [
+        const SizedBox(height: Spacing.sm),
+        Center(
+          child: CircleAvatar(
+            radius: 48,
+            backgroundColor: colorScheme.surfaceContainerHighest,
+            child: profile.avatarUrl != null
+                ? ClipOval(
+                    child: CachedNetworkImage(
+                      imageUrl: profile.avatarUrl!,
+                      width: 96,
+                      height: 96,
+                      fit: BoxFit.cover,
+                      errorWidget: (_, __, ___) => Text(initials, style: textTheme.headlineMedium),
+                    ),
+                  )
+                : profile.defaultAvatar != null
+                    ? ClipOval(
+                        child: Image.asset(
+                          profile.defaultAvatar!,
+                          width: 96,
+                          height: 96,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Text(initials, style: textTheme.headlineMedium),
+                        ),
+                      )
+                    : Text(initials, style: textTheme.headlineMedium),
+          ),
+        ),
+        const SizedBox(height: Spacing.sm),
+        Center(
+          child: Text(
+            profile.displayName ?? profile.username,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+          ),
+        ),
+        const SizedBox(height: Spacing.xs),
+        Center(
+          child: Text(
+            '@${profile.username}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+          ),
+        ),
+        const SizedBox(height: Spacing.md),
+        Card(
+          margin: const EdgeInsetsDirectional.symmetric(horizontal: 16),
+          child: Column(
+            children: [
+              _InfoRow(
+                icon: Icons.person_rounded,
+                label: l10n.displayName,
+                value: profile.displayName ?? profile.username,
+              ),
+              Divider(height: 1, indent: 56, color: colorScheme.outline.withValues(alpha: 0.2)),
+              _InfoRow(
+                icon: Icons.alternate_email_rounded,
+                label: l10n.username,
+                value: profile.username,
+              ),
+              Divider(height: 1, indent: 56, color: colorScheme.outline.withValues(alpha: 0.2)),
+              _InfoRow(
+                icon: Icons.email_rounded,
+                label: l10n.email,
+                value: profile.email,
+              ),
+              if (profile.bio != null && profile.bio!.isNotEmpty) ...[
+                Divider(height: 1, indent: 56, color: colorScheme.outline.withValues(alpha: 0.2)),
+                _InfoRow(
+                  icon: Icons.info_outline_rounded,
+                  label: l10n.bio,
+                  value: profile.bio!,
+                ),
+              ],
+              if (profile.gender != null) ...[
+                Divider(height: 1, indent: 56, color: colorScheme.outline.withValues(alpha: 0.2)),
+                _InfoRow(
+                  icon: Icons.wc_rounded,
+                  label: l10n.gender,
+                  value: switch (profile.gender!) {
+                    Gender.male => l10n.male,
+                    Gender.female => l10n.female,
+                    Gender.ratherNotSay => l10n.ratherNotSay,
+                  },
+                ),
+              ],
+              if (profile.dateOfBirth != null) ...[
+                Divider(height: 1, indent: 56, color: colorScheme.outline.withValues(alpha: 0.2)),
+                _InfoRow(
+                  icon: Icons.cake_rounded,
+                  label: l10n.age,
+                  value: '${_calculateAge(profile.dateOfBirth!)} (${profile.dateOfBirth!.month}/${profile.dateOfBirth!.day}/${profile.dateOfBirth!.year})',
+                ),
+              ],
+            ],
+          ),
+        ),
+        if (isOwn) ...[
+          const SizedBox(height: Spacing.md),
+          Padding(
+            padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
+            child: Column(
+              children: [
+                FilledButton.icon(
+                  onPressed: () => context.pushNamed('editProfile'),
+                  icon: const Icon(Icons.edit_rounded),
+                  label: Text(l10n.editProfile),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 48),
+                  ),
+                ),
+                const SizedBox(height: Spacing.sm),
+                OutlinedButton.icon(
+                  onPressed: () => context.push('/tracking'),
+                  icon: const Icon(Icons.timeline_rounded),
+                  label: Text(l10n.viewTracking),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 48),
+                  ),
+                ),
+                const SizedBox(height: Spacing.sm),
+                OutlinedButton.icon(
+                  onPressed: () => context.push('/analytics'),
+                  icon: const Icon(Icons.analytics_rounded),
+                  label: Text(l10n.viewAnalytics),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 48),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        if (!isOwn) ...[
+          const SizedBox(height: Spacing.md),
+          _buildBlockReportSection(context, ref, profile, colorScheme, textTheme),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSection(
+    String title,
+    List<Widget> tiles,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(Spacing.lg, Spacing.lg, Spacing.lg, Spacing.sm),
+          child: Text(
+            title,
+            style: textTheme.titleSmall?.copyWith(
+              color: colorScheme.primary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        Card(
+          margin: const EdgeInsetsDirectional.symmetric(horizontal: 16),
+          child: Column(
+            children: List.generate(tiles.length, (index) {
+              final isLast = index == tiles.length - 1;
+              return Column(
+                children: [
+                  tiles[index],
+                  if (!isLast)
+                    Divider(
+                      height: 1,
+                      indent: 56,
+                      color: colorScheme.outline.withValues(alpha: 0.2),
+                    ),
+                ],
+              );
+            }),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBlockReportSection(
+    BuildContext context,
+    WidgetRef ref,
+    UserModel profile,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final isBlockedAsync = ref.watch(isBlockedProvider(profile.id));
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
+      child: isBlockedAsync.when(
+        data: (isBlocked) => Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _showReportDialog(context, ref, profile),
+                icon: const Icon(Icons.flag_rounded, size: 18),
+                label: Text(l10n.report),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 48),
+                ),
+              ),
+            ),
+            const SizedBox(width: Spacing.sm),
+            Expanded(
+              child: isBlocked
+                  ? FilledButton.icon(
+                      onPressed: () => ref.read(unblockUserProvider(profile.id)),
+                      icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+                      label: Text(l10n.unblock),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 48),
+                      ),
+                    )
+                  : OutlinedButton.icon(
+                      onPressed: () => _showBlockDialog(context, ref, profile),
+                      icon: const Icon(Icons.block_rounded, size: 18),
+                      label: Text(l10n.block),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 48),
+                        foregroundColor: colorScheme.error,
+                        side: BorderSide(color: colorScheme.error.withValues(alpha: 0.5)),
+                      ),
+                    ),
+            ),
+          ],
+        ),
+        loading: () => const SizedBox(height: 48),
+        error: (_, __) => const SizedBox.shrink(),
+      ),
+    );
+  }
+
+  void _showReportDialog(BuildContext context, WidgetRef ref, UserModel user) {
+    final l10n = AppLocalizations.of(context)!;
+    final reasonController = TextEditingController();
+    String selectedReason = 'spam';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          title: Text(l10n.reportUser),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('${l10n.report} @${user.username}'),
+              const SizedBox(height: Spacing.lg),
+              DropdownButtonFormField<String>(
+                initialValue: selectedReason,
+                decoration: InputDecoration(labelText: l10n.reason),
+                items: [
+                  DropdownMenuItem(value: 'spam', child: Text(l10n.spam)),
+                  DropdownMenuItem(value: 'inappropriate', child: Text(l10n.inappropriate)),
+                  DropdownMenuItem(value: 'harassment', child: Text(l10n.harassment)),
+                  DropdownMenuItem(value: 'other', child: Text(l10n.other)),
+                ],
+                onChanged: (value) {
+                  if (value != null) setState(() => selectedReason = value);
+                },
+              ),
+              const SizedBox(height: Spacing.md),
+              TextField(
+                controller: reasonController,
+                decoration: InputDecoration(
+                  labelText: l10n.additionalDetails,
+                  hintText: l10n.optional,
+                ),
+                maxLines: 3,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () async {
+                await ref.read(reportUserProvider((
+                  userId: user.id,
+                  reason: selectedReason,
+                  description: reasonController.text.trim(),
+                )).future);
+                if (ctx.mounted) Navigator.pop(ctx);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.reportSubmitted)),
+                  );
+                }
+              },
+              child: Text(l10n.submit),
+            ),
+          ],
+        ),
+      ),
+    );
+    reasonController.dispose();
+  }
+
+  void _showBlockDialog(BuildContext context, WidgetRef ref, UserModel user) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.blockUser),
+        content: Text(l10n.confirmBlockUser),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+            onPressed: () async {
+              await ref.read(blockUserProvider(user.id).future);
+              if (ctx.mounted) Navigator.pop(ctx);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.userBlocked)),
+                );
+              }
+            },
+            child: Text(l10n.block),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showThemePicker(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final current = ref.read(themeModeProvider);
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadiusDirectional.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsetsDirectional.symmetric(vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 8),
+                child: Text(l10n.chooseTheme, style: Theme.of(ctx).textTheme.titleMedium),
+              ),
+              ListTile(
+                leading: const Icon(Icons.settings_suggest_rounded),
+                title: Text(l10n.systemMode),
+                subtitle: Text(l10n.followSystem),
+                trailing: current == ThemeMode.system
+                    ? Icon(Icons.check, color: Theme.of(ctx).colorScheme.primary)
+                    : null,
+                onTap: () {
+                  ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.system);
+                  Navigator.pop(ctx);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.light_mode_rounded),
+                title: Text(l10n.lightMode),
+                trailing: current == ThemeMode.light
+                    ? Icon(Icons.check, color: Theme.of(ctx).colorScheme.primary)
+                    : null,
+                onTap: () {
+                  ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.light);
+                  Navigator.pop(ctx);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.dark_mode_rounded),
+                title: Text(l10n.darkMode),
+                trailing: current == ThemeMode.dark
+                    ? Icon(Icons.check, color: Theme.of(ctx).colorScheme.primary)
+                    : null,
+                onTap: () {
+                  ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.dark);
+                  Navigator.pop(ctx);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showLanguagePicker(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final current = ref.read(localeProvider);
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadiusDirectional.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsetsDirectional.symmetric(vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 8),
+                child: Text(l10n.chooseLanguage, style: Theme.of(ctx).textTheme.titleMedium),
+              ),
+              ListTile(
+                leading: const Icon(Icons.language_rounded),
+                title: Text(l10n.englishLanguage),
+                trailing: current.languageCode == 'en'
+                    ? Icon(Icons.check, color: Theme.of(ctx).colorScheme.primary)
+                    : null,
+                onTap: () {
+                  ref.read(localeProvider.notifier).setLocale(const Locale('en'));
+                  Navigator.pop(ctx);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.language_rounded),
+                title: Text(l10n.arabicLanguage),
+                trailing: current.languageCode == 'ar'
+                    ? Icon(Icons.check, color: Theme.of(ctx).colorScheme.primary)
+                    : null,
+                onTap: () {
+                  ref.read(localeProvider.notifier).setLocale(const Locale('ar'));
+                  Navigator.pop(ctx);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSignOutButton(BuildContext context, WidgetRef ref, ColorScheme colorScheme) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
+      child: OutlinedButton.icon(
+        onPressed: () => _showSignOutDialog(context, ref),
+        icon: const Icon(Icons.logout_rounded),
+        label: Text(l10n.signOut),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: colorScheme.error,
+          side: BorderSide(color: colorScheme.error.withValues(alpha: 0.5)),
+          minimumSize: const Size(double.infinity, 48),
+        ),
+      ),
+    );
+  }
+
+  void _showSignOutDialog(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.logout),
+        content: Text(l10n.signOutConfirmation),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(l10n.cancel)),
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              await ref.read(authNotifierProvider.notifier).signOut();
+              if (context.mounted) context.go('/auth');
+            },
+            child: Text(l10n.signOut),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext parentContext, WidgetRef ref) {
+    final l10n = AppLocalizations.of(parentContext)!;
+    showDialog(
+      context: parentContext,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.deleteAccount),
+        content: Text(l10n.deleteAccountWarning),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(l10n.cancel)),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(dialogContext).colorScheme.error),
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              try {
+                await ref.read(authServiceProvider).deleteAccount();
+              } catch (e) {
+                if (parentContext.mounted) {
+                  ScaffoldMessenger.of(parentContext).showSnackBar(
+                    SnackBar(content: Text(l10n.errorWithDetails(e.toString()))),
+                  );
+                }
+                return;
+              }
+              if (!parentContext.mounted) return;
+              ScaffoldMessenger.of(parentContext).showSnackBar(
+                SnackBar(content: Text(l10n.deleteAccount)),
+              );
+              ref.read(authNotifierProvider.notifier).forceUnauthenticated();
+            },
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showChangePasswordDialog(BuildContext parentContext, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(parentContext)!;
+    final emailController = TextEditingController();
+    await showDialog(
+      context: parentContext,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.changePassword),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.enterEmailForReset),
+            const SizedBox(height: Spacing.lg),
+            TextField(
+              controller: emailController,
+              decoration: InputDecoration(
+                labelText: l10n.email,
+                prefixIcon: const Icon(Icons.email_rounded),
+              ),
+              keyboardType: TextInputType.emailAddress,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(l10n.cancel)),
+          FilledButton(
+            onPressed: () async {
+              final email = emailController.text.trim();
+              if (email.isEmpty) return;
+              Navigator.pop(dialogContext);
+              try {
+                await ref.read(authNotifierProvider.notifier).resetPassword(email);
+                if (parentContext.mounted) {
+                  ScaffoldMessenger.of(parentContext).showSnackBar(
+                    SnackBar(content: Text(l10n.sendResetLink)),
+                  );
+                }
+              } catch (e) {
+                if (parentContext.mounted) {
+                  ScaffoldMessenger.of(parentContext).showSnackBar(SnackBar(content: Text(l10n.errorWithDetails(e.toString()))));
+                }
+              }
+            },
+            child: Text(l10n.sendResetLink),
+          ),
+        ],
+      ),
+    );
+    emailController.dispose();
+  }
+
+  void _showVersionDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    showAboutDialog(
+      context: context,
+              applicationName: l10n.appName,
+              applicationVersion: '0.10.0',
+              applicationLegalese: '© 2026 ${l10n.appName}',
+      children: [
+        const SizedBox(height: Spacing.lg),
+        Text(l10n.aboutAppDescription),
+      ],
+    );
+  }
+
+  void _showTerms(BuildContext context) {
+    context.pushNamed('terms');
+  }
+
+  void _showPrivacy(BuildContext context) {
+    context.pushNamed('privacy');
+  }
+
+  void _showLicenses(BuildContext context) {
+    context.pushNamed('licenses');
+  }
+
+  void _showAttribution(BuildContext context) {
+    context.pushNamed('attribution');
+  }
+}
+
+int _calculateAge(DateTime dateOfBirth) {
+  final now = DateTime.now();
+  int age = now.year - dateOfBirth.year;
+  if (now.isBefore(DateTime(dateOfBirth.year, dateOfBirth.month, dateOfBirth.day))) {
+    age--;
+  }
+  return age;
+}
+
+class _SettingsTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final Color? titleColor;
+  final VoidCallback? onTap;
+
+  const _SettingsTile({
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.trailing,
+    this.titleColor,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return ListTile(
+      leading: Icon(icon, color: colorScheme.onSurfaceVariant, size: 22),
+      title: Text(
+        title,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: titleColor ?? colorScheme.onSurface,
+            ),
+      ),
+      subtitle: subtitle != null
+          ? Text(
+              subtitle!,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+            )
+          : null,
+      trailing: trailing,
+      onTap: onTap,
+      contentPadding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: colorScheme.onSurfaceVariant),
+          const SizedBox(width: Spacing.lg),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+                const SizedBox(height: 2),
+                Text(value, maxLines: 3, overflow: TextOverflow.ellipsis, style: textTheme.bodyMedium),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

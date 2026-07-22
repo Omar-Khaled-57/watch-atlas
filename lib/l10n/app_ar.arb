@@ -1,0 +1,773 @@
+{
+  "@@locale": "ar",
+  "@@last_modified": "2026-06-24",
+
+  "appName": "واتش أطلس",
+
+  "@_Common": {
+    "description": "سلاسل شائعة في التطبيق"
+  },
+  "loading": "جارٍ التحميل...",
+  "loadingMore": "جارٍ تحميل المزيد...",
+  "error": "خطأ",
+  "retry": "إعادة المحاولة",
+  "cancel": "إلغاء",
+  "save": "حفظ",
+  "delete": "حذف",
+  "search": "بحث",
+  "edit": "تعديل",
+  "close": "إغلاق",
+  "back": "رجوع",
+  "next": "التالي",
+  "done": "تم",
+  "yes": "نعم",
+  "no": "لا",
+  "ok": "موافق",
+  "errorOccurred": "حدث خطأ",
+  "noInternet": "لا يوجد اتصال بالإنترنت",
+  "pullToRefresh": "اسحب للتحديث",
+  "somethingWentWrong": "حدث خطأ ما",
+
+  "@_Navigation": {
+    "description": "علامات تبويب التنقل السفلي"
+  },
+  "navHome": "الرئيسية",
+  "navDiscover": "اكتشف",
+  "navSearch": "بحث",
+  "navLists": "القوائم",
+  "navProfile": "الملف الشخصي",
+
+  "@_Auth": {
+    "description": "نصوص المصادقة"
+  },
+  "signIn": "تسجيل الدخول",
+  "signUp": "إنشاء حساب",
+  "signOut": "تسجيل الخروج",
+  "email": "البريد الإلكتروني",
+  "password": "كلمة المرور",
+  "forgotPassword": "نسيت كلمة المرور؟",
+  "signInWithGoogle": "تسجيل الدخول عبر Google",
+  "signInWithApple": "تسجيل الدخول عبر Apple",
+  "welcomeBack": "مرحبًا بعودتك",
+  "createAccount": "إنشاء حساب",
+  "dontHaveAccount": "ليس لديك حساب؟",
+  "alreadyHaveAccount": "لديك حساب بالفعل؟",
+
+  "@_Home": {
+    "description": "عناوين أقسام الشاشة الرئيسية"
+  },
+  "trendingNow": "رائج الآن",
+  "popularThisWeek": "الأكثر مشاهدة هذا الأسبوع",
+  "continueWatching": "مشاهدة مستمرة",
+  "recentlyAdded": "أُضيف مؤخرًا",
+  "upcomingReleases": "الإصدارات القادمة",
+  "recommendedForYou": "موصى به لك",
+  "seeAll": "عرض الكل",
+
+  "@_Media": {
+    "description": "تسميات أنواع المحتوى والتفاصيل"
+  },
+  "movies": "أفلام",
+  "tvShows": "مسلسلات",
+  "anime": "أنمي",
+  "kdrama": "دراما كورية",
+  "ratings": "التقييمات",
+  "overview": "نظرة عامة",
+  "cast": "طاقم التمثيل",
+  "crew": "طاقم العمل",
+  "trailers": "المقاطع الدعائية",
+  "recommendations": "التوصيات",
+  "reviews": "المراجعات",
+  "similar": "مشابهة",
+  "addToList": "أضف إلى القائمة",
+  "share": "مشاركة",
+  "mediaType": "نوع الوسائط",
+  "releaseDate": "تاريخ الإصدار",
+  "runtime": "المدة",
+  "genres": "التصنيفات",
+  "status": "الحالة",
+  "language": "اللغة",
+  "country": "البلد",
+
+  "@_WatchStatus": {
+    "description": "حالات المشاهدة"
+  },
+  "watching": "يشاهد",
+  "completed": "مكتمل",
+  "onHold": "متوقف",
+  "dropped": "تم الإلغاء",
+  "planToWatch": "يخطط للمشاهدة",
+  "rewatching": "يعيد المشاهدة",
+
+  "@_Tracking": {
+    "description": "التتبع والتقدم"
+  },
+  "myTracking": "تتبعي",
+  "totalWatched": "إجمالي المشاهدات",
+  "totalEpisodes": "إجمالي الحلقات",
+  "totalHours": "إجمالي الساعات",
+  "progress": "التقدم",
+  "updateStatus": "تحديث الحالة",
+  "addToTracking": "أضف إلى التتبع",
+  "removeFromTracking": "إزالة من التتبع",
+  "trackingCount": "{count, plural, one{عنوان واحد} other{{count} عناوين}}",
+  "episodeCount": "{count, plural, one{حلقة واحدة} other{{count} حلقات}}",
+
+  "@_Lists": {
+    "description": "قوائم المستخدم"
+  },
+  "myLists": "قوائمي",
+  "createList": "إنشاء قائمة",
+  "listTitle": "عنوان القائمة",
+  "listDescription": "وصف القائمة",
+  "publicList": "عام",
+  "privateList": "خاص",
+  "collaborative": "تعاوني",
+  "addToListTitle": "أضف {title} إلى القائمة",
+  "noListsYet": "لا توجد قوائم بعد",
+  "createFirstList": "أنشئ قائمتك الأولى",
+
+  "@_Profile": {
+    "description": "الملف الشخصي للمستخدم"
+  },
+  "editProfile": "تعديل الملف الشخصي",
+  "bio": "السيرة الذاتية",
+  "followers": "المتابعون",
+  "following": "يتابع",
+  "activity": "النشاط",
+  "stats": "الإحصائيات",
+  "joinedOn": "انضم في {date}",
+
+  "@_Social": {
+    "description": "الميزات الاجتماعية"
+  },
+  "findFriends": "البحث عن أصدقاء",
+  "follow": "متابعة",
+  "unfollow": "إلغاء المتابعة",
+  "friendActivity": "نشاط الأصدقاء",
+  "noFriendsYet": "لا يوجد أصدقاء بعد",
+  "suggestedFriends": "أصدقاء مقترحون",
+
+  "@_Search": {
+    "description": "شاشة البحث"
+  },
+  "searchHint": "ابحث عن أفلام، مسلسلات، أنمي...",
+  "searchHistory": "سجل البحث",
+  "trendingSearches": "عمليات البحث الرائجة",
+  "noResults": "لم يتم العثور على نتائج",
+  "filters": "عوامل التصفية",
+  "clearHistory": "مسح السجل",
+  "searchResults": "نتائج البحث",
+
+  "@_Notifications": {
+    "description": "الإشعارات"
+  },
+  "notifications": "الإشعارات",
+  "markAllRead": "تحديد الكل كمقروء",
+  "clearAll": "مسح الكل",
+  "noNotifications": "لا توجد إشعارات بعد",
+  "notificationFollow": "بدأ {name} بمتابعتك",
+  "notificationLike": "أعجب {name} بمراجعتك",
+  "notificationComment": "علق {name} على مراجعتك",
+  "notificationList": "أضافك {name} إلى قائمة",
+
+  "@_Settings": {
+    "description": "شاشة الإعدادات"
+  },
+  "settings": "الإعدادات",
+  "theme": "المظهر",
+  "contentLanguage": "لغة المحتوى",
+  "darkMode": "الوضع الداكن",
+  "lightMode": "الوضع الفاتح",
+  "systemMode": "وضع النظام",
+  "about": "حول",
+  "appVersion": "إصدار التطبيق",
+  "termsOfServiceTitle": "شروط الخدمة",
+  "privacyPolicyTitle": "سياسة الخصوصية",
+  "privacyPolicy": "سياسة الخصوصية",
+  "termsOfServiceBody": "باستخدامك لووتش أطلس، فإنك توافق على هذه الشروط. يرجى قراءتها بعناية.\n\n[توضع الشروط الكاملة هنا]",
+  "privacyPolicyBody": "خصوصيتك تهمنا.\n\n[توضع سياسة الخصوصية الكاملة هنا]",
+  "termsOfService": "شروط الخدمة",
+  "licenses": "التراخيص",
+  "rateApp": "تقييم التطبيق",
+  "shareApp": "مشاركة التطبيق",
+  "logout": "تسجيل الخروج",
+  "deleteAccount": "حذف الحساب",
+  "appearance": "المظهر",
+  "account": "الحساب",
+  "userProfile": "الملف الشخصي للمستخدم",
+  "failedToLoadProfile": "فشل تحميل الملف الشخصي",
+  "profileNotFound": "الملف الشخصي غير موجود",
+  "changePassword": "تغيير كلمة المرور",
+  "moderation": "الرقابة",
+  "recommendationsAndPrivacy": "التوصيات والخصوصية",
+  "personalizedRecommendations": "توصيات مخصصة",
+  "activityImprovesSuggestions": "اجعل نشاطك يحسن التوصيات",
+  "clearRecommendationHistory": "مسح سجل التوصيات",
+  "removeAllBehavioralData": "إزالة جميع البيانات السلوكية",
+  "chooseTheme": "اختر المظهر",
+  "chooseLanguage": "اختر اللغة",
+  "followSystem": "اتباع إعدادات النظام",
+  "displayName": "الاسم المعروض",
+  "username": "اسم المستخدم",
+  "age": "العمر",
+  "gender": "الجنس",
+  "male": "ذكر",
+  "female": "أنثى",
+  "ratherNotSay": "أفضل عدم الإفصاح",
+  "viewTracking": "عرض التتبع",
+  "viewAnalytics": "عرض التحليلات",
+  "signOutConfirmation": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
+  "sendResetLink": "إرسال رابط إعادة التعيين",
+
+  "@_Analytics": {
+    "description": "التحليلات والإحصائيات"
+  },
+  "statistics": "الإحصائيات",
+  "yourStats": "إحصائياتك",
+  "totalWatchedCount": "إجمالي المشاهدات",
+  "totalHoursCount": "إجمالي الساعات",
+  "averageRating": "متوسط التقييم",
+  "genreDistribution": "توزيع التصنيفات",
+  "weeklyActivity": "النشاط الأسبوعي",
+  "monthlyActivity": "النشاط الشهري",
+  "favoriteGenre": "التصنيف المفضل",
+  "favoriteCountry": "البلد المفضل",
+  "mostWatchedGenre": "التصنيف الأكثر مشاهدة",
+  "topRated": "الأعلى تقييمًا",
+  "recentActivity": "النشاط الأخير",
+  "countryDistribution": "توزيع البلدان",
+  "yearlyActivity": "النشاط السنوي",
+  "ratingDistribution": "توزيع التقييمات",
+  "avgRating": "متوسط التقييم",
+  "mostWatchedDecade": "العقد الأكثر مشاهدة",
+  "noDataAvailable": "لا توجد بيانات متاحة",
+
+  "@_Time": {
+    "description": "نصوص متعلقة بالوقت"
+  },
+  "justNow": "الآن",
+  "minutesAgo": "منذ {minutes} د",
+  "hoursAgo": "منذ {hours} س",
+  "daysAgo": "منذ {days} ي",
+  "weeksAgo": "منذ {weeks} أ",
+  "monthsAgo": "منذ {months} ش",
+  "yearsAgo": "منذ {years} س",
+
+  "@_Legal": {
+    "description": "شاشات قانونية"
+  },
+  "termsOfServiceTitle": "شروط الخدمة",
+  "lastUpdated": "آخر تحديث: 26 يونيو 2026",
+  "acceptanceOfTerms": "1. قبول الشروط",
+  "acceptanceOfTermsBody": "باستخدامك أو الوصول إلى واتش أطلس، فإنك توافق على الالتزام بشروط الخدمة هذه. إذا كنت لا توافق، فلا تستخدم الخدمة.",
+  "descriptionOfService": "2. وصف الخدمة",
+  "descriptionOfServiceBody": "واتش أطلس هو تطبيق لتتبع الوسائط يسمح للمستخدمين باكتشاف وتتبع وتنظيم الأفلام والمسلسلات والأنمي. يمكن للمستخدمين التقييم والمراجعة والحفاظ على قوائم المشاهدة.",
+  "userAccounts": "3. حسابات المستخدمين",
+  "userAccountsBody": "يجب تسجيل الدخول عبر Google OAuth لاستخدام الخدمة. أنت مسؤول عن الحفاظ على سرية حسابك. يجب أن يكون عمرك 13 عامًا على الأقل لاستخدام هذه الخدمة.",
+  "userResponsibilities": "4. مسؤوليات المستخدم",
+  "userResponsibilitiesBody": "توافق على عدم نشر محتوى مسيء أو مضايق أو غير لائق؛ عدم انتحال شخصية الآخرين؛ عدم محاولة التحايل على إجراءات الأمان؛ وعدم استخدام الخدمة لأي غرض غير قانوني. أنت مسؤول عن جميع الأنشطة التي تحدث تحت حسابك.",
+  "acceptableUse": "5. الاستخدام المقبول",
+  "acceptableUseBody": "يجوز لك استخدام الخدمة لأغراض قانونية فقط. توافق على عدم التداخل مع سلامة أو أداء الخدمة أو محاولة الوصول غير المصرح به إلى أي جزء من الخدمة أو الأنظمة ذات الصلة.",
+  "userGeneratedContent": "6. المحتوى الذي ينشئه المستخدم",
+  "userGeneratedContentBody": "أنت تحتفظ بملكية المحتوى الذي تنشئه، بما في ذلك القوائم والتقييمات والمراجعات والملاحظات ومعلومات الملف الشخصي. باستخدامك الخدمة، فإنك تمنح واتش أطلس ترخيصًا عالميًا غير حصري لتخزين وعرض وتوزيع هذا المحتوى في connection with تقديم الخدمة. أنت المسول الوحيد عن المحتوى الذي ترسله.",
+  "intellectualProperty": "7. الملكية الفكرية",
+  "intellectualPropertyBody": "يتم توفير بيانات الوسائط والصور بواسطة TMDB وAniList بموجب تراخيص كل منهما. تطبيق واتش أطلس والكود مملوك. المحتوى الذي ينشئه المستخدم (المراجعات، التقييمات، القوائم) يظل ملكًا لك، مع ترخيص لواتش أطلس لعرضه داخل الخدمة.",
+  "thirdPartyServicesTerms": "8. خدمات الطرف الثالث",
+  "thirdPartyServicesTermsBody": "قد تحتوي الخدمة على روابط أو تدمج مع خدمات طرف ثالث، بما في ذلك TMDB وAniList وGoogle OAuth. يحكم استخدامك لخدمات الطرف الثالث شروطها وسياسات الخصوصية الخاصة بها. واتش أطلس غير مسؤول عن ممارسات أو محتوى خدمات الطرف الثالث.",
+  "externalLinks": "9. الروابط الخارجية",
+  "externalLinksBody": "قد تحتوي الخدمة على روابط لمواقع أو موارد خارجية. واتش أطلس غير مسؤول عن توفر أو محتوى هذه المواقع الخارجية ولا ي Endorse أي محتوى أو منتجات أو خدمات متاحة منها.",
+  "availabilityOfService": "10. توفر الخدمة",
+  "availabilityOfServiceBody": "نسعى للحفاظ على الخدمة متاحة وآمنة ومحدثة. ومع ذلك، لا نضمن وصولًا غير منقطع. قد تكون الخدمة غير متاحة مؤقتًا بسبب الصيانة أو التحديثات أو عوامل خارجة عن سيطرتنا.",
+  "changesToFeatures": "11. التغييرات على الميزات",
+  "changesToFeaturesBody": "قد نقوم بتعديل أو تحديث أو إيقاف ميزات الخدمة في أي وقت، مع أو بدون إشعار. لسنا مسؤولين تجاهك أو أي طرف ثالث عن أي تعديل أو تعليق أو إيقاف للخدمة أو أي جزء منها.",
+  "accountSuspension": "12. تعليق أو إنهاء الحساب",
+  "accountSuspensionBody": "نحتفظ بالحق في تعليق أو إنهاء الحسابات التي تنتهك هذه الشروط. يمكنك حذف حسابك والبيانات المرتبطة به في أي وقت من خلال إعدادات التطبيق أو عن طريق الاتصال بنا.",
+  "disclaimers": "13. إخلاء المسؤولية",
+  "disclaimersBody": "يتم توفير الخدمة كما هي وكما هي متاحة. لا نقدم أي ضمانات، صريحة أو ضمنية، بشأن دقة أو موثوقية أو توفر الخدمة. لا نضمن أن بيانات الوسائط أو التوصيات أو نتائج البحث ستكون خالية من الأخطاء أو تلبي توقعاتك.",
+  "privacyReference": "14. الخصوصية",
+  "privacyReferenceBody": "استخدامك للخدمة يحكمه أيضًا سياسة الخصوصية الخاصة بنا. يرجى مراجعة سياسة الخصوصية الخاصة بنا لفهم كيفية جمع واستخدام وحماية معلوماتك الشخصية.",
+  "changesToTerms": "15. التغييرات على الشروط",
+  "changesToTermsBody": "قد نقوم بتحديث هذه الشروط في أي وقت. الاستمرار في الاستخدام بعد التغييرات يعتبر قبولًا. سيتم إخطار المستخدمين بالتغييرات الجوهرية عبر البريد الإلكتروني أو الإشعار داخل التطبيق.",
+  "contactSection": "16. الاتصال",
+  "contactLegal": "للاستفسارات حول هذه الشروط، اتصل: legal@watchatlas.app",
+  "contactPrivacy": "للاستفسارات المتعلقة بالخصوصية، اتصل: privacy@watchatlas.app",
+  "informationWeCollect": "1. المعلومات التي نجمعها",
+  "informationWeCollectBody": "عند تسجيل الدخول عبر Google OAuth، نجمع عنوان بريدك الإلكتروني واسم العرض. نقوم أيضًا بتخزين الوسائط التي تتابعها (أفلام، مسلسلات، أنمي) مع حالة المشاهدة والتقييمات والمراجعات. الصور الرمزية وأسماء العرض مخزنة عبر Supabase storage.\n\nالمعلومات الاختيارية التي قد تقدمها تشمل تاريخ الميلاد والجنس، وتُستخدم فقط لتخصيص تجربتك.",
+  "automaticallyCollectedData": "2. البيانات المجمعة تلقائيًا",
+  "automaticallyCollectedDataBody": "قد نجمع تلقائيًا معلومات معينة عند استخدامك للتطبيق، بما في ذلك نوع الجهاز وإصخدام التطبيق وتقارير الأعطال إن وجدت. تتم معالجة بيانات المصادقة بواسطة موفر المصادقة لدينا (Google OAuth) للحفاظ على جلستك بأمان.",
+  "howWeUseInfo": "3. كيف نستخدم معلوماتك",
+  "howWeUseInfoBody": "تُستخدم معلوماتك لتقديم الخدمة وتحسينها: تخصيص تجربتك، والحفاظ على قوائم المشاهدة والمراجعات، وإنشاء توصيات بناءً على نشاطك، وإبلاغك بتحديثات الخدمة إذا لزم الأمر.",
+  "dataStorage": "4. تخزين البيانات والأمان",
+  "dataStorageBody": "يتم تخزين بياناتك بشكل آمن على Supabase وGoogle Cloud. نستخدم أمان مستوى الصف لضمان وصولك إلى بياناتك فقط. لا يتم تخزين كلمات المرور مطلقًا — تتم المصادقة بالكامل عبر Google OAuth. جميع عمليات نقل البيانات تستخدم اتصالات HTTPS آمنة.",
+  "thirdPartyServicesPrivacy": "5. خدمات الطرف الثالث",
+  "thirdPartyServicesPrivacyBody": "نستخدم TMDB لجلب بيانات الوسائط. يتم إرسال عمليات البحث ومعرفات الوسائط التي تعرضها إلى API الخاص بـ TMDB. نستخدم أيضًا AniList لبيانات الأنمي. Google OAuth يُستخدم للمصادقة. كل خدمة طرف ثالث تعالج البيانات وفقًا لسياسة الخصوصية الخاصة بها.",
+  "cookiesLocalStorage": "6. ملفات تعريف الارتباط والتخزين المحلي",
+  "cookiesLocalStorageBody": "نستخدم التخزين المحلي للحفاظ على جلستك، وتذكر تفضيلاتك (مثل المظهر واللغة)، وتخزين البيانات مؤقتًا لتحسين الأداء. لا نستخدم ملفات تعريف الارتباط للتتبع أو تقنيات مماثلة لأغراض إعلانية.",
+  "dataRetention": "7. الاحتفاظ بالبيانات",
+  "dataRetentionBody": "يتم الاحتفاظ ببياناتك طالما أن حسابك نشط. يمكنك حذف حسابك والبيانات المرتبطة به في أي وقت عن طريق الاتصال بنا أو استخدام ميزة حذف الحساب في التطبيق.",
+  "yourRights": "8. حقوقك",
+  "yourRightsBody": "يحق لك طلب نسخة من بياناتك، أو تصحيح البيانات غير الدقيقة، أو حذف حسابك والبيانات المرتبطة به في أي وقت. يمكنك تحديث معلومات ملفك الشخصي، وإدارة تفضيلات التخصيص، وتغيير لغتك، أو تسجيل الخروج في أي وقت من خلال إعدادات التطبيق.",
+  "childrensPrivacy": "9. خصوصية الأطفال",
+  "childrensPrivacyBody": "واتش أطلس مخصص للمستخدمين من عمر 13 عامًا فما فوق. لا نجمع عن علم معلومات شخصية من الأطفال دون سن 13. إذا كنت والدًا أو وصياً وتعتقد أن طفلك قدم لنا معلومات شخصية، فيرجى الاتصال بنا لنتخذ الإجراء المناسب.",
+  "policyUpdates": "10. تحديثات السياسة",
+  "policyUpdatesBody": "قد نقوم بتحديث سياسة الخصوصية هذه من وقت لآخر. سنقوم بإعلامك بأي تغييرات جوهرية عن طريق نشر السياسة المحدثة في التطبيق وتحديث تاريخ آخر تحديث أعلاه. استمرارك في استخدام الخدمة بعد التغييرات يعتبر قبولًا للسياسة المحدثة.",
+
+  "@_AuthExtra": {
+    "description": "سلاسل إضافية للمصادقة"
+  },
+  "confirmPassword": "تأكيد كلمة المرور",
+  "passwordsDoNotMatch": "كلمات المرور غير متطابقة",
+  "pleaseEnterPassword": "الرجاء إدخال كلمة المرور",
+  "passwordMinLength": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+  "pleaseEnterEmail": "الرجاء إدخال البريد الإلكتروني",
+  "pleaseConfirmPassword": "الرجاء تأكيد كلمة المرور",
+  "enterEmailForReset": "أدخل بريدك الإلكتروني لتلقي رابط إعادة تعيين كلمة المرور",
+  "backToSignIn": "العودة إلى تسجيل الدخول",
+  "orContinueWith": "أو المتابعة عبر",
+  "setUpProfile": "إعداد ملفك الشخصي",
+  "chooseAvatar": "اختر صورة رمزية",
+  "uploadPhoto": "رفع صورة",
+  "orPickDefault": "أو اختر واحدة من الصور الافتراضية أدناه",
+  "notSpecified": "غير محدد",
+  "selectDateOfBirth": "اختر تاريخ الميلاد",
+  "completeSetup": "إكمال الإعداد",
+  "camera": "الكاميرا",
+  "gallery": "معرض الصور",
+  "mustBe13": "يجب أن يكون عمرك 13 عامًا على الأقل لاستخدام هذا التطبيق",
+  "failedToSaveProfile": "فشل حفظ الملف الشخصي",
+  "invalidEmailOrPassword": "بريد إلكتروني أو كلمة مرور غير صحيحة",
+  "pleaseConfirmEmail": "الرجاء تأكيد بريدك الإلكتروني",
+  "accountAlreadyExists": "يوجد حساب بهذا البريد الإلكتروني بالفعل",
+  "chooseAccount": "اختر حسابًا",
+  "continueWithGoogle": "المتابعة عبر Google",
+  "signInToGoogle": "تسجيل الدخول إلى حساب Google",
+  "previouslyUsed": "مستخدم سابقًا",
+  "signInTo": "تسجيل الدخول إلى",
+  "tryAnotherAccount": "جرب حسابًا آخر",
+  "useDifferentGoogleAccount": "استخدام حساب Google مختلف",
+
+  "@_HomeExtra": {
+    "description": "سلاسل إضافية للشاشة الرئيسية"
+  },
+  "couldNotLoadContinueWatching": "تعذر تحميل متابعة المشاهدة",
+  "noContentInProgress": "لا يوجد محتوى قيد المشاهدة",
+  "searchMoviesTv": "ابحث عن أفلام، مسلسلات...",
+  "searchFailed": "فشل البحث",
+
+  "@_Discover": {
+    "description": "سلاسل شاشة الاكتشاف"
+  },
+  "discover": "اكتشف",
+  "tryAdjustingFilters": "حاول تعديل عوامل التصفية",
+  "searchMoviesTvAnime": "ابحث عن أفلام، مسلسلات، أنمي...",
+  "advancedFilters": "عوامل تصفية متقدمة",
+  "allCountries": "جميع الدول",
+  "yearRange": "نطاق السنة",
+  "ratingRange": "نطاق التقييم",
+  "reset": "إعادة تعيين",
+  "applyFilters": "تطبيق عوامل التصفية",
+
+  "@_MediaExtra": {
+    "description": "سلاسل إضافية لتفاصيل الوسائط"
+  },
+  "failedToLoadDetails": "فشل تحميل التفاصيل",
+  "writeReview": "كتابة مراجعة",
+  "noReviewsYet": "لا توجد مراجعات بعد. كن أول من يراجع!",
+  "failedToLoadReviews": "فشل تحميل المراجعات",
+  "noRecentActivity": "لا نشاط حديث",
+  "createNewList": "إنشاء قائمة جديدة",
+  "addedTo": "تمت الإضافة إلى",
+  "addedToTitle": "تمت الإضافة إلى \"{title}\"",
+  "listCreated": "تم إنشاء القائمة",
+  "removeFromTrackingList": "إزالة من هذه القائمة",
+
+  "@_TrackingExtra": {
+    "description": "سلاسل إضافية للتتبع"
+  },
+  "tracking": "التتبع",
+  "recentlyUpdated": "تم التحديث مؤخرًا",
+  "noMediaInList": "لا توجد وسائط في هذه القائمة",
+  "failedToLoadTracking": "فشل تحميل بيانات التتبع",
+
+  "@_ListsExtra": {
+    "description": "سلاسل إضافية للقوائم"
+  },
+  "myCollections": "مجموعاتي",
+  "allCollections": "جميع المجموعات",
+  "selectList": "اختر قائمة",
+  "chooseListFromSidebar": "اختر قائمة من الشريط الجانبي لعرض محتوياتها",
+  "yourCollections": "مجموعاتك",
+  "allItems": "جميع العناصر",
+  "noItemsInList": "لا توجد عناصر في هذه القائمة",
+  "addMediaFromDetails": "أضف وسائط من صفحة التفاصيل",
+  "noOtherListsToMoveTo": "لا توجد قوائم أخرى للنقل إليها",
+  "noOtherListsToCopyTo": "لا توجد قوائم أخرى للنسخ إليها",
+  "moveTo": "نقل إلى...",
+  "copyTo": "نسخ إلى...",
+  "movedTo": "تم النقل إلى",
+  "copiedTo": "تم النسخ إلى",
+  "removedFromList": "تمت الإزالة من القائمة",
+  "toggleView": "تبديل العرض",
+  "searchItems": "ابحث عن عناصر...",
+  "failedToLoadList": "فشل تحميل القائمة",
+  "listNotFound": "القائمة غير موجودة",
+  "listCouldNotBeFound": "لم يتم العثور على هذه القائمة",
+  "checkOutMyList": "تحقق من قائمتي: {title} على WatchAtlas",
+  "failedToLoadItems": "فشل تحميل العناصر",
+  "enterListName": "أدخل اسم القائمة",
+  "titleRequired": "العنوان مطلوب",
+  "descriptionOptional": "الوصف (اختياري)",
+  "describeList": "صف هذه القائمة",
+  "anyoneCanSee": "يمكن لأي شخص رؤية هذه القائمة",
+  "onlyYouCanSee": "أنت فقط من يمكنه رؤية هذه القائمة",
+  "othersCanAddRemove": "يمكن للآخرين إضافة وإزالة العناصر",
+  "noItemsMatch": "لا توجد عناصر مطابقة",
+  "across": "عبر",
+  "deleteListConfirm": "حذف \"{title}\"?",
+  "deleteListWarning": "سيؤدي هذا إلى إزالة القائمة وجميع إدخالات الوسائط بشكل دائم. لا يمكن التراجع عن هذا الإجراء.",
+  "listDeleted": "تم الحذف",
+
+  "@_SocialExtra": {
+    "description": "سلاسل إضافية اجتماعية"
+  },
+  "community": "المجتمع",
+  "failedToLoadFollowing": "فشل تحميل المتابَعين",
+  "notFollowingAnyone": "لا تتابع أحدًا",
+  "findFriendsToFollow": "ابحث عن أصدقاء لمتابعتهم ورؤية نشاطهم.",
+  "failedToLoadFollowers": "فشل تحميل المتابعين",
+  "noFollowersYet": "لا يوجد متابعون بعد",
+  "whenSomeoneFollowsYou": "عندما يتابعك شخص ما، سيظهر هنا.",
+  "failedToLoadActivity": "فشل تحميل النشاط",
+  "noFriendActivity": "لا يوجد نشاط للأصدقاء",
+  "activityFromPeopleYouFollow": "سيظهر نشاط الأشخاص الذين تتابعهم هنا.",
+  "searchByUsername": "ابحث باسم المستخدم...",
+
+  "@_NotificationsExtra": {
+    "description": "سلاسل إضافية للإشعارات"
+  },
+  "failedToLoadNotifications": "فشل تحميل الإشعارات",
+  "youreAllCaughtUp": "كل شيء محدث!",
+  "clearAllNotificationsConfirm": "مسح جميع الإشعارات؟",
+  "clearAllWarning": "لا يمكن التراجع عن هذا الإجراء. سيتم حذف جميع الإشعارات بشكل دائم.",
+  "unknown": "غير معروف",
+  "today": "اليوم",
+  "yesterday": "أمس",
+
+  "@_Moderation": {
+    "description": "سلاسل شاشة الرقابة"
+  },
+  "accessDenied": "تم رفض الوصول",
+  "noModeratorPermissions": "ليس لديك صلاحيات المشرف.",
+  "reports": "التقارير",
+  "failedToLoadReports": "فشل تحميل التقارير",
+  "noPendingReports": "لا توجد تقارير معلقة",
+  "allClear": "كل شيء على ما يرام!",
+  "reportedUser": "المستخدم المُبلغ عنه",
+  "mediaId": "معرف الوسائط",
+  "reporter": "المُبلغ",
+  "takeAction": "اتخاذ إجراء",
+  "dismissReport": "رفض البلاغ",
+  "markReportAsResolved": "تحديد هذا البلاغ كمحلول دون أي إجراء آخر",
+  "warnUser": "تحذير المستخدم",
+  "sendWarningToUser": "إرسال تحذير إلى المستخدم",
+  "hideContent": "إخفاء المحتوى",
+  "makeContentInvisible": "جعل المحتوى غير مرئي للمستخدمين",
+  "deleteContent": "حذف المحتوى",
+  "permanentlyRemoveContent": "إزالة هذا المحتوى بشكل دائم",
+  "confirmDeletion": "تأكيد الحذف",
+  "confirmDeleteContent": "هل أنت متأكد أنك تريد حذف هذا المحتوى بشكل دائم؟",
+  "banUser": "حظر المستخدم",
+  "permanentlyBanUser": "حظر هذا المستخدم بشكل دائم من المنصة",
+  "confirmBan": "تأكيد الحظر",
+  "confirmBanUser": "هل أنت متأكد أنك تريد حظر هذا المستخدم نهائيًا؟",
+  "ban": "حظر",
+  "users": "المستخدمون",
+  "failedToLoadUsers": "فشل تحميل المستخدمين",
+  "noUsersFound": "لم يتم العثور على مستخدمين",
+  "staff": "الموظفون",
+  "roleUser": "مستخدم",
+  "roleModerator": "مشرف",
+  "roleAdmin": "مدير",
+
+  "@_BlockReport": {
+    "description": "سلاسل حظر وإبلاغ المستخدمين"
+  },
+  "block": "حظر",
+  "unblock": "إلغاء الحظر",
+  "blockUser": "حظر المستخدم",
+  "confirmBlockUser": "هل أنت متأكد أنك تريد حظر هذا المستخدم؟ لن يتمكن من متابعتك أو رؤية محتواك.",
+  "userBlocked": "تم حظر المستخدم",
+  "report": "إبلاغ",
+  "reportUser": "الإبلاغ عن المستخدم",
+  "spam": "رسائل غير مرغوب فيها",
+  "inappropriate": "محتوى غير لائق",
+  "harassment": "إزعاج",
+  "other": "أخرى",
+  "reason": "السبب",
+  "additionalDetails": "تفاصيل إضافية",
+  "optional": "اختياري",
+  "submit": "إرسال",
+  "reportSubmitted": "تم إرسال البلاغ",
+
+  "@_NotificationPreferences": {
+    "description": "سلاسل تفضيلات الإشعارات"
+  },
+  "notificationPreferences": "تفضيلات الإشعارات",
+  "failedToLoadPreferences": "فشل تحميل التفضيلات",
+  "pushNotifications": "إشعارات الدفع",
+  "newFollowers": "المتابعون الجدد",
+  "newFollowersDescription": "احصل على إشعار عندما يتبعك شخص ما",
+  "activityUpdates": "تحديثات النشاط",
+  "activityUpdatesDescription": "تحديثات من الأشخاص الذين تتابعهم",
+  "recommendationsDescription": "توصيات إعلامية مخصصة لك",
+  "listUpdates": "تحديثات القوائم",
+  "listUpdatesDescription": "عندما يضيف شخص ما إلى قوائمك المشتركة",
+  "emailNotifications": "إشعارات البريد الإلكتروني",
+  "weeklyDigest": "الملخص الأسبوعي",
+  "weeklyDigestDescription": "ملخص أسبوعي لأنشطتك وتوصياتك",
+  "marketingEmails": "رسائل تسويقية",
+  "marketingEmailsDescription": "أخبار وتحديثات حول WatchAtlas",
+
+  "@_FilteredAnalytics": {
+    "description": "سلاسل شاشة التحليلات المفلترة"
+  },
+  "mediaFor": "وسائط لـ",
+  "noMediaForPeriod": "لا توجد وسائط لهذه الفترة",
+  "filteredMedia": "وسائط مفلترة",
+  "failedToLoadMedia": "فشل تحميل الوسائط",
+
+  "@_Splash": {
+    "description": "سلاسل شاشة البداية"
+  },
+  "splashSubtitle": "قائمة مشاهدتك العالمية",
+
+  "@_EditProfile": {
+    "description": "سلاسل شاشة تعديل الملف الشخصي"
+  },
+  "profileUpdatedSuccessfully": "تم تحديث الملف الشخصي بنجاح",
+  "enterDisplayName": "أدخل اسم العرض",
+  "displayNameMax50": "يجب ألا يتجاوز اسم العرض 50 حرفًا",
+  "tellOthersAboutYourself": "أخبر الآخرين عن نفسك",
+  "bioMax500": "يجب ألا تتجاوز السيرة الذاتية 500 حرف",
+  "saveChanges": "حفظ التغييرات",
+
+  "@_ExtraCommon": {
+    "description": "سلاسل شائعة إضافية"
+  },
+  "confirm": "تأكيد",
+  "continueAction": "متابعة",
+  "remove": "إزالة",
+  "rename": "إعادة تسمية",
+  "move": "نقل",
+  "copy": "نسخ",
+  "create": "إنشاء",
+  "name": "الاسم",
+  "title": "العنوان",
+  "description": "الوصف",
+  "visibility": "الرؤية",
+  "type": "النوع",
+  "tryAgain": "حاول مرة أخرى",
+  "items": "عناصر",
+  "item": "عنصر",
+  "noResultsForSearch": "لا توجد نتائج",
+  "tryDifferentSearchTerm": "جرب مصطلح بحث مختلف",
+
+  "@_Badges": {
+    "description": "تسميات شارات الحالة"
+  },
+  "watchingBadge": "مشاهدة",
+  "completedBadge": "مكتمل",
+  "onHoldBadge": "معلق",
+  "droppedBadge": "ملغي",
+  "planToWatchBadge": "مخطط",
+  "rewatchingBadge": "إعادة مشاهدة",
+
+  "@_NewAdditions": {
+    "description": "نصوص تمت إضافتها مؤخرًا بدلاً من النصوص الثابتة"
+  },
+  "removeListTitle": "إزالة \"{title}\"؟",
+  "@removeListTitle": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "removeFromListWarning": "سيؤدي هذا إلى إزالة العنصر من هذه القائمة.",
+  "clearActivityWarning": "سيؤدي هذا إلى إزالة جميع بيانات نشاطك المستخدمة للتوصيات. هل ترغب في المتابعة؟",
+  "englishLanguage": "English",
+  "arabicLanguage": "العربية",
+  "deleteAccountWarning": "هذا الإجراء دائم ولا يمكن التراجع عنه. سيتم حذف جميع بياناتك.",
+  "aboutAppDescription": "منصة حديثة لتتبع الوسائط لاكتشاف وتتبع ومشاركة أفلامك، مسلسلاتك المفضلة، والمزيد.",
+  "dateOfBirth": "تاريخ الميلاد",
+  "inYourList": "في قائمتك",
+  "inYourLibrary": "في مكتبتك",
+  "addedLabel": "أُضيف",
+  "updatedLabel": "مُحدث",
+  "notTracked": "غير متتبع",
+  "detailsLabel": "التفاصيل",
+  "recommendationReason": "سبب التوصية: {reason}",
+  "@recommendationReason": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+  "likeLabel": "إعجاب",
+  "previousSlide": "الشريحة السابقة",
+  "nextSlide": "الشريحة التالية",
+  "errorWithDetails": "خطأ: {error}",
+  "@errorWithDetails": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "reviewsScreen": "شاشة المراجعات",
+  "itemCount": "{count, plural, =0{0 عناصر} =1{عنصر واحد} =2{عنصران} few{{count} عناصر} many{{count} عنصرًا} other{{count} عنصر}}",
+  "@itemCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "movedToTitle": "تم النقل إلى \"{title}\"",
+  "@movedToTitle": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "copiedToTitle": "تم النسخ إلى \"{title}\"",
+  "@copiedToTitle": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "ratedStars": "مُقيم بـ {stars} نجوم",
+  "@ratedStars": {
+    "placeholders": {
+      "stars": { "type": "double" }
+    }
+  },
+  "allFilter": "الكل",
+  "listDeletedTitle": "تم حذف \"{title}\"",
+  "@listDeletedTitle": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "episodeProgress": "{current}\u200f/\u200f{total}",
+  "@episodeProgress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "countryWithCode": "{name} ({code})",
+  "@countryWithCode": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "code": { "type": "String" }
+    }
+  },
+  "mediaWithId": "وسائط #{id}",
+  "@mediaWithId": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "unknownList": "قائمة غير معروفة",
+  "profileDatabaseError": "تأكد من تطبيق منح قاعدة البيانات.\nقم بتشغيل supabase/grants.sql في محرر SQL الخاص بـ Supabase.",
+  "accountCreated": "تم إنشاء الحساب! تحقق من بريدك الإلكتروني للحصول على رابط التأكيد قبل تسجيل الدخول.",
+  "notificationChannelDescription": "إشعارات من واتش أطلس",
+  "anonymous": "مجهول",
+  "contentReport": "تقرير محتوى",
+  "userReport": "تقرير مستخدم",
+  "reportPending": "معلق",
+  "reportResolved": "تم الحل",
+  "continueWithApple": "المتابعة عبر Apple",
+  "continueWithGoogle": "المتابعة عبر Google",
+  "popularTrending": "رائج",
+  "recommendationBecauseYouSaved": "لأنك حفظت...",
+  "recommendationBecauseYouViewed": "لأنك شاهدت...",
+  "recommendationTrendingNearYou": "رائع بالقرب منك",
+  "recommendationPopularThisWeek": "الأكثر شعبية هذا الأسبوع",
+  "recommendationContinueExploring": "متابعة الاستكشاف",
+  "recommendationNewReleases": "إصدارات حديثة",
+  "recommendationHiddenGems": "جوهرة مخفية",
+  "recommendationCriticallyAcclaimed": "مشهور نقديًا",
+  "recommendationTopRated": "الأعلى تقييمًا",
+  "recommendationSimilarToFavorites": "مشابه لتفضيلاتك",
+  "recommendationBecauseYouLikeGenre": "لأنك تحب...",
+  "recommendationFriendsAlsoSaved": "أصدقاؤك حفظوها أيضًا",
+  "recommendationUsersLikeYou": "مستخدمون مثلك استمتعوا بهذا",
+  "recommendationAwardWinners": "فائزون بجوائز",
+  "recommendationUnderratedClassics": "كلاسيكيات غير معترف بها",
+"recommendationUpcomingReleases": "إصدارات قادمة",
+   "similarToSaved": "مشابه لما حفظته",
+   "forYou": "لك",
+   "seeMore": "عرض المزيد",
+   "allRecommendations": "جميع التوصيات",
+   "viewAllRecommendations": "عرض جميع التوصيات",
+   "recommendationCategories": "فئات التوصيات",
+   "failedToLoadRecommendations": "فشل تحميل التوصيات",
+   "noRecommendationsYet": "لا توجد توصيات بعد",
+   "navRecommendations": "التوصيات",
+   "similarToFavorites": "مشابه لتفضيلاتك",
+  "usersLikeYouEnjoyed": "مستخدمون بذوق مشابه استمتعوا بهذا",
+  "becauseYouEnjoyGenre": "لأنك تحب {genre}",
+  "@becauseYouEnjoyGenre": {
+    "placeholders": {
+      "genre": { "type": "String" }
+    }
+  },
+  "recentlyReleased": "أُصدِر مؤخرًا",
+  "topRated": "الأعلى تقييمًا",
+  "hiddenGem": "جوهرة مخفية — تقييم عالي وغير معروف",
+  "criticallyAcclaimed": "مشهور نقديًا",
+  "justNow": "الآن",
+  "minutesAgo": "{count} دقيقة مضت",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": { "type": "double" }
+    }
+  },
+  "hoursAgo": "{count} ساعة مضت",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": { "type": "double" }
+    }
+  },
+  "daysAgo": "{count} يوم مضت",
+  "@daysAgo": {
+    "placeholders": {
+      "count": { "type": "double" }
+    }
+  },
+  "monthsAgo": "{count} شهر مضى",
+  "@monthsAgo": {
+    "placeholders": {
+      "count": { "type": "double" }
+    }
+  },
+  "privacyPolicyTitle": "سياسة الخصوصية",
+  "openSourceNotice": "إشعار المصدر المفتوح",
+  "openSourceNoticeBody": "واتش أطلس يستخدم مكتبات وأطر عمل مفتوحة المصدر المختلفة. نعترم بامتنان بمساهمات مجتمع المصادر المفتوحة. تطبق التراخيص الخاصة بهذه المكتبات على استخدامها داخل هذا التطبيق.",
+  "thirdPartyLibraries": "مكتبات الطرف الثالث",
+  "thirdPartyLibrariesBody": "يتضمن هذا التطبيق مكونات برمجية مفتوحة المصدر. تتوفر تفاصيل الترخيص لهذه المكونات من خلال صفحة الترخيص أدناه.",
+  "mediaOwnership": "ملكية الوسائط",
+  "mediaOwnershipBody": "بيانات الوسائط والملصقات والصور الخلفية والشعارات والأعمال الفنية الترويجية الخاصة بالأفلام والمسلسلات والأنمي والوسائط الأخرى هي ملك لأصحابها وحاملي حقوق الطبع والنشر. واتش أطلس لا يدعي ملكية أي أصول وسائط طرف ثالث. يُستخدم هذا المحتوى لأغراض التعريف والتصنيف والمعلومات فقط.",
+  "aiGeneratedLogo": "الشعار المُنشأ بالذكاء الاصطناعي",
+  "aiGeneratedLogoBody": "تم إنشاء شعار تطبيق واتش أطلس باستخدام أدوات تصميم بمساعدة الذكاء الاصطناعي. الشعار يستخدم كهوية بصرية للتطبيق. واتش أطلس لا يدعي ملكية حصرية للنموذج الأساسي للذكاء الاصطناعي أو الأسلوب المُنشأ أو البيانات التدريبية المستخدمة في إنشائه. أي حقوق مرتبطة بالشعار المُنشأ تخضع لشروط خدمة الذكاء الاصطناعي المستخدمة في إنشائه. يجب عدم تفسير الشعار على أنه يدعي ملكية منهجيات الذكاء الاصطناعي المُنشأة أو الملكية الفكرية الطرف الثالث.",
+  "trademarks": "العلامات التجارية",
+  "trademarksBody": "عناوين الأفلام والمسلسلات والأنمي وأسماء الاستوديوهات ومنصات البث وأسماء الشركات والعلامات التجارية الظاهرة في التطبيق هي ملك لأصحابها. ظهورها داخل واتش أطلس لأغراض التعريف والتصنيف والمعلومات فقط.",
+  "contentAndAttribution": "المحتوى والنسب",
+  "metadataAttribution": "البيانات الوصفية",
+  "metadataAttributionBody": "معلومات الوسائط المعروضة في التطبيق — بما في ذلك العناوين والأوصاف والتقييمات والأنواع وتواريخ الإصدار وطاقم التمثيل والإنتاج والمدة — يتم الحصول عليها من موفرين طرف ثالث، chiefly TMDB و AniList. يتم توفير هذه البيانات لأغراض إعلامية وقد تحتوي أحيانًا على أخطاء أو تكون قديمة.",
+  "imagesAttribution": "الصور",
+  "imagesAttributionBody": "الملصقات والصور الخلفية والشعارات والأعمال الفنية الترويجية المعروضة في التطبيق هي ملك لأصحاب حقوق الطبع والنشرrespective وتُستخدم بموجب ترخيص أو لأغراق التعريف فقط. واتش أطلس لا يدعي ملكية أي أصول بصرية.",
+  "recommendationSystemInfo": "نظام التوصيات",
+  "recommendationSystemInfoBody": "يتم إنشاء التوصيات تلقائيًا بناءً على نشاطك وتفضيلاتك، مثل ما تشاهده وتقيّمه وتحفظه وتبحث عنه. الهدف هو تحسين اكتشاف المحتوى. التوصيات هي اقتراحات وليست ضمانات، ولا تعكس أي تأييد رسمي من منشئي المحتوى أو الموزعين.",
+  "userContentOwnership": "محتوى المستخدم",
+  "userContentOwnershipBody": "أنت تحتفظ بملكية المحتوى الذي تنشئه في واتش أطلس، بما في ذلك القوائم والتقييمات والملاحظات. باستخدامك الخدمة، فإنك تمنح واتش أطلس الحقوق اللازمة لتخزين وعرض ومعالجة هذا المحتوى داخل التطبيق. أنت مسؤول عن المحتوى الذي ترسله ويجب أن تحترم حقوق الآخرين.",
+  "accuracyDisclaimer": "الدقة",
+  "accuracyDisclaimerBody": "على الرغم من سعي واتش أطلس لتقديم معلومات دقيقة ومحدثة، قد تحتوي البيانات الوصفية أحيانًا على أخطاء أو معلومات قديمة بسبب اعتمادها على مصادر طرف ثالث. نشجع المستخدمين على التحقق من التفاصيل المهمة من خلال المصادر الرسمية.",
+  "showMore": "عرض المزيد",
+  "showLess": "عرض أقل"
+}
