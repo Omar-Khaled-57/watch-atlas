@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/dimensions.dart';
 import '../../../core/models/media_enums.dart';
 import '../../../models/user_media_model.dart';
@@ -31,76 +32,107 @@ class ProgressCard extends StatelessWidget {
         ? (userMedia.episodeProgress / userMedia.totalEpisodes).clamp(0.0, 1.0)
         : 0.0;
 
-    return GestureDetector(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: Stack(
-                children: [
-                  if (posterUrl != null)
-                    CachedNetworkImage(
-                      imageUrl: posterUrl!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                      errorWidget: (context, url, error) => _Placeholder(colorScheme: colorScheme),
-                    )
-                  else
-                    _Placeholder(colorScheme: colorScheme),
-                  PositionedDirectional(
-                    top: 8,
-                    end: 8,
-                    child: _StatusBadge(status: userMedia.status, textTheme: textTheme),
-                  ),
-                  if (userMedia.userRating != null)
-                    PositionedDirectional(
-                      bottom: 8,
-                      start: 8,
-                      child: _RatingBadge(rating: userMedia.userRating!, textTheme: textTheme),
-                    ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(Spacing.sm, Spacing.sm, Spacing.sm, Spacing.xs),
-              child: Text(
-                title,
-                style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (hasProgress)
-              Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(Spacing.sm, 0, Spacing.sm, Spacing.sm),
-                      child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    final statusText = _StatusBadge.statusLabel(userMedia.status, context);
+
+    return Semantics(
+      button: true,
+      label:
+          '$title, status: $statusText${hasProgress ? ', progress ${userMedia.episodeProgress} of ${userMedia.totalEpisodes} episodes' : ''}',
+      child: GestureDetector(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: Card(
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: Stack(
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadiusDirectional.all(Radius.circular(4)),
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        minHeight: 4,
-                        backgroundColor: colorScheme.surfaceContainerHighest,
-                        color: colorScheme.primary,
+                    if (posterUrl != null)
+                      CachedNetworkImage(
+                        imageUrl: posterUrl!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                        errorWidget: (context, url, error) =>
+                            _Placeholder(colorScheme: colorScheme),
+                      )
+                    else
+                      _Placeholder(colorScheme: colorScheme),
+                    PositionedDirectional(
+                      top: 8,
+                      end: 8,
+                      child: _StatusBadge(
+                        status: userMedia.status,
+                        textTheme: textTheme,
                       ),
                     ),
-                    const SizedBox(height: Spacing.xs),
-                    Text(
-                      context.l10n.episodeProgress(userMedia.episodeProgress, userMedia.totalEpisodes),
-                      style: textTheme.labelSmall?.copyWith(fontSize: 10),
-                    ),
+                    if (userMedia.userRating != null)
+                      PositionedDirectional(
+                        bottom: 8,
+                        start: 8,
+                        child: _RatingBadge(
+                          rating: userMedia.userRating!,
+                          textTheme: textTheme,
+                        ),
+                      ),
                   ],
                 ),
-              )
-            else
-              const SizedBox(height: Spacing.xs),
-          ],
+              ),
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  Spacing.sm,
+                  Spacing.sm,
+                  Spacing.sm,
+                  Spacing.xs,
+                ),
+                child: Text(
+                  title,
+                  style: textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (hasProgress)
+                Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                    Spacing.sm,
+                    0,
+                    Spacing.sm,
+                    Spacing.sm,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadiusDirectional.all(
+                          Radius.circular(4),
+                        ),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          minHeight: 4,
+                          backgroundColor: colorScheme.surfaceContainerHighest,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(height: Spacing.xs),
+                      Text(
+                        context.l10n.episodeProgress(
+                          userMedia.episodeProgress,
+                          userMedia.totalEpisodes,
+                        ),
+                        style: textTheme.labelSmall?.copyWith(fontSize: 10),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                const SizedBox(height: Spacing.xs),
+            ],
+          ),
         ),
       ),
     );
@@ -116,7 +148,11 @@ class _Placeholder extends StatelessWidget {
     return Container(
       color: colorScheme.surfaceContainerHighest,
       child: Center(
-        child: Icon(Icons.movie_outlined, size: 32, color: colorScheme.onSurfaceVariant),
+        child: Icon(
+          Icons.movie_outlined,
+          size: 32,
+          color: colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }
@@ -133,38 +169,40 @@ class _StatusBadge extends StatelessWidget {
       duration: const Duration(milliseconds: 250),
       child: Container(
         key: ValueKey(status),
-        padding: const EdgeInsetsDirectional.symmetric(horizontal: 6, vertical: 2),
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: 6,
+          vertical: 2,
+        ),
         decoration: BoxDecoration(
-          color: _statusColor(status).withValues(alpha: 0.85),
+          color: status.color.withValues(alpha: 0.85),
           borderRadius: BorderRadiusDirectional.all(Radius.circular(4)),
         ),
         child: Text(
           statusLabel(status, context),
-          style: textTheme.labelSmall?.copyWith(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w700),
+          style: textTheme.labelSmall?.copyWith(
+            color: Colors.white,
+            fontSize: 9,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
   }
 
-  Color _statusColor(WatchStatus status) {
+  static String statusLabel(WatchStatus status, BuildContext context) {
     switch (status) {
-      case WatchStatus.watching: return Colors.blue;
-      case WatchStatus.completed: return Colors.green;
-      case WatchStatus.onHold: return Colors.orange;
-      case WatchStatus.dropped: return Colors.red;
-      case WatchStatus.planToWatch: return Colors.purple;
-      case WatchStatus.rewatching: return Colors.teal;
-    }
-  }
-
-  String statusLabel(WatchStatus status, BuildContext context) {
-    switch (status) {
-      case WatchStatus.watching: return context.l10n.watchingBadge;
-      case WatchStatus.completed: return context.l10n.completedBadge;
-      case WatchStatus.onHold: return context.l10n.onHoldBadge;
-      case WatchStatus.dropped: return context.l10n.droppedBadge;
-      case WatchStatus.planToWatch: return context.l10n.planToWatchBadge;
-      case WatchStatus.rewatching: return context.l10n.rewatchingBadge;
+      case WatchStatus.watching:
+        return context.l10n.watchingBadge;
+      case WatchStatus.completed:
+        return context.l10n.completedBadge;
+      case WatchStatus.onHold:
+        return context.l10n.onHoldBadge;
+      case WatchStatus.dropped:
+        return context.l10n.droppedBadge;
+      case WatchStatus.planToWatch:
+        return context.l10n.planToWatchBadge;
+      case WatchStatus.rewatching:
+        return context.l10n.rewatchingBadge;
     }
   }
 }
@@ -177,7 +215,10 @@ class _RatingBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsetsDirectional.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: 6,
+        vertical: 2,
+      ),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.75),
         borderRadius: BorderRadiusDirectional.all(Radius.circular(4)),
@@ -185,11 +226,15 @@ class _RatingBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.star_rounded, size: 10, color: Colors.amber),
+          Icon(Icons.star_rounded, size: 10, color: AppColors.star),
           const SizedBox(width: 2),
           Text(
             rating.toStringAsFixed(1),
-            style: textTheme.labelSmall?.copyWith(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600),
+            style: textTheme.labelSmall?.copyWith(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),

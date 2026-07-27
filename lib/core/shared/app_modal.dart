@@ -44,21 +44,26 @@ class AppDialog extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    horizontal: 16,
+                  ),
                   child: Row(
                     children: [
                       Expanded(
                         child: Text(
                           title,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
+                          style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close_rounded),
-                        onPressed: () => Navigator.pop(context),
+                      Semantics(
+                        button: true,
+                        label: 'Close',
+                        child: IconButton(
+                          icon: const Icon(Icons.close_rounded),
+                          onPressed: () => Navigator.pop(context),
+                          tooltip: 'Close',
+                        ),
                       ),
                     ],
                   ),
@@ -109,15 +114,19 @@ class AppDialog extends StatelessWidget {
                   Expanded(
                     child: Text(
                       title,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.w600),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded),
-                    onPressed: () => Navigator.pop(context),
+                  Semantics(
+                    button: true,
+                    label: 'Close',
+                    child: IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => Navigator.pop(context),
+                      tooltip: 'Close',
+                    ),
                   ),
                 ],
               ),
@@ -125,14 +134,24 @@ class AppDialog extends StatelessWidget {
             const Divider(height: 1),
             Flexible(
               child: SingleChildScrollView(
-                padding: const EdgeInsetsDirectional.fromSTEB(Spacing.xl, Spacing.lg, Spacing.xl, Spacing.lg),
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  Spacing.xl,
+                  Spacing.lg,
+                  Spacing.xl,
+                  Spacing.lg,
+                ),
                 child: content,
               ),
             ),
             if (actions != null && actions!.isNotEmpty) ...[
               const Divider(height: 1),
               Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(Spacing.xl, Spacing.md, Spacing.xl, Spacing.md),
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  Spacing.xl,
+                  Spacing.md,
+                  Spacing.xl,
+                  Spacing.md,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: actions!,

@@ -117,6 +117,6 @@ BEGIN
   END IF;
 
   IF EXISTS (SELECT FROM pg_tables WHERE schemaname='public' AND tablename='recommendations_cache') THEN
-    EXECUTE 'GRANT SELECT, UPDATE ON public.recommendations_cache TO authenticated';
+    EXECUTE 'GRANT SELECT, INSERT, UPDATE ON public.recommendations_cache TO authenticated';
   END IF;
 END $$;

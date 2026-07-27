@@ -17,5 +17,6 @@ abstract class SyncQueueModel with _$SyncQueueModel {
     DateTime? createdAt,
   }) = _SyncQueueModel;
 
-  factory SyncQueueModel.fromJson(Map<String, dynamic> json) => _$SyncQueueModelFromJson(json);
+  factory SyncQueueModel.fromJson(Map<String, dynamic> json) =>
+      _$SyncQueueModelFromJson(json);
 }

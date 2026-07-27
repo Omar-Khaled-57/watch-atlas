@@ -70,8 +70,18 @@ class _SocialScreenState extends ConsumerState<SocialScreen>
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildFollowingTab(followingAsync, userId, colorScheme, textTheme),
-                _buildFollowersTab(followersAsync, userId, colorScheme, textTheme),
+                _buildFollowingTab(
+                  followingAsync,
+                  userId,
+                  colorScheme,
+                  textTheme,
+                ),
+                _buildFollowersTab(
+                  followersAsync,
+                  userId,
+                  colorScheme,
+                  textTheme,
+                ),
                 _buildFriendActivityTab(activityAsync, colorScheme, textTheme),
               ],
             ),
@@ -83,29 +93,41 @@ class _SocialScreenState extends ConsumerState<SocialScreen>
 
   Widget _buildSearchBar(ColorScheme colorScheme, TextTheme textTheme) {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(Spacing.lg, Spacing.sm, Spacing.lg, Spacing.sm),
-      child: TextField(
-        controller: _searchController,
-        decoration: InputDecoration(
-          hintText: context.l10n.searchByUsername,
-          prefixIcon: const Icon(Icons.search_rounded),
-          suffixIcon: _searchController.text.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.clear_rounded),
-                  onPressed: () {
-                    _searchController.clear();
-                    setState(() {});
-                  },
-                )
-              : null,
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        Spacing.lg,
+        Spacing.sm,
+        Spacing.lg,
+        Spacing.sm,
+      ),
+      child: Semantics(
+        label: context.l10n.searchByUsername,
+        child: TextField(
+          controller: _searchController,
+          decoration: InputDecoration(
+            hintText: context.l10n.searchByUsername,
+            prefixIcon: const Icon(Icons.search_rounded),
+            suffixIcon: _searchController.text.isNotEmpty
+                ? Semantics(
+                    button: true,
+                    label: context.l10n.clearSearch,
+                    child: IconButton(
+                      icon: const Icon(Icons.clear_rounded),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {});
+                      },
+                    ),
+                  )
+                : null,
+          ),
+          textInputAction: TextInputAction.search,
+          onSubmitted: (value) {
+            if (value.trim().isNotEmpty) {
+              ref.invalidate(searchUsersProvider(value.trim()));
+            }
+          },
+          onChanged: (value) => setState(() {}),
         ),
-        textInputAction: TextInputAction.search,
-        onSubmitted: (value) {
-          if (value.trim().isNotEmpty) {
-            ref.invalidate(searchUsersProvider(value.trim()));
-          }
-        },
-        onChanged: (value) => setState(() {}),
       ),
     );
   }
@@ -213,26 +235,33 @@ class _SocialScreenState extends ConsumerState<SocialScreen>
             ),
             itemBuilder: (context, index) {
               final item = activities[index];
-              return ListTile(
-                leading: UserAvatar(
-                  imageUrl: item['user_avatar'] as String?,
-                  radius: 18,
+              final description = item['description'] as String? ?? '';
+              final time = item['created_at'] != null
+                  ? _formatTime(item['created_at'] as String)
+                  : '';
+              return Semantics(
+                label: '$description${time.isNotEmpty ? ', $time' : ''}',
+                child: ListTile(
+                  leading: UserAvatar(
+                    imageUrl: item['user_avatar'] as String?,
+                    radius: 18,
+                  ),
+                  title: Text(
+                    description,
+                    style: textTheme.bodyMedium,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: item['created_at'] != null
+                      ? Text(
+                          time,
+                          style: textTheme.labelSmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        )
+                      : null,
+                  onTap: () {},
                 ),
-                title: Text(
-                  item['description'] as String? ?? '',
-                  style: textTheme.bodyMedium,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                subtitle: item['created_at'] != null
-                    ? Text(
-                        _formatTime(item['created_at'] as String),
-                        style: textTheme.labelSmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      )
-                    : null,
-                onTap: () {},
               );
             },
           ),
@@ -250,84 +279,97 @@ class _SocialScreenState extends ConsumerState<SocialScreen>
     final isSelf = user.id == currentUserId;
     final isBlocked = ref.watch(isBlockedProvider(user.id));
 
-    return ListTile(
-      leading: UserAvatar(
-        imageUrl: user.avatarUrl,
-        initials: (user.displayName ?? user.username)[0].toUpperCase(),
-        radius: 22,
-      ),
-      title: Text(
-        user.displayName ?? user.username,
-        style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      subtitle: Text(
-        '@${user.username}',
-        style: textTheme.bodySmall?.copyWith(
-          color: colorScheme.onSurfaceVariant,
+    return Semantics(
+      button: true,
+      label: '${user.displayName ?? user.username}, @${user.username}',
+      child: ListTile(
+        leading: UserAvatar(
+          imageUrl: user.avatarUrl,
+          initials: (user.displayName ?? user.username)[0].toUpperCase(),
+          radius: 22,
         ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      trailing: isSelf
-          ? null
-          : isBlocked.when(
-              data: (blocked) {
-                if (blocked) {
-                  return OutlinedButton(
-                    onPressed: () => ref.read(unblockUserProvider(user.id)),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsetsDirectional.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
+        title: Text(
+          user.displayName ?? user.username,
+          style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Text(
+          '@${user.username}',
+          style: textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: isSelf
+            ? null
+            : isBlocked.when(
+                data: (blocked) {
+                  if (blocked) {
+                    return OutlinedButton(
+                      onPressed: () => ref.read(unblockUserProvider(user.id)),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsetsDirectional.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: Text(context.l10n.unblock),
+                      child: Text(context.l10n.unblock),
+                    );
+                  }
+                  return PopupMenuButton<String>(
+                    itemBuilder: (ctx) => [
+                      PopupMenuItem(
+                        value: 'report',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.flag_rounded,
+                              size: 18,
+                              color: colorScheme.error,
+                            ),
+                            const SizedBox(width: Spacing.sm),
+                            Text(context.l10n.report),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'block',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.block_rounded,
+                              size: 18,
+                              color: colorScheme.error,
+                            ),
+                            const SizedBox(width: Spacing.sm),
+                            Text(context.l10n.block),
+                          ],
+                        ),
+                      ),
+                    ],
+                    onSelected: (value) {
+                      if (value == 'report') {
+                        _showReportDialog(context, ref, user);
+                      } else if (value == 'block') {
+                        _showBlockDialog(context, ref, user);
+                      }
+                    },
                   );
-                }
-                return PopupMenuButton<String>(
-                  itemBuilder: (ctx) => [
-                    PopupMenuItem(
-                      value: 'report',
-                      child: Row(
-                        children: [
-                          Icon(Icons.flag_rounded, size: 18, color: colorScheme.error),
-                          const SizedBox(width: Spacing.sm),
-                          Text(context.l10n.report),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'block',
-                      child: Row(
-                        children: [
-                          Icon(Icons.block_rounded, size: 18, color: colorScheme.error),
-                          const SizedBox(width: Spacing.sm),
-                          Text(context.l10n.block),
-                        ],
-                      ),
-                    ),
-                  ],
-                  onSelected: (value) {
-                    if (value == 'report') {
-                      _showReportDialog(context, ref, user);
-                    } else if (value == 'block') {
-                      _showBlockDialog(context, ref, user);
-                    }
-                  },
-                );
-              },
-              loading: () => const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                },
+                loading: () => const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                error: (error, stack) => const SizedBox.shrink(),
               ),
-              error: (error, stack) => const SizedBox.shrink(),
-            ),
-      onTap: () => context.pushNamed('userProfile', pathParameters: {'id': user.id}),
+        onTap: () =>
+            context.pushNamed('userProfile', pathParameters: {'id': user.id}),
+      ),
     );
   }
 
@@ -358,8 +400,14 @@ class _SocialScreenState extends ConsumerState<SocialScreen>
                 decoration: InputDecoration(labelText: l10n.reason),
                 items: [
                   DropdownMenuItem(value: 'spam', child: Text(l10n.spam)),
-                  DropdownMenuItem(value: 'inappropriate', child: Text(l10n.inappropriate)),
-                  DropdownMenuItem(value: 'harassment', child: Text(l10n.harassment)),
+                  DropdownMenuItem(
+                    value: 'inappropriate',
+                    child: Text(l10n.inappropriate),
+                  ),
+                  DropdownMenuItem(
+                    value: 'harassment',
+                    child: Text(l10n.harassment),
+                  ),
                   DropdownMenuItem(value: 'other', child: Text(l10n.other)),
                 ],
                 onChanged: (value) {
@@ -384,16 +432,18 @@ class _SocialScreenState extends ConsumerState<SocialScreen>
             ),
             FilledButton(
               onPressed: () async {
-                await ref.read(reportUserProvider((
-                  userId: user.id,
-                  reason: selectedReason,
-                  description: reasonController.text.trim(),
-                )).future);
+                await ref.read(
+                  reportUserProvider((
+                    userId: user.id,
+                    reason: selectedReason,
+                    description: reasonController.text.trim(),
+                  )).future,
+                );
                 if (ctx.mounted) Navigator.pop(ctx);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.reportSubmitted)),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(l10n.reportSubmitted)));
                 }
               },
               child: Text(l10n.submit),
@@ -418,14 +468,16 @@ class _SocialScreenState extends ConsumerState<SocialScreen>
             child: Text(l10n.cancel),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
             onPressed: () async {
               await ref.read(blockUserProvider(user.id).future);
               if (ctx.mounted) Navigator.pop(ctx);
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.userBlocked)),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(l10n.userBlocked)));
               }
             },
             child: Text(l10n.block),

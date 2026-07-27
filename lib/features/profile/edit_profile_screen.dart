@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,10 +8,10 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
+import '../../core/extensions/string_extensions.dart';
 import '../../core/models/gender.dart';
 import '../../core/providers/app_providers.dart';
-import '../../core/services/auth_service.dart';
-import '../../core/services/supabase_service.dart';
+import '../../core/providers/service_providers.dart';
 import '../../l10n/l10n.dart';
 import 'providers/profile_providers.dart';
 
@@ -28,6 +29,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   final _imagePicker = ImagePicker();
 
   String? _avatarPath;
+  Uint8List? _avatarBytes;
   Gender? _gender;
   DateTime? _dateOfBirth;
   bool _isSaving = false;
@@ -61,7 +63,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadiusDirectional.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadiusDirectional.vertical(
+          top: Radius.circular(16),
+        ),
       ),
       builder: (context) => SafeArea(
         child: Padding(
@@ -95,35 +99,69 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     );
 
     if (picked != null && mounted) {
-      setState(() => _avatarPath = picked.path);
+      final bytes = kIsWeb ? await picked.readAsBytes() : null;
+      setState(() {
+        _avatarPath = picked.path;
+        _avatarBytes = bytes;
+      });
     }
   }
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
+    if (_dateOfBirth != null) {
+      final now = DateTime.now();
+      final age =
+          now.year -
+          _dateOfBirth!.year -
+          (now.isBefore(
+                DateTime(
+                  _dateOfBirth!.year,
+                  _dateOfBirth!.month,
+                  _dateOfBirth!.day,
+                ),
+              )
+              ? 1
+              : 0);
+      if (age < 13) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(context.l10n.mustBe13)));
+        }
+        return;
+      }
+    }
+
     setState(() => _isSaving = true);
 
     try {
-      final supabase = SupabaseService.instance;
-      final currentUser = AuthService.instance.currentUser;
+      final supabase = ref.read(supabaseServiceProvider);
+      final currentUser = ref.read(authServiceProvider).currentUser;
       final userId = ref.read(authServiceProvider).userId;
 
       final updates = <String, dynamic>{
         'email': currentUser?.email ?? '',
         'username': currentUser?.email?.split('@').first ?? 'user_$userId',
-        'display_name': _displayNameController.text.trim(),
-        'bio': _bioController.text.trim(),
+        'display_name': _displayNameController.text.sanitizeUserInput(),
+        'bio': _bioController.text.sanitizeUserInput(),
         'gender': _gender?.name,
         'dob': _dateOfBirth?.toIso8601String().split('T').first,
         'updated_at': DateTime.now().toIso8601String(),
       };
 
       if (_avatarPath != null) {
-        updates['avatar_url'] = await supabase.uploadAvatar(userId, _avatarPath!);
+        updates['avatar_url'] = kIsWeb && _avatarBytes != null
+            ? await supabase.uploadAvatarBytes(
+                userId,
+                _avatarPath!,
+                _avatarBytes!,
+              )
+            : await supabase.uploadAvatar(userId, _avatarPath!);
       }
 
-      await AuthService.instance.updateProfile(updates);
+      await ref.read(authServiceProvider).updateProfile(updates);
       ref.invalidate(currentUserProfileProvider);
 
       if (mounted) {
@@ -136,7 +174,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(context.l10n.errorWithDetails('${context.l10n.failedToSaveProfile}: $e')),
+            content: Text(
+              context.l10n.errorWithDetails(
+                '${context.l10n.failedToSaveProfile}: $e',
+              ),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -149,7 +191,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
 
     return Scaffold(
       appBar: AppBar(
@@ -222,7 +265,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   List<Widget> _buildFormFields(ColorScheme colorScheme) {
     final textTheme = Theme.of(context).textTheme;
     return [
-      Text(context.l10n.displayName, style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+      Text(
+        context.l10n.displayName,
+        style: textTheme.titleSmall?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
+      ),
       const SizedBox(height: Spacing.sm),
       TextFormField(
         controller: _displayNameController,
@@ -240,7 +288,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         },
       ),
       const SizedBox(height: Spacing.xl),
-      Text(context.l10n.bio, style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+      Text(
+        context.l10n.bio,
+        style: textTheme.titleSmall?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
+      ),
       const SizedBox(height: Spacing.sm),
       TextFormField(
         controller: _bioController,
@@ -259,45 +312,71 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         },
       ),
       const SizedBox(height: Spacing.xl),
-      Text(context.l10n.gender, style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+      Text(
+        context.l10n.gender,
+        style: textTheme.titleSmall?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
+      ),
       const SizedBox(height: Spacing.sm),
       DropdownButtonFormField<Gender?>(
         initialValue: _gender,
         decoration: const InputDecoration(prefixIcon: Icon(Icons.wc_rounded)),
         items: [
-          DropdownMenuItem(value: null, child: Text(context.l10n.notSpecified, style: textTheme.bodyMedium)),
+          DropdownMenuItem(
+            value: null,
+            child: Text(context.l10n.notSpecified, style: textTheme.bodyMedium),
+          ),
           DropdownMenuItem(value: Gender.male, child: Text(context.l10n.male)),
-          DropdownMenuItem(value: Gender.female, child: Text(context.l10n.female)),
-          DropdownMenuItem(value: Gender.ratherNotSay, child: Text(context.l10n.ratherNotSay)),
+          DropdownMenuItem(
+            value: Gender.female,
+            child: Text(context.l10n.female),
+          ),
+          DropdownMenuItem(
+            value: Gender.ratherNotSay,
+            child: Text(context.l10n.ratherNotSay),
+          ),
         ],
         onChanged: (value) => setState(() => _gender = value),
       ),
       const SizedBox(height: Spacing.xl),
-      Text(context.l10n.dateOfBirth, style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+      Text(
+        context.l10n.dateOfBirth,
+        style: textTheme.titleSmall?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
+      ),
       const SizedBox(height: Spacing.sm),
-      InkWell(
-        onTap: () async {
-          final now = DateTime.now();
-          final picked = await showDatePicker(
-            context: context,
-            initialDate: _dateOfBirth ?? DateTime(now.year - 18),
-            firstDate: DateTime(now.year - 120),
-            lastDate: now,
-            helpText: context.l10n.selectDateOfBirth,
-          );
-          if (picked != null) setState(() => _dateOfBirth = picked);
-        },
-        child: InputDecorator(
-          decoration: const InputDecoration(
-            prefixIcon: Icon(Icons.cake_rounded),
-            suffixIcon: Icon(Icons.calendar_month_rounded),
-          ),
-          child: Text(
-            _dateOfBirth != null
-                ? '${_dateOfBirth!.month}/${_dateOfBirth!.day}/${_dateOfBirth!.year}'
-                : context.l10n.selectDateOfBirth,
-            style: textTheme.bodyLarge?.copyWith(
-              color: _dateOfBirth != null ? null : colorScheme.onSurfaceVariant,
+      Semantics(
+        button: true,
+        label:
+            '${context.l10n.dateOfBirth}: ${_dateOfBirth != null ? '${_dateOfBirth!.month}/${_dateOfBirth!.day}/${_dateOfBirth!.year}' : context.l10n.selectDateOfBirth}',
+        child: InkWell(
+          onTap: () async {
+            final now = DateTime.now();
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: _dateOfBirth ?? DateTime(now.year - 18),
+              firstDate: DateTime(now.year - 120),
+              lastDate: now,
+              helpText: context.l10n.selectDateOfBirth,
+            );
+            if (picked != null) setState(() => _dateOfBirth = picked);
+          },
+          child: InputDecorator(
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.cake_rounded),
+              suffixIcon: Icon(Icons.calendar_month_rounded),
+            ),
+            child: Text(
+              _dateOfBirth != null
+                  ? '${_dateOfBirth!.month}/${_dateOfBirth!.day}/${_dateOfBirth!.year}'
+                  : context.l10n.selectDateOfBirth,
+              style: textTheme.bodyLarge?.copyWith(
+                color: _dateOfBirth != null
+                    ? null
+                    : colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ),
@@ -324,74 +403,92 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   Widget _buildAvatarPicker(ColorScheme colorScheme, {double radius = 48}) {
     final diameter = radius * 2;
-    return GestureDetector(
-      onTap: () => _pickImage(),
-      child: Stack(
-        children: [
-          CircleAvatar(
-            radius: radius,
-            backgroundColor: colorScheme.surfaceContainerHighest,
-            child: _avatarPath != null
-                ? ClipOval(
-                    child: Image.file(
-                      File(_avatarPath!),
-                      width: diameter,
-                      height: diameter,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          _buildAvatarPlaceholder(colorScheme),
+    return Semantics(
+      button: true,
+      label: 'Change profile photo',
+      child: GestureDetector(
+        onTap: () => _pickImage(),
+        child: Stack(
+          children: [
+            CircleAvatar(
+              radius: radius,
+              backgroundColor: colorScheme.surfaceContainerHighest,
+              child: _avatarPath != null
+                  ? ClipOval(
+                      child: kIsWeb && _avatarBytes != null
+                          ? Image.memory(
+                              _avatarBytes!,
+                              width: diameter,
+                              height: diameter,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  _buildAvatarPlaceholder(colorScheme),
+                            )
+                          : Image.file(
+                              File(_avatarPath!),
+                              width: diameter,
+                              height: diameter,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  _buildAvatarPlaceholder(colorScheme),
+                            ),
+                    )
+                  : Consumer(
+                      builder: (context, ref, child) {
+                        final profile = ref
+                            .watch(currentUserProfileProvider)
+                            .asData
+                            ?.value;
+                        if (profile?.avatarUrl != null) {
+                          return ClipOval(
+                            child: CachedNetworkImage(
+                              imageUrl: profile!.avatarUrl!,
+                              width: diameter,
+                              height: diameter,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) =>
+                                  _buildAvatarPlaceholder(colorScheme),
+                              errorWidget: (context, url, error) =>
+                                  _buildAvatarPlaceholder(colorScheme),
+                            ),
+                          );
+                        }
+                        if (profile?.defaultAvatar != null) {
+                          return ClipOval(
+                            child: Image.asset(
+                              profile!.defaultAvatar!,
+                              width: diameter,
+                              height: diameter,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                                  _buildAvatarPlaceholder(colorScheme),
+                            ),
+                          );
+                        }
+                        return _buildAvatarPlaceholder(colorScheme);
+                      },
                     ),
-                  )
-                : Consumer(builder: (context, ref, child) {
-                    final profile =
-                        ref.watch(currentUserProfileProvider).asData?.value;
-                    if (profile?.avatarUrl != null) {
-                      return ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl: profile!.avatarUrl!,
-                          width: diameter,
-                          height: diameter,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) =>
-                              _buildAvatarPlaceholder(colorScheme),
-                          errorWidget: (context, url, error) =>
-                              _buildAvatarPlaceholder(colorScheme),
-                        ),
-                      );
-                    }
-                    if (profile?.defaultAvatar != null) {
-                      return ClipOval(
-                        child: Image.asset(
-                          profile!.defaultAvatar!,
-                          width: diameter,
-                          height: diameter,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _buildAvatarPlaceholder(colorScheme),
-                        ),
-                      );
-                    }
-                    return _buildAvatarPlaceholder(colorScheme);
-                  }),
-          ),
-          PositionedDirectional(
-            bottom: 0,
-            end: 0,
-            child: Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: colorScheme.primary,
-                shape: BoxShape.circle,
-                border: Border.all(color: colorScheme.surface, width: 2),
-              ),
-              child: const Icon(
-                Icons.camera_alt_rounded,
-                size: 16,
-                color: Colors.white,
+            ),
+            PositionedDirectional(
+              bottom: 0,
+              end: 0,
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: colorScheme.surface, width: 2),
+                ),
+                child: const Icon(
+                  Icons.camera_alt_rounded,
+                  size: 16,
+                  color: Colors.white,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -10,88 +10,97 @@ class ActivityTile extends StatelessWidget {
   final UserActivity activity;
   final VoidCallback? onTap;
 
-  const ActivityTile({
-    super.key,
-    required this.activity,
-    this.onTap,
-  });
+  const ActivityTile({super.key, required this.activity, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.all(Radius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildIcon(colorScheme),
-            const SizedBox(width: Spacing.md),
-            if (activity.mediaPoster != null)
-              ClipRRect(
-                borderRadius: BorderRadiusDirectional.all(Radius.circular(6)),
-                child: SizedBox(
-                  width: 44,
-                  height: 64,
-                  child: CachedNetworkImage(
-                    imageUrl: activity.mediaPoster!,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      color: colorScheme.surfaceContainerHighest,
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: colorScheme.surfaceContainerHighest,
-                      child: Icon(
-                        Icons.movie_rounded,
-                        color: colorScheme.onSurfaceVariant,
-                        size: 20,
+    return Semantics(
+      button: true,
+      label:
+          '${activity.description}${activity.mediaTitle != null ? ', ${activity.mediaTitle}' : ''}',
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildIcon(colorScheme),
+              const SizedBox(width: Spacing.md),
+              if (activity.mediaPoster != null)
+                ClipRRect(
+                  borderRadius: BorderRadiusDirectional.all(Radius.circular(6)),
+                  child: SizedBox(
+                    width: 44,
+                    height: 64,
+                    child: Semantics(
+                      label: 'Media poster',
+                      image: true,
+                      child: CachedNetworkImage(
+                        imageUrl: activity.mediaPoster!,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: colorScheme.surfaceContainerHighest,
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: colorScheme.surfaceContainerHighest,
+                          child: Icon(
+                            Icons.movie_rounded,
+                            color: colorScheme.onSurfaceVariant,
+                            size: 20,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            if (activity.mediaPoster != null) const SizedBox(width: Spacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    activity.description,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurface,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (activity.mediaTitle != null) ...[
-                    const SizedBox(height: 2),
+              if (activity.mediaPoster != null)
+                const SizedBox(width: Spacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      activity.mediaTitle!,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.primary,
-                        fontWeight: FontWeight.w600,
+                      activity.description,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface,
                       ),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                  if (activity.createdAt != null) ...[
-                    const SizedBox(height: Spacing.xs),
-                    Text(
-                      _formatTime(activity.createdAt!, context),
-                      style: textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                    if (activity.mediaTitle != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        activity.mediaTitle!,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
+                    ],
+                    if (activity.createdAt != null) ...[
+                      const SizedBox(height: Spacing.xs),
+                      Text(
+                        _formatTime(activity.createdAt!, context),
+                        style: textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -143,6 +152,8 @@ class ActivityTile extends StatelessWidget {
     if (diff.inMinutes < 60) return l10n.minutesAgo(diff.inMinutes.toDouble());
     if (diff.inHours < 24) return l10n.hoursAgo(diff.inHours.toDouble());
     if (diff.inDays < 7) return l10n.daysAgo(diff.inDays.toDouble());
-    return DateFormat.yMd(Localizations.localeOf(context).toString()).format(dateTime);
+    return DateFormat.yMd(
+      Localizations.localeOf(context).toString(),
+    ).format(dateTime);
   }
 }

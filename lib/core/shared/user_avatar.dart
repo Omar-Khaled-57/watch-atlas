@@ -25,50 +25,55 @@ class UserAvatar extends StatelessWidget {
       return _LoadingAvatar(radius: radius);
     }
 
-    return SizedBox(
-      width: radius * 2,
-      height: radius * 2,
-      child: Stack(
-        children: [
-          CircleAvatar(
-            radius: radius,
-            backgroundColor: colorScheme.surfaceContainerHighest,
-            child: imageUrl != null
-                ? ClipOval(
-                    child: CachedNetworkImage(
-                      imageUrl: imageUrl!,
-                      width: radius * 2,
-                      height: radius * 2,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => _LoadingAvatar(radius: radius),
-                      errorWidget: (context, url, error) => _InitialsAvatar(
-                        initials: initials,
-                        radius: radius,
-                        colorScheme: colorScheme,
+    return Semantics(
+      label: initials != null ? 'User avatar for $initials' : 'User avatar',
+      image: imageUrl != null,
+      child: SizedBox(
+        width: radius * 2,
+        height: radius * 2,
+        child: Stack(
+          children: [
+            CircleAvatar(
+              radius: radius,
+              backgroundColor: colorScheme.surfaceContainerHighest,
+              child: imageUrl != null
+                  ? ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl!,
+                        width: radius * 2,
+                        height: radius * 2,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) =>
+                            _LoadingAvatar(radius: radius),
+                        errorWidget: (context, url, error) => _InitialsAvatar(
+                          initials: initials,
+                          radius: radius,
+                          colorScheme: colorScheme,
+                        ),
                       ),
+                    )
+                  : _InitialsAvatar(
+                      initials: initials,
+                      radius: radius,
+                      colorScheme: colorScheme,
                     ),
-                  )
-                : _InitialsAvatar(
-                    initials: initials,
-                    radius: radius,
-                    colorScheme: colorScheme,
+            ),
+            if (showOnlineIndicator)
+              PositionedDirectional(
+                bottom: 0,
+                end: 0,
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF22C55E),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: colorScheme.surface, width: 2),
                   ),
-          ),
-          if (showOnlineIndicator)
-            PositionedDirectional(
-              bottom: 0,
-              end: 0,
-              child: Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF22C55E),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: colorScheme.surface, width: 2),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -89,8 +94,8 @@ class _InitialsAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final displayText = initials != null && initials!.isNotEmpty
         ? initials!.length >= 2
-            ? initials!.substring(0, 2).toUpperCase()
-            : initials!.toUpperCase()
+              ? initials!.substring(0, 2).toUpperCase()
+              : initials!.toUpperCase()
         : '?';
 
     return CircleAvatar(
@@ -118,7 +123,9 @@ class _LoadingAvatar extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return CircleAvatar(
       radius: radius,
-      backgroundColor: isDark ? const Color(0xFF20242E) : const Color(0xFFE5E7EB),
+      backgroundColor: isDark
+          ? const Color(0xFF20242E)
+          : const Color(0xFFE5E7EB),
     );
   }
 }

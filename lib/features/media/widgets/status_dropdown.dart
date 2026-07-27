@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/l10n.dart';
+import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/dimensions.dart';
 import '../../../core/models/media_enums.dart';
 
@@ -20,9 +21,7 @@ class StatusDropdown extends StatelessWidget {
       decoration: InputDecoration(
         labelText: context.l10n.status,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(12),
-          ),
+          borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
         contentPadding: EdgeInsetsDirectional.symmetric(
           horizontal: 16,
@@ -34,11 +33,7 @@ class StatusDropdown extends StatelessWidget {
           value: status,
           child: Row(
             children: [
-              Icon(
-                _statusIcon(status),
-                size: 18,
-                color: _statusColor(status, context),
-              ),
+              Icon(_statusIcon(status), size: 18, color: status.color),
               SizedBox(width: Spacing.md),
               Text(_statusLabel(context, status)),
             ],
@@ -65,23 +60,6 @@ class StatusDropdown extends StatelessWidget {
         return Icons.bookmark_add_rounded;
       case WatchStatus.rewatching:
         return Icons.replay_rounded;
-    }
-  }
-
-  Color _statusColor(WatchStatus status, BuildContext context) {
-    switch (status) {
-      case WatchStatus.watching:
-        return Colors.blue;
-      case WatchStatus.completed:
-        return Colors.green;
-      case WatchStatus.onHold:
-        return Colors.orange;
-      case WatchStatus.dropped:
-        return Colors.red;
-      case WatchStatus.planToWatch:
-        return Colors.purple;
-      case WatchStatus.rewatching:
-        return Colors.teal;
     }
   }
 

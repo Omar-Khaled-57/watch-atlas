@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/constants/app_colors.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_constants.dart';
@@ -15,8 +17,13 @@ import '../../core/shared/section_header.dart';
 import '../../models/media_model.dart';
 import '../tracking/widgets/progress_card.dart';
 import '../../l10n/l10n.dart';
+import '../notifications/providers/notifications_providers.dart';
 import 'providers/home_providers.dart';
 
+/// Main home screen showing trending media, recent updates, and search.
+///
+/// Displays a featured carousel, trending/recommended horizontal carousels,
+/// and a progress card. Includes a search bar with debounced queries.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -31,7 +38,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.invalidate(trendingProvider));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(trendingProvider);
+    });
   }
 
   @override
@@ -67,136 +76,221 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: ListView(
           padding: EdgeInsetsDirectional.only(
             top: MediaQuery.of(context).padding.top,
-            bottom: MediaQuery.of(context).padding.bottom + kBottomNavigationBarHeight,
+            bottom:
+                MediaQuery.of(context).padding.bottom +
+                kBottomNavigationBarHeight,
           ),
           children: [
             SizedBox(height: Spacing.sm),
+            _buildHeader(context),
             _buildSearchBar(context),
             if (isSearching)
               ..._buildSearchResults(context, searchResultsAsync)
             else ...[
               SizedBox(height: Spacing.sm),
-            trending.isEmpty
-                ? _buildShimmerCarousel()
-                : FeaturedCarousel(
-                    items: trending.map((m) => FeaturedCarouselItem(
-                      title: m.title,
-                      backdropUrl: AppConstants.mediaImageUrl(m.backdropPath, size: 'w1280'),
-                      voteAverage: m.voteAverage,
-                      onTap: () => _navigateToDetail(m),
-                    )).toList(),
-                  ).animate().fadeIn(duration: 400.ms),
-            SizedBox(height: Spacing.lg),
-            continueWatchingAsync.when(
-              loading: () => _buildContinueWatchingShimmer().animate().fadeIn(duration: 300.ms).slideX(begin: 0.05),
-              error: (err, _) => Padding(
-                padding: const EdgeInsetsDirectional.only(start: Spacing.lg, bottom: Spacing.md),
-                child: Text(
-                  l10n.couldNotLoadContinueWatching,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+              trending.isEmpty
+                  ? _buildShimmerCarousel()
+                  : FeaturedCarousel(
+                      items: trending
+                          .map(
+                            (m) => FeaturedCarouselItem(
+                              title: m.title,
+                              backdropUrl: AppConstants.mediaImageUrl(
+                                m.backdropPath,
+                                size: 'w1280',
+                              ),
+                              voteAverage: m.voteAverage,
+                              onTap: () => _navigateToDetail(m),
+                            ),
+                          )
+                          .toList(),
+                    ).animate().fadeIn(duration: 400.ms),
+              SizedBox(height: Spacing.lg),
+              continueWatchingAsync.when(
+                loading: () => _buildContinueWatchingShimmer()
+                    .animate()
+                    .fadeIn(duration: 300.ms)
+                    .slideX(begin: 0.05),
+                error: (err, _) => Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: Spacing.lg,
+                    bottom: Spacing.md,
                   ),
-                ),
-              ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.05),
-              data: (items) {
-                if (items.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsetsDirectional.only(start: Spacing.lg, bottom: Spacing.md),
-                    child: Text(
-                      l10n.noContentInProgress,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  child: Text(
+                    l10n.couldNotLoadContinueWatching,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.05),
+                data: (items) {
+                  if (items.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsetsDirectional.only(
+                        start: Spacing.lg,
+                        bottom: Spacing.md,
                       ),
-                    ),
+                      child: Text(
+                        l10n.noContentInProgress,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.05);
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          start: Spacing.lg,
+                          end: Spacing.lg,
+                          bottom: Spacing.md,
+                        ),
+                        child: SectionHeader(title: l10n.continueWatching),
+                      ),
+                      HorizontalCarousel(
+                        height: 200,
+                        padding: const EdgeInsetsDirectional.only(
+                          start: Spacing.md,
+                          end: Spacing.md,
+                        ),
+                        separatorWidth: Spacing.sm,
+                        itemExtent: 148,
+                        itemCount: items.length,
+                        itemBuilder: (context, index) {
+                          final item = items[index];
+                          return ProgressCard(
+                            userMedia: item.userMedia,
+                            title: item.media.title,
+                            posterUrl: AppConstants.mediaImageUrl(
+                              item.media.posterPath,
+                            ),
+                            onTap: () => _navigateToDetail(item.media),
+                          );
+                        },
+                      ),
+                    ],
                   ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.05);
-                }
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(start: Spacing.lg, end: Spacing.lg, bottom: Spacing.md),
-                      child: SectionHeader(title: l10n.continueWatching),
-                    ),
-                    HorizontalCarousel(
-                      height: 200,
-                      padding: const EdgeInsetsDirectional.only(start: Spacing.md, end: Spacing.md),
-                      separatorWidth: Spacing.sm,
-                      itemExtent: 148,
-                      itemCount: items.length,
-                      itemBuilder: (context, index) {
-                        final item = items[index];
-                        return ProgressCard(
-                          userMedia: item.userMedia,
-                          title: item.media.title,
-                          posterUrl: AppConstants.mediaImageUrl(item.media.posterPath),
-                          onTap: () => _navigateToDetail(item.media),
-                        );
-                      },
-                    ),
-                  ],
-                ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.05);
-              },
-            ),
-            if (popular.isNotEmpty) ...[
-              SizedBox(height: Spacing.xl),
-              MediaRow(
-                title: l10n.popularThisWeek,
-                items: popular.map((m) => MediaRowItem(
-                  id: m.id,
-                  title: m.title,
-                  posterUrl: AppConstants.mediaImageUrl(m.posterPath),
-                  voteAverage: m.voteAverage,
-                  mediaType: m.mediaType,
-                  onTap: () => _navigateToDetail(m),
-                )).toList(),
-              ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.05),
+                },
+              ),
+              if (popular.isNotEmpty) ...[
+                SizedBox(height: Spacing.xl),
+                MediaRow(
+                  title: l10n.popularThisWeek,
+                  onSeeAll: () => context.go('/discover'),
+                  items: popular
+                      .map(
+                        (m) => MediaRowItem(
+                          id: m.id,
+                          title: m.title,
+                          posterUrl: AppConstants.mediaImageUrl(m.posterPath),
+                          voteAverage: m.voteAverage,
+                          mediaType: m.mediaType,
+                          onTap: () => _navigateToDetail(m),
+                        ),
+                      )
+                      .toList(),
+                ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.05),
+              ],
+              if (recentlyAdded.isNotEmpty) ...[
+                SizedBox(height: Spacing.xl),
+                MediaRow(
+                  title: l10n.recentlyAdded,
+                  onSeeAll: () => context.go('/discover'),
+                  items: recentlyAdded
+                      .map(
+                        (m) => MediaRowItem(
+                          id: m.id,
+                          title: m.title,
+                          posterUrl: AppConstants.mediaImageUrl(m.posterPath),
+                          voteAverage: m.voteAverage,
+                          mediaType: m.mediaType,
+                          onTap: () => _navigateToDetail(m),
+                        ),
+                      )
+                      .toList(),
+                ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.05),
+              ],
+              if (upcoming.isNotEmpty) ...[
+                SizedBox(height: Spacing.xl),
+                MediaRow(
+                  title: l10n.upcomingReleases,
+                  onSeeAll: () => context.go('/discover'),
+                  items: upcoming
+                      .map(
+                        (m) => MediaRowItem(
+                          id: m.id,
+                          title: m.title,
+                          posterUrl: AppConstants.mediaImageUrl(m.posterPath),
+                          voteAverage: m.voteAverage,
+                          mediaType: m.mediaType,
+                          onTap: () => _navigateToDetail(m),
+                        ),
+                      )
+                      .toList(),
+                ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.05),
+              ],
+              if (recommended.isNotEmpty) ...[
+                SizedBox(height: Spacing.xl),
+                MediaRow(
+                  title: l10n.recommendedForYou,
+                  onSeeAll: () => context.go('/discover'),
+                  items: recommended
+                      .map(
+                        (m) => MediaRowItem(
+                          id: m.id,
+                          title: m.title,
+                          posterUrl: AppConstants.mediaImageUrl(m.posterPath),
+                          voteAverage: m.voteAverage,
+                          mediaType: m.mediaType,
+                          onTap: () => _navigateToDetail(m),
+                        ),
+                      )
+                      .toList(),
+                ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.05),
+              ],
+              SizedBox(height: Spacing.xxl),
             ],
-            if (recentlyAdded.isNotEmpty) ...[
-              SizedBox(height: Spacing.xl),
-              MediaRow(
-                title: l10n.recentlyAdded,
-                items: recentlyAdded.map((m) => MediaRowItem(
-                  id: m.id,
-                  title: m.title,
-                  posterUrl: AppConstants.mediaImageUrl(m.posterPath),
-                  voteAverage: m.voteAverage,
-                  mediaType: m.mediaType,
-                  onTap: () => _navigateToDetail(m),
-                )).toList(),
-              ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.05),
-            ],
-            if (upcoming.isNotEmpty) ...[
-              SizedBox(height: Spacing.xl),
-              MediaRow(
-                title: l10n.upcomingReleases,
-                items: upcoming.map((m) => MediaRowItem(
-                  id: m.id,
-                  title: m.title,
-                  posterUrl: AppConstants.mediaImageUrl(m.posterPath),
-                  voteAverage: m.voteAverage,
-                  mediaType: m.mediaType,
-                  onTap: () => _navigateToDetail(m),
-                )).toList(),
-              ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.05),
-            ],
-            if (recommended.isNotEmpty) ...[
-              SizedBox(height: Spacing.xl),
-              MediaRow(
-                title: l10n.recommendedForYou,
-                items: recommended.map((m) => MediaRowItem(
-                  id: m.id,
-                  title: m.title,
-                  posterUrl: AppConstants.mediaImageUrl(m.posterPath),
-                  voteAverage: m.voteAverage,
-                  mediaType: m.mediaType,
-                  onTap: () => _navigateToDetail(m),
-                )).toList(),
-              ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.05),
-            ],
-            SizedBox(height: Spacing.xxl),
-          ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    final unreadAsync = ref.watch(unreadCountProvider);
+    final unreadCount = unreadAsync.asData?.value ?? 0;
+
+    return Padding(
+      padding: EdgeInsetsDirectional.symmetric(
+        horizontal: Spacing.lg,
+        vertical: Spacing.xs,
+      ),
+      child: Row(
+        children: [
+          Text(
+            context.l10n.appName,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const Spacer(),
+          Semantics(
+            button: true,
+            label: context.l10n.notifications,
+            child: IconButton(
+              icon: Badge(
+                isLabelVisible: unreadCount > 0,
+                label: unreadCount > 99
+                    ? const Text('99+')
+                    : Text('$unreadCount'),
+                child: const Icon(Icons.notifications_outlined),
+              ),
+              onPressed: () => context.push('/notifications'),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -204,37 +298,58 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildSearchBar(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(Spacing.lg, 0, Spacing.lg, Spacing.md),
-      child: TextField(
-        controller: _searchController,
-        onChanged: (value) {
-          _searchDebounce?.cancel();
-          _searchDebounce = Timer(const Duration(milliseconds: 300), () {
-            ref.read(homeSearchQueryProvider.notifier).update(value);
-          });
-        },
-        decoration: InputDecoration(
-          hintText: context.l10n.searchMoviesTv,
-          hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-          prefixIcon: Icon(Icons.search_rounded, color: colorScheme.onSurfaceVariant),
-          suffixIcon: _searchController.text.isNotEmpty
-              ? IconButton(
-                  icon: Icon(Icons.clear_rounded, color: colorScheme.onSurfaceVariant),
-                  onPressed: () {
-                    _searchController.clear();
-                    ref.read(homeSearchQueryProvider.notifier).update('');
-                  },
-                )
-              : null,
-          filled: true,
-          fillColor: colorScheme.surfaceContainerHighest,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
-            borderSide: BorderSide.none,
+      padding: EdgeInsetsDirectional.fromSTEB(
+        Spacing.lg,
+        0,
+        Spacing.lg,
+        Spacing.md,
+      ),
+      child: Semantics(
+        label: context.l10n.searchMoviesTv,
+        child: TextField(
+          controller: _searchController,
+          onChanged: (value) {
+            _searchDebounce?.cancel();
+            _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+              ref.read(homeSearchQueryProvider.notifier).update(value);
+            });
+          },
+          decoration: InputDecoration(
+            hintText: context.l10n.searchMoviesTv,
+            hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+            prefixIcon: Icon(
+              Icons.search_rounded,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            suffixIcon: _searchController.text.isNotEmpty
+                ? Semantics(
+                    button: true,
+                    label: context.l10n.clearSearch,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.clear_rounded,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      onPressed: () {
+                        _searchController.clear();
+                        ref.read(homeSearchQueryProvider.notifier).update('');
+                      },
+                      tooltip: context.l10n.close,
+                    ),
+                  )
+                : null,
+            filled: true,
+            fillColor: colorScheme.surfaceContainerHighest,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: EdgeInsetsDirectional.symmetric(
+              vertical: Spacing.md,
+            ),
           ),
-          contentPadding: EdgeInsetsDirectional.symmetric(vertical: Spacing.md),
+          style: TextStyle(color: colorScheme.onSurface),
         ),
-        style: TextStyle(color: colorScheme.onSurface),
       ),
     );
   }
@@ -245,12 +360,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   ) {
     return [
       Padding(
-        padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg, vertical: Spacing.xs),
+        padding: EdgeInsetsDirectional.symmetric(
+          horizontal: Spacing.lg,
+          vertical: Spacing.xs,
+        ),
         child: Text(
           context.l10n.searchResults,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
       ),
       ...searchResultsAsync.when(
@@ -263,11 +381,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.search_off_rounded, size: 64,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      Icon(
+                        Icons.search_off_rounded,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                       SizedBox(height: Spacing.lg),
-                      Text(context.l10n.noResults,
-                        style: Theme.of(context).textTheme.titleMedium),
+                      Text(
+                        context.l10n.noResults,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
                     ],
                   ),
                 ),
@@ -304,7 +427,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildSearchGrid(List<MediaModel> results) {
     final screenWidth = context.screenWidth;
-    final columns = screenWidth >= 1024 ? 6 : screenWidth >= 768 ? 4 : 3;
+    final columns = Spacing.gridColumns(screenWidth);
     return GridView.builder(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
@@ -317,57 +440,81 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       itemCount: results.length,
       itemBuilder: (context, index) {
         final item = results[index];
-        return GestureDetector(
-          onTap: () => _navigateToDetail(item),
-          child: Card(
-            clipBehavior: Clip.antiAlias,
-            elevation: 2,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: item.posterPath != null
-                      ? Image.network(
-                          AppConstants.mediaImageUrl(item.posterPath)!,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Center(
-                            child: Icon(Icons.movie_outlined,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant),
-                          ),
-                        )
-                      : Center(
-                          child: Icon(Icons.movie_outlined,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant),
-                        ),
-                ),
-                Padding(
-                  padding: EdgeInsetsDirectional.all(6),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(item.title, maxLines: 2, overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(height: 2),
-                      if (item.voteAverage != null)
-                        Row(
-                          children: [
-                            Icon(Icons.star_rounded, size: 12, color: Colors.amber),
-                            SizedBox(width: 2),
-                            Text(item.voteAverage!.toStringAsFixed(1),
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+        return Semantics(
+          button: true,
+          label:
+              '${item.title}${item.voteAverage != null ? ', rating ${item.voteAverage!.toStringAsFixed(1)}' : ''}',
+          child: GestureDetector(
+            onTap: () => _navigateToDetail(item),
+            child: Card(
+              clipBehavior: Clip.antiAlias,
+              elevation: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: item.posterPath != null
+                        ? Image.network(
+                            AppConstants.mediaImageUrl(item.posterPath)!,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            semanticLabel: 'Poster for ${item.title}',
+                            errorBuilder: (_, __, ___) => Center(
+                              child: Icon(
+                                Icons.movie_outlined,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                             ),
-                          ],
-                        ),
-                    ],
+                          )
+                        : Center(
+                            child: Icon(
+                              Icons.movie_outlined,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                   ),
-                ),
-              ],
+                  Padding(
+                    padding: EdgeInsetsDirectional.all(6),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        SizedBox(height: 2),
+                        if (item.voteAverage != null)
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.star_rounded,
+                                size: 12,
+                                color: AppColors.star,
+                              ),
+                              SizedBox(width: 2),
+                              Text(
+                                item.voteAverage!.toStringAsFixed(1),
+                                style: Theme.of(context).textTheme.labelSmall
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -389,39 +536,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildShimmerCarousel() {
-    return SizedBox(
-      height: 480,
-      child: Center(
-        child: CircularProgressIndicator(),
+    return ExcludeSemantics(
+      child: SizedBox(
+        height: 480,
+        child: Center(child: CircularProgressIndicator()),
       ),
     );
   }
 
   Widget _buildContinueWatchingShimmer() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsetsDirectional.only(start: 16, end: 16, bottom: 12),
-          child: SectionHeader(title: context.l10n.continueWatching),
-        ),
-        SizedBox(
-          height: 200,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsetsDirectional.only(start: 12, end: 12),
-            itemCount: 5,
-            itemExtent: 148,
-            itemBuilder: (context, index) => Container(
-              width: 140,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadiusDirectional.all(Radius.circular(10)),
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+    return ExcludeSemantics(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsetsDirectional.only(
+              start: Spacing.lg,
+              end: Spacing.lg,
+              bottom: Spacing.md,
+            ),
+            child: SectionHeader(title: context.l10n.continueWatching),
+          ),
+          SizedBox(
+            height: 200,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsetsDirectional.only(
+                start: Spacing.md,
+                end: Spacing.md,
+              ),
+              itemCount: 5,
+              itemExtent: 148,
+              itemBuilder: (context, index) => Container(
+                width: 140,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadiusDirectional.all(
+                    Radius.circular(10),
+                  ),
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

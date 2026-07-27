@@ -15,9 +15,8 @@ import '../repositories/recommendation_repository.dart';
 /// All tunable weights live in [RecommendationConfig].  Data access is
 /// delegated to [RecommendationRepository].
 class RecommendationEngine {
-  RecommendationEngine({
-    RecommendationRepository? repository,
-  }) : _repository = repository ?? RecommendationRepository();
+  RecommendationEngine({RecommendationRepository? repository})
+    : _repository = repository ?? RecommendationRepository();
 
   final RecommendationRepository _repository;
 
@@ -48,7 +47,11 @@ class RecommendationEngine {
       results = {};
     } else {
       results = await _buildPersonalisedFeeds(
-        userId, savedIds, viewedIds, knownIds, profile,
+        userId,
+        savedIds,
+        viewedIds,
+        knownIds,
+        profile,
       );
     }
 
@@ -77,31 +80,52 @@ class RecommendationEngine {
     final futures = <Future>[];
 
     if (savedIds.isNotEmpty) {
-      futures.add(_buildSimilarTo(savedIds, knownIds, RecCategory.becauseYouSaved)
-          .then((v) => results[RecCategory.becauseYouSaved] = v));
-      futures.add(_buildSimilarToFavorites(savedIds, knownIds)
-          .then((v) => results[RecCategory.similarToFavorites] = v));
+      futures.add(
+        _buildSimilarTo(
+          savedIds,
+          knownIds,
+          RecCategory.becauseYouSaved,
+        ).then((v) => results[RecCategory.becauseYouSaved] = v),
+      );
+      futures.add(
+        _buildSimilarToFavorites(
+          savedIds,
+          knownIds,
+        ).then((v) => results[RecCategory.similarToFavorites] = v),
+      );
     }
 
     if (viewedIds.isNotEmpty) {
-      final recentViews =
-          await _repository.fetchRecentViewedMediaIds(userId);
+      final recentViews = await _repository.fetchRecentViewedMediaIds(userId);
       final seeds = recentViews.isNotEmpty
           ? recentViews.take(RecommendationConfig.maxRecentViewedSeeds).toList()
           : viewedIds.take(RecommendationConfig.maxRecentViewedSeeds).toList();
       futures.add(
-          _buildSimilarTo(seeds.toSet(), knownIds, RecCategory.becauseYouViewed)
-              .then((v) => results[RecCategory.becauseYouViewed] = v));
+        _buildSimilarTo(
+          seeds.toSet(),
+          knownIds,
+          RecCategory.becauseYouViewed,
+        ).then((v) => results[RecCategory.becauseYouViewed] = v),
+      );
     }
 
     if (profile != null && profile.topGenres.isNotEmpty) {
-      futures.add(_buildGenreFeed(profile.topGenres.first, knownIds)
-          .then((v) => results[RecCategory.becauseYouLikeGenre] = v));
+      futures.add(
+        _buildGenreFeed(
+          profile.topGenres.first,
+          knownIds,
+        ).then((v) => results[RecCategory.becauseYouLikeGenre] = v),
+      );
     }
 
     if (savedIds.isNotEmpty) {
-      futures.add(_buildCollaborativeFeed(userId, savedIds, knownIds)
-          .then((v) => results[RecCategory.usersLikeYou] = v));
+      futures.add(
+        _buildCollaborativeFeed(
+          userId,
+          savedIds,
+          knownIds,
+        ).then((v) => results[RecCategory.usersLikeYou] = v),
+      );
     }
 
     await Future.wait(futures);
@@ -114,18 +138,22 @@ class RecommendationEngine {
   ) async {
     final feeds = <RecCategory, List<ScoredMedia>>{};
     final futures = <Future>[
-      _buildPopularFeed(knownIds)
-          .then((v) => feeds[RecCategory.trendingNearYou] = v),
-      _buildPopularFeed(knownIds)
-          .then((v) => feeds[RecCategory.popularThisWeek] = v),
-      _buildNewReleaseFeed(knownIds)
-          .then((v) => feeds[RecCategory.newReleases] = v),
-      _buildTopRatedFeed(knownIds)
-          .then((v) => feeds[RecCategory.topRated] = v),
-      _buildHiddenGemFeed(knownIds)
-          .then((v) => feeds[RecCategory.hiddenGems] = v),
-      _buildAcclaimedFeed(knownIds)
-          .then((v) => feeds[RecCategory.criticallyAcclaimed] = v),
+      _buildPopularFeed(
+        knownIds,
+      ).then((v) => feeds[RecCategory.trendingNearYou] = v),
+      _buildPopularFeed(
+        knownIds,
+      ).then((v) => feeds[RecCategory.popularThisWeek] = v),
+      _buildNewReleaseFeed(
+        knownIds,
+      ).then((v) => feeds[RecCategory.newReleases] = v),
+      _buildTopRatedFeed(knownIds).then((v) => feeds[RecCategory.topRated] = v),
+      _buildHiddenGemFeed(
+        knownIds,
+      ).then((v) => feeds[RecCategory.hiddenGems] = v),
+      _buildAcclaimedFeed(
+        knownIds,
+      ).then((v) => feeds[RecCategory.criticallyAcclaimed] = v),
     ];
     await Future.wait(futures);
 
@@ -149,11 +177,15 @@ class RecommendationEngine {
     String reason = 'Similar to what you\'ve saved',
     String reasonType = 'content',
   }) async {
-    final sourceGenres = await _repository.fetchGenresForMedia(seedIds.toList());
+    final sourceGenres = await _repository.fetchGenresForMedia(
+      seedIds.toList(),
+    );
     if (sourceGenres.isEmpty) return [];
 
-    final candidates =
-        await _repository.findSimilarByGenres(sourceGenres, exclude);
+    final candidates = await _repository.findSimilarByGenres(
+      sourceGenres,
+      exclude,
+    );
     final scored = candidates.map((item) {
       final itemGenres = (item['genres'] as List?)?.cast<String>() ?? [];
       final overlap = sourceGenres.intersection(itemGenres.toSet()).length;
@@ -161,8 +193,9 @@ class RecommendationEngine {
       final genreScore = union > 0 ? overlap / union : 0.0;
       final ratingScore =
           ((item['vote_average'] as num?)?.toDouble() ?? 0) /
-              RecommendationConfig.maxRating;
-      final score = genreScore * RecommendationConfig.contentGenreWeight +
+          RecommendationConfig.maxRating;
+      final score =
+          genreScore * RecommendationConfig.contentGenreWeight +
           ratingScore * RecommendationConfig.contentRatingWeight;
       return ScoredMedia(
         mediaId: item['id'] as int,
@@ -198,11 +231,13 @@ class RecommendationEngine {
 
     // Boost cross-genre candidates.
     similar = similar.map((s) {
-      final bonus = _crossGenreBonus(s.mediaId) *
+      final bonus =
+          _crossGenreBonus(s.mediaId) *
           RecommendationConfig.crossGenreBonusFactor;
       return ScoredMedia(
         mediaId: s.mediaId,
-        score: (s.score * (1.0 - RecommendationConfig.crossGenreBonusFactor)) +
+        score:
+            (s.score * (1.0 - RecommendationConfig.crossGenreBonusFactor)) +
             bonus,
         reason: s.reason,
         reasonType: s.reasonType,
@@ -230,21 +265,25 @@ class RecommendationEngine {
       return [];
     }
 
-    final candidates =
-        await _repository.fetchCollaborativeCandidates(similarUsers, knownIds);
+    final candidates = await _repository.fetchCollaborativeCandidates(
+      similarUsers,
+      knownIds,
+    );
 
     final sorted = candidates.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
     return sorted
         .take(RecommendationConfig.maxItemsPerCategory)
-        .map((e) => ScoredMedia(
-              mediaId: e.key,
-              score: (e.value / similarUsers.length).clamp(0.0, 1.0),
-              reason: 'Users with similar taste enjoyed this',
-              reasonType: 'collaborative',
-              category: RecCategory.usersLikeYou,
-            ))
+        .map(
+          (e) => ScoredMedia(
+            mediaId: e.key,
+            score: (e.value / similarUsers.length).clamp(0.0, 1.0),
+            reason: 'Users with similar taste enjoyed this',
+            reasonType: 'collaborative',
+            category: RecCategory.usersLikeYou,
+          ),
+        )
         .toList();
   }
 
@@ -258,7 +297,8 @@ class RecommendationEngine {
   ) async {
     final items = await _repository.fetchByGenre(topGenre, knownIds);
     return items.map((item) {
-      final score = ((item['vote_average'] as num?)?.toDouble() ?? 0) /
+      final score =
+          ((item['vote_average'] as num?)?.toDouble() ?? 0) /
           RecommendationConfig.maxRating;
       return ScoredMedia(
         mediaId: item['id'] as int,
@@ -276,60 +316,82 @@ class RecommendationEngine {
 
   Future<List<ScoredMedia>> _buildPopularFeed(Set<int> knownIds) async {
     final items = await _repository.fetchPopular(knownIds);
-    return items.map((item) => _toScoredMedia(
-          item,
-          'Popular trending',
-          'popularity',
-          RecCategory.trendingNearYou,
-          (d) => (d / RecommendationConfig.popularityNormaliser).clamp(0.0, 1.0),
-        )).toList();
+    return items
+        .map(
+          (item) => _toScoredMedia(
+            item,
+            'Popular trending',
+            'popularity',
+            RecCategory.trendingNearYou,
+            (d) =>
+                (d / RecommendationConfig.popularityNormaliser).clamp(0.0, 1.0),
+          ),
+        )
+        .toList();
   }
 
   Future<List<ScoredMedia>> _buildNewReleaseFeed(Set<int> knownIds) async {
     final items = await _repository.fetchNewReleases(knownIds);
-    return items.map((item) => _toScoredMedia(
-          item,
-          'Recently released',
-          'freshness',
-          RecCategory.newReleases,
-          (d) => (d / RecommendationConfig.popularityNormaliser).clamp(0.0, 1.0),
-        )).toList();
+    return items
+        .map(
+          (item) => _toScoredMedia(
+            item,
+            'Recently released',
+            'freshness',
+            RecCategory.newReleases,
+            (d) =>
+                (d / RecommendationConfig.popularityNormaliser).clamp(0.0, 1.0),
+          ),
+        )
+        .toList();
   }
 
   Future<List<ScoredMedia>> _buildTopRatedFeed(Set<int> knownIds) async {
     final items = await _repository.fetchTopRated(knownIds);
-    return items.map((item) => _toScoredMedia(
-          item,
-          'Top rated',
-          'rating',
-          RecCategory.topRated,
-          (v) => (v / RecommendationConfig.maxRating).clamp(0.0, 1.0),
-          valueKey: 'vote_average',
-        )).toList();
+    return items
+        .map(
+          (item) => _toScoredMedia(
+            item,
+            'Top rated',
+            'rating',
+            RecCategory.topRated,
+            (v) => (v / RecommendationConfig.maxRating).clamp(0.0, 1.0),
+            valueKey: 'vote_average',
+          ),
+        )
+        .toList();
   }
 
   Future<List<ScoredMedia>> _buildHiddenGemFeed(Set<int> knownIds) async {
     final items = await _repository.fetchHiddenGems(knownIds);
-    return items.map((item) => _toScoredMedia(
-          item,
-          'Hidden gem — highly rated but undiscovered',
-          'hidden_gem',
-          RecCategory.hiddenGems,
-          (v) => (v / RecommendationConfig.maxRating).clamp(0.0, 1.0),
-          valueKey: 'vote_average',
-        )).toList();
+    return items
+        .map(
+          (item) => _toScoredMedia(
+            item,
+            'Hidden gem — highly rated but undiscovered',
+            'hidden_gem',
+            RecCategory.hiddenGems,
+            (v) => (v / RecommendationConfig.maxRating).clamp(0.0, 1.0),
+            valueKey: 'vote_average',
+          ),
+        )
+        .toList();
   }
 
   Future<List<ScoredMedia>> _buildAcclaimedFeed(Set<int> knownIds) async {
     final items = await _repository.fetchAcclaimed(knownIds);
-    return items.map((item) => _toScoredMedia(
-          item,
-          'Critically acclaimed',
-          'acclaim',
-          RecCategory.criticallyAcclaimed,
-          (v) => (v / RecommendationConfig.maxRating).clamp(0.0, 1.0),
-          valueKey: 'vote_average',
-        )).toList();
+    return items
+        .map(
+          (item) => _toScoredMedia(
+            item,
+            'Critically acclaimed',
+            'acclaim',
+            RecCategory.criticallyAcclaimed,
+            (v) => (v / RecommendationConfig.maxRating).clamp(0.0, 1.0),
+            valueKey: 'vote_average',
+          ),
+        )
+        .toList();
   }
 
   /// Maps a raw DB row to a scored recommendation.

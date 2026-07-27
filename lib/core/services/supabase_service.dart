@@ -1,13 +1,20 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/secrets.dart';
-import '../constants/app_constants.dart';
 
+/// Singleton wrapper around the Supabase client.
+///
+/// Provides typed accessors for all Supabase tables ([profiles], [media],
+/// [userMedia], [userLists], etc.) and storage buckets ([avatarsBucket],
+/// [bannersBucket]). Initialize via [init] before first use.
+///
+/// Uses the singleton [instance] for app-wide access.
 class SupabaseService {
-  SupabaseService._();
+  SupabaseService();
 
-  static final SupabaseService instance = SupabaseService._();
+  static final SupabaseService instance = SupabaseService();
   SupabaseClient? _client;
 
   SupabaseClient get client {
@@ -29,7 +36,8 @@ class SupabaseService {
   SupabaseQueryBuilder get userEvents => client.from('user_events');
   SupabaseQueryBuilder get userRecProfiles => client.from('user_rec_profiles');
   SupabaseQueryBuilder get mediaSimilarity => client.from('media_similarity');
-  SupabaseQueryBuilder get recommendationsCache => client.from('recommendations_cache');
+  SupabaseQueryBuilder get recommendationsCache =>
+      client.from('recommendations_cache');
 
   Future<void> init() async {
     final supabaseUrl = Secrets.supabaseUrl;
@@ -50,8 +58,10 @@ class SupabaseService {
   StorageFileApi? _avatarsBucket;
   StorageFileApi? _bannersBucket;
 
-  StorageFileApi get avatarsBucket => _avatarsBucket ??= client.storage.from('avatars');
-  StorageFileApi get bannersBucket => _bannersBucket ??= client.storage.from('banners');
+  StorageFileApi get avatarsBucket =>
+      _avatarsBucket ??= client.storage.from('avatars');
+  StorageFileApi get bannersBucket =>
+      _bannersBucket ??= client.storage.from('banners');
 
   Future<String> uploadAvatar(String userId, String filePath) async {
     final ext = filePath.split('.').last;
@@ -60,10 +70,32 @@ class SupabaseService {
     return avatarsBucket.getPublicUrl(path);
   }
 
+  Future<String> uploadAvatarBytes(
+    String userId,
+    String filePath,
+    Uint8List bytes,
+  ) async {
+    final ext = filePath.split('.').last;
+    final path = '$userId/avatar.$ext';
+    await avatarsBucket.uploadBinary(path, bytes);
+    return avatarsBucket.getPublicUrl(path);
+  }
+
   Future<String> uploadBanner(String userId, String filePath) async {
     final ext = filePath.split('.').last;
     final path = '$userId/banner.$ext';
     await bannersBucket.upload(path, File(filePath));
+    return bannersBucket.getPublicUrl(path);
+  }
+
+  Future<String> uploadBannerBytes(
+    String userId,
+    String filePath,
+    Uint8List bytes,
+  ) async {
+    final ext = filePath.split('.').last;
+    final path = '$userId/banner.$ext';
+    await bannersBucket.uploadBinary(path, bytes);
     return bannersBucket.getPublicUrl(path);
   }
 

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/constants/app_colors.dart';
 import '../core/providers/app_providers.dart';
 import '../features/auth/auth_screen.dart';
 import '../features/auth/providers/auth_providers.dart';
@@ -27,6 +29,7 @@ import '../features/legal/terms_screen.dart';
 import '../features/legal/licenses_screen.dart';
 import '../features/legal/attribution_screen.dart';
 import '../features/recommendations/recommendations_screen.dart';
+import '../features/social/social_screen.dart';
 
 class _RouterRefreshNotifier extends ChangeNotifier {
   void requestRefresh() {
@@ -64,7 +67,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final authState = ref.read(authNotifierProvider);
 
       // Auth resolution still in progress — stay on splash
-      if (authState.status == AuthStatus.initial || authState.status == AuthStatus.loading) {
+      if (authState.status == AuthStatus.initial ||
+          authState.status == AuthStatus.loading) {
         if (!isSplashRoute) return '/splash';
         return null;
       }
@@ -79,7 +83,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (isAuthenticated && isAuthRoute) return '/';
 
       final isOnboardingRoute = state.matchedLocation == '/onboarding';
-      if (isAuthenticated && authState.isNewUser && !isOnboardingRoute) return '/onboarding';
+      if (isAuthenticated && authState.isNewUser && !isOnboardingRoute)
+        return '/onboarding';
       if (isOnboardingRoute && !authState.isNewUser) return '/';
 
       return null;
@@ -124,6 +129,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                path: '/tracking',
+                name: 'tracking',
+                pageBuilder: (context, state) => _buildTabTransition(
+                  child: const TrackingScreen(),
+                  state: state,
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
                 path: '/lists',
                 name: 'lists',
                 pageBuilder: (context, state) => _buildTabTransition(
@@ -134,9 +151,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: ':id',
                     name: 'listDetail',
-                    builder: (context, state) => ListDetailScreen(
-                      listId: state.pathParameters['id']!,
-                    ),
+                    builder: (context, state) =>
+                        ListDetailScreen(listId: state.pathParameters['id']!),
                   ),
                 ],
               ),
@@ -160,9 +176,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: ':id',
                     name: 'userProfile',
-                    builder: (context, state) => ProfileScreen(
-                      userId: state.pathParameters['id'],
-                    ),
+                    builder: (context, state) =>
+                        ProfileScreen(userId: state.pathParameters['id']),
                   ),
                 ],
               ),
@@ -184,18 +199,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/onboarding',
         name: 'onboarding',
-        pageBuilder: (context, state) => _buildPageTransition(
-          child: const OnboardingScreen(),
-          state: state,
-        ),
-      ),
-      GoRoute(
-        path: '/tracking',
-        name: 'tracking',
-        pageBuilder: (context, state) => _buildPageTransition(
-          child: const TrackingScreen(),
-          state: state,
-        ),
+        pageBuilder: (context, state) =>
+            _buildPageTransition(child: const OnboardingScreen(), state: state),
       ),
       GoRoute(
         path: '/notifications',
@@ -216,10 +221,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/analytics',
         name: 'analytics',
-        pageBuilder: (context, state) => _buildPageTransition(
-          child: const AnalyticsScreen(),
-          state: state,
-        ),
+        pageBuilder: (context, state) =>
+            _buildPageTransition(child: const AnalyticsScreen(), state: state),
       ),
       GoRoute(
         path: '/analytics/filtered',
@@ -238,10 +241,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/moderation',
         name: 'moderation',
-        pageBuilder: (context, state) => _buildPageTransition(
-          child: const ModerationScreen(),
-          state: state,
-        ),
+        pageBuilder: (context, state) =>
+            _buildPageTransition(child: const ModerationScreen(), state: state),
       ),
       GoRoute(
         path: '/recommendations',
@@ -250,6 +251,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           child: const RecommendationsScreen(),
           state: state,
         ),
+      ),
+      GoRoute(
+        path: '/social',
+        name: 'social',
+        pageBuilder: (context, state) =>
+            _buildPageTransition(child: const SocialScreen(), state: state),
       ),
       GoRoute(
         path: '/privacy',
@@ -283,10 +290,12 @@ Page<T> _buildPageTransition<T>({
     key: state.pageKey,
     child: child,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      if (MediaQuery.disableAnimationsOf(context)) return child;
       return FadeTransition(
-        opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-          CurvedAnimation(parent: animation, curve: Curves.easeInOut),
-        ),
+        opacity: Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut)),
         child: SlideTransition(
           position: Tween<Offset>(
             begin: const Offset(0.03, 0),
@@ -308,10 +317,12 @@ Page<T> _buildTabTransition<T>({
     key: state.pageKey,
     child: child,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      if (MediaQuery.disableAnimationsOf(context)) return child;
       return FadeTransition(
-        opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-          CurvedAnimation(parent: animation, curve: Curves.easeInOut),
-        ),
+        opacity: Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut)),
         child: child,
       );
     },
@@ -329,6 +340,11 @@ class ShellScaffold extends ConsumerWidget {
     return [
       _NavDest(Icons.home_rounded, Icons.home_outlined, l10n.navHome),
       _NavDest(Icons.explore_rounded, Icons.explore_outlined, l10n.discover),
+      _NavDest(
+        Icons.bookmark_rounded,
+        Icons.bookmark_outline_rounded,
+        l10n.navTracking,
+      ),
       _NavDest(Icons.folder_rounded, Icons.folder_outlined, l10n.navLists),
       _NavDest(Icons.person_rounded, Icons.person_outlined, l10n.navProfile),
     ];
@@ -363,10 +379,7 @@ class _MobileShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: navigationShell,
-      ),
+      body: SafeArea(bottom: false, child: navigationShell),
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: (index) {
@@ -390,65 +403,106 @@ class _MobileShell extends StatelessWidget {
   }
 }
 
-class _DesktopShell extends StatelessWidget {
+class _DesktopShell extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
 
   const _DesktopShell({required this.navigationShell});
 
   @override
+  State<_DesktopShell> createState() => _DesktopShellState();
+}
+
+class _DesktopShellState extends State<_DesktopShell> {
+  void _switchTab(int index) {
+    widget.navigationShell.goBranch(
+      index,
+      initialLocation: index == widget.navigationShell.currentIndex,
+    );
+  }
+
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    final ctrl =
+        HardwareKeyboard.instance.isControlPressed ||
+        HardwareKeyboard.instance.isMetaPressed;
+    if (!ctrl) return KeyEventResult.ignored;
+
+    switch (event.logicalKey) {
+      case LogicalKeyboardKey.digit1:
+        _switchTab(0);
+        return KeyEventResult.handled;
+      case LogicalKeyboardKey.digit2:
+        _switchTab(1);
+        return KeyEventResult.handled;
+      case LogicalKeyboardKey.digit3:
+        _switchTab(2);
+        return KeyEventResult.handled;
+      case LogicalKeyboardKey.digit4:
+        _switchTab(3);
+        return KeyEventResult.handled;
+      case LogicalKeyboardKey.digit5:
+        _switchTab(4);
+        return KeyEventResult.handled;
+      default:
+        return KeyEventResult.ignored;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Row(
-        children: [
-          NavigationRail(
-            selectedIndex: navigationShell.currentIndex,
-            onDestinationSelected: (index) {
-              navigationShell.goBranch(
-                index,
-                initialLocation: index == navigationShell.currentIndex,
-              );
-            },
-            labelType: NavigationRailLabelType.all,
-            leading: Padding(
-              padding: const EdgeInsetsDirectional.only(bottom: 16),
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF8B5CF6).withValues(alpha: 0.3),
-                      blurRadius: 12,
+    return Focus(
+      onKeyEvent: _handleKeyEvent,
+      autofocus: true,
+      child: SafeArea(
+        child: Row(
+          children: [
+            FocusTraversalGroup(
+              child: NavigationRail(
+                selectedIndex: widget.navigationShell.currentIndex,
+                onDestinationSelected: _switchTab,
+                labelType: NavigationRailLabelType.all,
+                leading: Padding(
+                  padding: const EdgeInsetsDirectional.only(bottom: 16),
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.logoPurple.withValues(alpha: 0.3),
+                          blurRadius: 12,
+                        ),
+                      ],
                     ),
-                  ],
+                    clipBehavior: Clip.antiAlias,
+                    child: ExcludeSemantics(
+                      child: Image.asset(
+                        'assets/images/logo/logo.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
                 ),
-                clipBehavior: Clip.antiAlias,
-                child: Image.asset(
-                  'assets/images/logo/logo.png',
-                  fit: BoxFit.contain,
+                trailing: Padding(
+                  padding: const EdgeInsetsDirectional.only(top: 16),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: []),
                 ),
+                destinations: ShellScaffold._navItems(context).map((item) {
+                  return NavigationRailDestination(
+                    icon: Icon(item.inactiveIcon),
+                    selectedIcon: Icon(item.activeIcon),
+                    label: Text(item.label),
+                  );
+                }).toList(),
               ),
             ),
-            trailing: Padding(
-              padding: const EdgeInsetsDirectional.only(top: 16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                ],
-              ),
-            ),
-            destinations: ShellScaffold._navItems(context).map((item) {
-              return NavigationRailDestination(
-                icon: Icon(item.inactiveIcon),
-                selectedIcon: Icon(item.activeIcon),
-                label: Text(item.label),
-              );
-            }).toList(),
-          ),
-          const VerticalDivider(width: 1, thickness: 1),
-          Expanded(child: navigationShell),
-        ],
+            const VerticalDivider(width: 1, thickness: 1),
+            Expanded(child: widget.navigationShell),
+          ],
+        ),
       ),
     );
   }

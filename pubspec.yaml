@@ -1,7 +1,7 @@
 name: watch_atlas
 description: "WatchAtlas - Modern media tracking platform"
 publish_to: 'none'
-version: 0.10.0+1
+version: 0.11.0+1
 
 environment:
   sdk: ^3.11.3
@@ -29,16 +29,15 @@ dependencies:
   json_annotation: ^4.9.0
 
   # Local Database
-  isar: ^3.1.0+1
-  isar_flutter_libs: ^3.1.0+1
   path_provider: ^2.1.5
+  sqflite_common_ffi: ^2.3.0
 
   # Image Caching
   cached_network_image: ^3.4.1
 
   # Animations
   flutter_animate: ^4.5.2
-  lottie: ^3.3.3
+  lottie: ^3.5.1
   shimmer: ^3.0.0
 
   # UI
@@ -81,6 +80,8 @@ dev_dependencies:
   riverpod_generator: ^4.0.3
   mocktail: any
   flutter_launcher_icons: ^0.14.3
+  integration_test:
+    sdk: flutter
 
 flutter_launcher_icons:
   android: true

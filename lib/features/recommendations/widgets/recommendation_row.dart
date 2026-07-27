@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/dimensions.dart';
 import '../../../core/models/recommendation_models.dart';
+import '../../../core/providers/app_providers.dart';
 import '../../../core/shared/horizontal_carousel.dart';
 import '../../../l10n/l10n.dart';
-import '../providers/recommendation_providers.dart';
 import 'recommendation_card.dart';
 
 /// A horizontal scrollable row of [RecommendationCard]s with a category header.
@@ -55,8 +55,9 @@ class RecommendationRow extends ConsumerWidget {
             label: categoryLabel,
             child: Text(
               categoryLabel,
-              style: textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w600),
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
@@ -71,10 +72,9 @@ class RecommendationRow extends ConsumerWidget {
             return RecommendationCard(
               scoredMedia: item,
               onTap: () {
-                ref.read(behaviorServiceProvider).trackRecommendationClick(
-                      item.mediaId,
-                      category.dbValue,
-                    );
+                ref
+                    .read(behaviorServiceProvider)
+                    .trackRecommendationClick(item.mediaId, category.dbValue);
                 context.push('/media/movie/${item.mediaId}');
               },
             );

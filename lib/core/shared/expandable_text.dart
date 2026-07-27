@@ -80,11 +80,17 @@ class _ExpandableTextState extends State<ExpandableText>
           duration: const Duration(milliseconds: 200),
         ),
         if (isLong)
-          TextButton(
-            onPressed: _toggle,
-            child: Text(_expanded
-                ? (widget.collapseLabel ?? context.l10n.showLess)
-                : (widget.expandLabel ?? context.l10n.showMore)),
+          Semantics(
+            button: true,
+            label: _expanded ? 'Show less text' : 'Show more text',
+            child: TextButton(
+              onPressed: _toggle,
+              child: Text(
+                _expanded
+                    ? (widget.collapseLabel ?? context.l10n.showLess)
+                    : (widget.expandLabel ?? context.l10n.showMore),
+              ),
+            ),
           ),
       ],
     );

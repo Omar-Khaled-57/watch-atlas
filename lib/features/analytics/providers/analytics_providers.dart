@@ -24,7 +24,9 @@ final allUserMediaProvider = FutureProvider<List<UserMediaModel>>((ref) async {
   }
 });
 
-final watchedMediaDetailsProvider = FutureProvider<Map<int, MediaModel>>((ref) async {
+final watchedMediaDetailsProvider = FutureProvider<Map<int, MediaModel>>((
+  ref,
+) async {
   final userMedia = await ref.watch(allUserMediaProvider.future);
   final tmdb = ref.watch(tmdbServiceProvider);
   final result = <int, MediaModel>{};
@@ -46,7 +48,9 @@ final watchedMediaDetailsProvider = FutureProvider<Map<int, MediaModel>>((ref) a
         title: data['title'] as String? ?? data['name'] as String? ?? '',
         genres: genres,
         countries: (data['origin_country'] as List<dynamic>?)?.cast<String>(),
-        releaseDate: _parseDate(data['release_date'] as String? ?? data['first_air_date'] as String?),
+        releaseDate: _parseDate(
+          data['release_date'] as String? ?? data['first_air_date'] as String?,
+        ),
       );
     } catch (e) {
       debugPrint('Failed to fetch media ${um.mediaId} for analytics: $e');
@@ -60,46 +64,62 @@ DateTime? _parseDate(String? dateStr) {
   return DateTime.tryParse(dateStr);
 }
 
-final genreDistributionProvider = FutureProvider<List<DistributionItem>>((ref) async {
+final genreDistributionProvider = FutureProvider<List<DistributionItem>>((
+  ref,
+) async {
   final mediaMap = await ref.watch(watchedMediaDetailsProvider.future);
   final userMedia = await ref.watch(allUserMediaProvider.future);
   final counts = <String, int>{};
   for (final um in userMedia) {
-    if (um.status != WatchStatus.completed && um.status != WatchStatus.watching) continue;
+    if (um.status != WatchStatus.completed && um.status != WatchStatus.watching)
+      continue;
     final genres = mediaMap[um.mediaId]?.genres;
     if (genres == null) continue;
     for (final genre in genres) {
       counts[genre] = (counts[genre] ?? 0) + 1;
     }
   }
-  final sorted = counts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+  final sorted = counts.entries.toList()
+    ..sort((a, b) => b.value.compareTo(a.value));
   final total = sorted.fold(0, (sum, e) => sum + e.value);
-  return sorted.map((e) => DistributionItem(
-    label: e.key,
-    count: e.value,
-    percentage: total > 0 ? e.value / total : 0.0,
-  )).toList();
+  return sorted
+      .map(
+        (e) => DistributionItem(
+          label: e.key,
+          count: e.value,
+          percentage: total > 0 ? e.value / total : 0.0,
+        ),
+      )
+      .toList();
 });
 
-final countryDistributionProvider = FutureProvider<List<DistributionItem>>((ref) async {
+final countryDistributionProvider = FutureProvider<List<DistributionItem>>((
+  ref,
+) async {
   final mediaMap = await ref.watch(watchedMediaDetailsProvider.future);
   final userMedia = await ref.watch(allUserMediaProvider.future);
   final counts = <String, int>{};
   for (final um in userMedia) {
-    if (um.status != WatchStatus.completed && um.status != WatchStatus.watching) continue;
+    if (um.status != WatchStatus.completed && um.status != WatchStatus.watching)
+      continue;
     final countries = mediaMap[um.mediaId]?.countries;
     if (countries == null) continue;
     for (final country in countries) {
       counts[country] = (counts[country] ?? 0) + 1;
     }
   }
-  final sorted = counts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+  final sorted = counts.entries.toList()
+    ..sort((a, b) => b.value.compareTo(a.value));
   final total = sorted.fold(0, (sum, e) => sum + e.value);
-  return sorted.map((e) => DistributionItem(
-    label: e.key,
-    count: e.value,
-    percentage: total > 0 ? e.value / total : 0.0,
-  )).toList();
+  return sorted
+      .map(
+        (e) => DistributionItem(
+          label: e.key,
+          count: e.value,
+          percentage: total > 0 ? e.value / total : 0.0,
+        ),
+      )
+      .toList();
 });
 
 final watchStatisticsProvider = FutureProvider<WatchStatistics>((ref) async {
@@ -114,22 +134,29 @@ final weeklyActivityProvider = FutureProvider<List<ActivityDay>>((ref) async {
   final dayCounts = <String, int>{};
   for (int i = 0; i < 7; i++) {
     final day = weekAgo.add(Duration(days: i));
-    final key = '${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}';
+    final key =
+        '${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}';
     dayCounts[key] = 0;
   }
   for (final um in userMedia) {
     final eventDate = um.completedAt ?? um.updatedAt;
-    if (eventDate != null && eventDate.isAfter(weekAgo.subtract(const Duration(days: 1)))) {
-      final key = '${eventDate.year}-${eventDate.month.toString().padLeft(2, '0')}-${eventDate.day.toString().padLeft(2, '0')}';
+    if (eventDate != null &&
+        eventDate.isAfter(weekAgo.subtract(const Duration(days: 1)))) {
+      final key =
+          '${eventDate.year}-${eventDate.month.toString().padLeft(2, '0')}-${eventDate.day.toString().padLeft(2, '0')}';
       if (dayCounts.containsKey(key)) {
         dayCounts[key] = (dayCounts[key] ?? 0) + 1;
       }
     }
   }
-  return dayCounts.entries.map((e) => ActivityDay(date: e.key, count: e.value)).toList();
+  return dayCounts.entries
+      .map((e) => ActivityDay(date: e.key, count: e.value))
+      .toList();
 });
 
-final monthlyActivityProvider = FutureProvider<List<ActivityMonth>>((ref) async {
+final monthlyActivityProvider = FutureProvider<List<ActivityMonth>>((
+  ref,
+) async {
   final userMedia = await ref.watch(allUserMediaProvider.future);
   final now = DateTime.now();
   final monthCounts = <String, int>{};
@@ -140,13 +167,16 @@ final monthlyActivityProvider = FutureProvider<List<ActivityMonth>>((ref) async 
   }
   for (final um in userMedia) {
     if (um.completedAt != null) {
-      final key = '${um.completedAt!.year}-${um.completedAt!.month.toString().padLeft(2, '0')}';
+      final key =
+          '${um.completedAt!.year}-${um.completedAt!.month.toString().padLeft(2, '0')}';
       if (monthCounts.containsKey(key)) {
         monthCounts[key] = (monthCounts[key] ?? 0) + 1;
       }
     }
   }
-  return monthCounts.entries.map((e) => ActivityMonth(month: e.key, count: e.value)).toList();
+  return monthCounts.entries
+      .map((e) => ActivityMonth(month: e.key, count: e.value))
+      .toList();
 });
 
 final yearlyActivityProvider = FutureProvider<List<ActivityYear>>((ref) async {
@@ -154,10 +184,12 @@ final yearlyActivityProvider = FutureProvider<List<ActivityYear>>((ref) async {
   final yearCounts = <int, int>{};
   for (final um in userMedia) {
     if (um.completedAt != null) {
-      yearCounts[um.completedAt!.year] = (yearCounts[um.completedAt!.year] ?? 0) + 1;
+      yearCounts[um.completedAt!.year] =
+          (yearCounts[um.completedAt!.year] ?? 0) + 1;
     }
   }
-  final sorted = yearCounts.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+  final sorted = yearCounts.entries.toList()
+    ..sort((a, b) => a.key.compareTo(b.key));
   return sorted.map((e) => ActivityYear(year: e.key, count: e.value)).toList();
 });
 
@@ -189,7 +221,9 @@ final mostWatchedDecadeProvider = FutureProvider<String?>((ref) async {
   return decadeCounts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
 });
 
-final ratingDistributionProvider = FutureProvider<List<RatingBucket>>((ref) async {
+final ratingDistributionProvider = FutureProvider<List<RatingBucket>>((
+  ref,
+) async {
   final userMedia = await ref.watch(allUserMediaProvider.future);
   final rated = userMedia.where((u) => u.userRating != null).toList();
   final buckets = <String, List<double>>{
@@ -201,17 +235,26 @@ final ratingDistributionProvider = FutureProvider<List<RatingBucket>>((ref) asyn
   };
   for (final um in rated) {
     final r = um.userRating!;
-    if (r <= 2) buckets['1-2']!.add(r);
-    else if (r <= 4) buckets['3-4']!.add(r);
-    else if (r <= 6) buckets['5-6']!.add(r);
-    else if (r <= 8) buckets['7-8']!.add(r);
-    else buckets['9-10']!.add(r);
+    if (r <= 2)
+      buckets['1-2']!.add(r);
+    else if (r <= 4)
+      buckets['3-4']!.add(r);
+    else if (r <= 6)
+      buckets['5-6']!.add(r);
+    else if (r <= 8)
+      buckets['7-8']!.add(r);
+    else
+      buckets['9-10']!.add(r);
   }
-  return buckets.entries.map((e) => RatingBucket(
-    label: e.key,
-    count: e.value.length,
-    total: rated.length,
-  )).toList();
+  return buckets.entries
+      .map(
+        (e) => RatingBucket(
+          label: e.key,
+          count: e.value.length,
+          total: rated.length,
+        ),
+      )
+      .toList();
 });
 
 class WatchStatistics {
@@ -228,10 +271,14 @@ class WatchStatistics {
   });
 
   factory WatchStatistics.compute(List<UserMediaModel> userMedia) {
-    final watched = userMedia.where((u) =>
-        u.status == WatchStatus.completed ||
-        u.status == WatchStatus.watching ||
-        u.status == WatchStatus.rewatching).toList();
+    final watched = userMedia
+        .where(
+          (u) =>
+              u.status == WatchStatus.completed ||
+              u.status == WatchStatus.watching ||
+              u.status == WatchStatus.rewatching,
+        )
+        .toList();
 
     int totalEpisodes = 0;
     double totalRating = 0;
@@ -295,58 +342,65 @@ class RatingBucket {
   RatingBucket({required this.label, required this.count, required this.total});
 }
 
-final filteredMediaProvider = FutureProvider.family<List<Map<String, dynamic>>, (String, String)>((ref, params) async {
-  final (filterType, filterKey) = params;
-  final supabase = ref.watch(supabaseServiceProvider);
-  final auth = ref.watch(authServiceProvider);
-  if (auth.userId.isEmpty) return [];
+final filteredMediaProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, (String, String)>((
+      ref,
+      params,
+    ) async {
+      final (filterType, filterKey) = params;
+      final supabase = ref.watch(supabaseServiceProvider);
+      final auth = ref.watch(authServiceProvider);
+      if (auth.userId.isEmpty) return [];
 
-  try {
-    final response = await supabase.userMedia
-        .select('*, media!inner(id, title, media_type, vote_average)')
-        .eq('user_id', auth.userId);
+      try {
+        final response = await supabase.userMedia
+            .select('*, media!inner(id, title, media_type, vote_average)')
+            .eq('user_id', auth.userId);
 
-    final List<Map<String, dynamic>> results = [];
-    for (final item in response as List<dynamic>) {
-      final um = item as Map<String, dynamic>;
-      final eventDate = um['completed_at'] as String? ?? um['updated_at'] as String?;
-      if (eventDate == null) continue;
+        final List<Map<String, dynamic>> results = [];
+        for (final item in response as List<dynamic>) {
+          final um = item as Map<String, dynamic>;
+          final eventDate =
+              um['completed_at'] as String? ?? um['updated_at'] as String?;
+          if (eventDate == null) continue;
 
-      final date = DateTime.tryParse(eventDate);
-      if (date == null) continue;
+          final date = DateTime.tryParse(eventDate);
+          if (date == null) continue;
 
-      bool matches = false;
-      if (filterType == 'weekly') {
-        final filterDate = DateTime.tryParse(filterKey);
-        if (filterDate != null) {
-          matches = date.year == filterDate.year &&
-              date.month == filterDate.month &&
-              date.day == filterDate.day;
+          bool matches = false;
+          if (filterType == 'weekly') {
+            final filterDate = DateTime.tryParse(filterKey);
+            if (filterDate != null) {
+              matches =
+                  date.year == filterDate.year &&
+                  date.month == filterDate.month &&
+                  date.day == filterDate.day;
+            }
+          } else if (filterType == 'monthly') {
+            final parts = filterKey.split('-');
+            if (parts.length >= 2) {
+              matches =
+                  date.year == int.tryParse(parts[0]) &&
+                  date.month == int.tryParse(parts[1]);
+            }
+          }
+
+          if (matches) {
+            final media = um['media'] as Map<String, dynamic>?;
+            if (media != null) {
+              results.add({
+                'id': media['id'],
+                'title': media['title'],
+                'media_type': media['media_type'],
+                'vote_average': media['vote_average'],
+              });
+            }
+          }
         }
-      } else if (filterType == 'monthly') {
-        final parts = filterKey.split('-');
-        if (parts.length >= 2) {
-          matches = date.year == int.tryParse(parts[0]) &&
-              date.month == int.tryParse(parts[1]);
-        }
+
+        return results;
+      } catch (e) {
+        debugPrint('filteredMediaProvider: $e');
+        return [];
       }
-
-      if (matches) {
-        final media = um['media'] as Map<String, dynamic>?;
-        if (media != null) {
-          results.add({
-            'id': media['id'],
-            'title': media['title'],
-            'media_type': media['media_type'],
-            'vote_average': media['vote_average'],
-          });
-        }
-      }
-    }
-
-    return results;
-  } catch (e) {
-    debugPrint('filteredMediaProvider: $e');
-    return [];
-  }
-});
+    });

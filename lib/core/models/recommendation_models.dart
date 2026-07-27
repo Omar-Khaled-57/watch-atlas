@@ -70,22 +70,22 @@ class ScoredMedia {
   });
 
   factory ScoredMedia.fromJson(Map<String, dynamic> json) => ScoredMedia(
-        mediaId: json['media_id'] as int,
-        score: (json['score'] as num).toDouble(),
-        reason: json['reason'] as String?,
-        reasonType: json['reason_type'] as String?,
-        category: RecCategory.fromDb(json['category'] as String),
-        isDismissed: json['is_dismissed'] as bool? ?? false,
-      );
+    mediaId: json['media_id'] as int,
+    score: (json['score'] as num).toDouble(),
+    reason: json['reason'] as String?,
+    reasonType: json['reason_type'] as String?,
+    category: RecCategory.fromDb(json['category'] as String),
+    isDismissed: json['is_dismissed'] as bool? ?? false,
+  );
 
   Map<String, dynamic> toJson() => {
-        'media_id': mediaId,
-        'score': score,
-        'reason': reason,
-        'reason_type': reasonType,
-        'category': category.dbValue,
-        'is_dismissed': isDismissed,
-      };
+    'media_id': mediaId,
+    'score': score,
+    'reason': reason,
+    'reason_type': reasonType,
+    'category': category.dbValue,
+    'is_dismissed': isDismissed,
+  };
 }
 
 /// A single user behaviour event recorded for recommendation signals.
@@ -113,16 +113,16 @@ class BehaviorEvent {
   });
 
   Map<String, dynamic> toJson() => {
-        if (id != null) 'id': id,
-        'user_id': userId,
-        'event_type': eventType.name,
-        if (mediaId != null) 'media_id': mediaId,
-        'metadata': metadata,
-        if (device != null) 'device': device,
-        if (platform != null) 'platform': platform,
-        if (sessionId != null) 'session_id': sessionId,
-        if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
-      };
+    if (id != null) 'id': id,
+    'user_id': userId,
+    'event_type': eventType.name,
+    if (mediaId != null) 'media_id': mediaId,
+    'metadata': metadata,
+    if (device != null) 'device': device,
+    if (platform != null) 'platform': platform,
+    if (sessionId != null) 'session_id': sessionId,
+    if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
+  };
 }
 
 /// Aggregated user interest profile computed from behaviour events.
@@ -163,27 +163,43 @@ class UserRecProfile {
   });
 
   factory UserRecProfile.fromJson(Map<String, dynamic> json) => UserRecProfile(
-        userId: json['user_id'] as String,
-        genreWeights: Map<String, double>.from(
-            (json['genre_weights'] as Map?)?.map((k, v) => MapEntry(k, (v as num).toDouble())) ?? {}),
-        actorWeights: Map<String, double>.from(
-            (json['actor_weights'] as Map?)?.map((k, v) => MapEntry(k, (v as num).toDouble())) ?? {}),
-        directorWeights: Map<String, double>.from(
-            (json['director_weights'] as Map?)?.map((k, v) => MapEntry(k, (v as num).toDouble())) ?? {}),
-        keywordWeights: Map<String, double>.from(
-            (json['keyword_weights'] as Map?)?.map((k, v) => MapEntry(k, (v as num).toDouble())) ?? {}),
-        preferredLanguages: (json['preferred_languages'] as List?)?.cast<String>() ?? [],
-        preferredCountries: (json['preferred_countries'] as List?)?.cast<String>() ?? [],
-        avgSessionDuration: (json['avg_session_duration'] as num?)?.toDouble() ?? 0,
-        preferredRuntime: json['preferred_runtime'] as String? ?? 'any',
-        topGenres: (json['top_genres'] as List?)?.cast<String>() ?? [],
-        topActors: (json['top_actors'] as List?)?.cast<String>() ?? [],
-        topDirectors: (json['top_directors'] as List?)?.cast<String>() ?? [],
-        diversitySeenCount: (json['diversity_seen_count'] as num?)?.toInt() ?? 0,
-        lastComputedAt: json['last_computed_at'] != null
-            ? DateTime.parse(json['last_computed_at'] as String)
-            : null,
-      );
+    userId: json['user_id'] as String,
+    genreWeights: Map<String, double>.from(
+      (json['genre_weights'] as Map?)?.map(
+            (k, v) => MapEntry(k, (v as num).toDouble()),
+          ) ??
+          {},
+    ),
+    actorWeights: Map<String, double>.from(
+      (json['actor_weights'] as Map?)?.map(
+            (k, v) => MapEntry(k, (v as num).toDouble()),
+          ) ??
+          {},
+    ),
+    directorWeights: Map<String, double>.from(
+      (json['director_weights'] as Map?)?.map(
+            (k, v) => MapEntry(k, (v as num).toDouble()),
+          ) ??
+          {},
+    ),
+    keywordWeights: Map<String, double>.from(
+      (json['keyword_weights'] as Map?)?.map(
+            (k, v) => MapEntry(k, (v as num).toDouble()),
+          ) ??
+          {},
+    ),
+    preferredLanguages:
+        (json['preferred_languages'] as List?)?.cast<String>() ?? [],
+    preferredCountries:
+        (json['preferred_countries'] as List?)?.cast<String>() ?? [],
+    avgSessionDuration: (json['avg_session_duration'] as num?)?.toDouble() ?? 0,
+    preferredRuntime: json['preferred_runtime'] as String? ?? 'any',
+    topGenres: (json['top_genres'] as List?)?.cast<String>() ?? [],
+    topActors: (json['top_actors'] as List?)?.cast<String>() ?? [],
+    topDirectors: (json['top_directors'] as List?)?.cast<String>() ?? [],
+    diversitySeenCount: (json['diversity_seen_count'] as num?)?.toInt() ?? 0,
+    lastComputedAt: json['last_computed_at'] != null
+        ? DateTime.parse(json['last_computed_at'] as String)
+        : null,
+  );
 }
-
-

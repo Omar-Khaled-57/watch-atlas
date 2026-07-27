@@ -11,7 +11,9 @@ abstract class UserListModel with _$UserListModel {
     @JsonKey(name: 'user_id') required String userId,
     required String title,
     String? description,
-    @JsonKey(name: 'list_type') @Default(MediaListType.public) MediaListType listType,
+    @JsonKey(name: 'list_type')
+    @Default(MediaListType.public)
+    MediaListType listType,
     @JsonKey(name: 'is_pinned') @Default(false) bool isPinned,
     @Default([]) List<String> tags,
     @JsonKey(name: 'created_at') DateTime? createdAt,
@@ -20,5 +22,6 @@ abstract class UserListModel with _$UserListModel {
     @JsonKey(name: 'likes_count') @Default(0) int likesCount,
   }) = _UserListModel;
 
-  factory UserListModel.fromJson(Map<String, dynamic> json) => _$UserListModelFromJson(json);
+  factory UserListModel.fromJson(Map<String, dynamic> json) =>
+      _$UserListModelFromJson(json);
 }

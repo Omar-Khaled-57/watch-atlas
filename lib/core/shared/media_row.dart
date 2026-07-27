@@ -29,7 +29,11 @@ class MediaRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsetsDirectional.only(start: Spacing.lg, end: Spacing.lg, bottom: Spacing.md),
+          padding: EdgeInsetsDirectional.only(
+            start: Spacing.lg,
+            end: Spacing.lg,
+            bottom: Spacing.md,
+          ),
           child: SectionHeader(
             title: title,
             actionLabel: onSeeAll != null ? context.l10n.seeAll : null,
@@ -38,13 +42,19 @@ class MediaRow extends StatelessWidget {
         ),
         HorizontalCarousel(
           height: cardWidth * 1.5 + Spacing.xxl,
-          padding: EdgeInsetsDirectional.only(start: Spacing.md, end: Spacing.md),
+          padding: EdgeInsetsDirectional.only(
+            start: Spacing.md,
+            end: Spacing.md,
+          ),
           itemExtent: cardWidth + Spacing.sm,
           itemCount: items.length,
           itemBuilder: (context, index) {
             final item = items[index];
             return Padding(
-              padding: EdgeInsetsDirectional.only(start: Spacing.xs, end: Spacing.xs),
+              padding: EdgeInsetsDirectional.only(
+                start: Spacing.xs,
+                end: Spacing.xs,
+              ),
               child: MediaCard(
                 id: item.id,
                 title: item.title,

@@ -23,32 +23,32 @@ class MediaStats extends StatelessWidget {
     final items = <_StatItem>[];
 
     if (runtime != null) {
-      items.add(_StatItem(
-        icon: Icons.schedule_rounded,
-        label: runtime!.toRuntimeString(),
-      ));
+      items.add(
+        _StatItem(
+          icon: Icons.schedule_rounded,
+          label: runtime!.toRuntimeString(),
+        ),
+      );
     }
 
     if (releaseDate != null) {
       final locale = Localizations.localeOf(context).toString();
-      items.add(_StatItem(
-        icon: Icons.calendar_today_rounded,
-        label: DateFormat.yMMMd(locale).format(releaseDate!),
-      ));
+      items.add(
+        _StatItem(
+          icon: Icons.calendar_today_rounded,
+          label: DateFormat.yMMMd(locale).format(releaseDate!),
+        ),
+      );
     }
 
     if (countries != null && countries!.isNotEmpty) {
-      items.add(_StatItem(
-        icon: Icons.public_rounded,
-        label: countries!.join(', '),
-      ));
+      items.add(
+        _StatItem(icon: Icons.public_rounded, label: countries!.join(', ')),
+      );
     }
 
     if (language != null) {
-      items.add(_StatItem(
-        icon: Icons.language_rounded,
-        label: language!,
-      ));
+      items.add(_StatItem(icon: Icons.language_rounded, label: language!));
     }
 
     if (items.isEmpty) return SizedBox.shrink();
@@ -65,8 +65,8 @@ class MediaStats extends StatelessWidget {
               size: 16,
               color: context.colorScheme.onSurfaceVariant,
             ),
-          SizedBox(width: Spacing.xs),
-          Text(
+            SizedBox(width: Spacing.xs),
+            Text(
               item.label,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -85,8 +85,5 @@ class _StatItem {
   final IconData icon;
   final String label;
 
-  const _StatItem({
-    required this.icon,
-    required this.label,
-  });
+  const _StatItem({required this.icon, required this.label});
 }

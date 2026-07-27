@@ -79,10 +79,7 @@ class _ModerationScreenState extends ConsumerState<ModerationScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _ReportsTab(),
-          _UsersTab(),
-        ],
+        children: [_ReportsTab(), _UsersTab()],
       ),
     );
   }
@@ -108,11 +105,18 @@ class _ReportsTab extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.check_circle_outline_rounded, size: 64, color: cs.onSurfaceVariant),
+                Icon(
+                  Icons.check_circle_outline_rounded,
+                  size: 64,
+                  color: cs.onSurfaceVariant,
+                ),
                 const SizedBox(height: Spacing.lg),
                 Text(context.l10n.noPendingReports, style: tt.titleMedium),
                 const SizedBox(height: Spacing.sm),
-                Text(context.l10n.allClear, style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
+                Text(
+                  context.l10n.allClear,
+                  style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+                ),
               ],
             ),
           );
@@ -147,13 +151,18 @@ class _ReportCard extends ConsumerWidget {
     final statusColor = report.status == 'pending'
         ? Colors.orange
         : report.status == 'resolved'
-            ? Colors.green
-            : Colors.grey;
+        ? Colors.green
+        : Colors.grey;
 
     return Card(
       margin: EdgeInsetsDirectional.zero,
       child: ExpansionTile(
-        tilePadding: const EdgeInsetsDirectional.fromSTEB(Spacing.lg, Spacing.sm, Spacing.lg, Spacing.sm),
+        tilePadding: const EdgeInsetsDirectional.fromSTEB(
+          Spacing.lg,
+          Spacing.sm,
+          Spacing.lg,
+          Spacing.sm,
+        ),
         childrenPadding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 16),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadiusDirectional.all(Radius.circular(12)),
@@ -169,21 +178,19 @@ class _ReportCard extends ConsumerWidget {
             borderRadius: BorderRadiusDirectional.all(Radius.circular(10)),
           ),
           child: Icon(
-            report.mediaId != null
-                ? Icons.movie_rounded
-                : Icons.person_rounded,
+            report.mediaId != null ? Icons.movie_rounded : Icons.person_rounded,
             color: statusColor,
             size: 20,
           ),
         ),
-        title: Text(
-          report.reasonLabel,
-          style: tt.titleSmall,
-        ),
+        title: Text(report.reasonLabel, style: tt.titleSmall),
         subtitle: Row(
           children: [
             Container(
-              padding: const EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 2),
+              padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: 8,
+                vertical: 2,
+              ),
               decoration: BoxDecoration(
                 color: statusColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadiusDirectional.all(Radius.circular(4)),
@@ -212,24 +219,37 @@ class _ReportCard extends ConsumerWidget {
           if (report.description.isNotEmpty) ...[
             Align(
               alignment: AlignmentDirectional.centerStart,
-          child: Text(
-            report.description,
-            maxLines: 6,
-            overflow: TextOverflow.ellipsis,
-            style: tt.bodyMedium,
-          ),
+              child: Text(
+                report.description,
+                maxLines: 6,
+                overflow: TextOverflow.ellipsis,
+                style: tt.bodyMedium,
+              ),
             ),
             const SizedBox(height: Spacing.md),
           ],
           if (report.reportedUser != null) ...[
-            _buildDetailRow(context, context.l10n.reportedUser, report.reportedUser?['username'] as String? ?? context.l10n.unknown),
+            _buildDetailRow(
+              context,
+              context.l10n.reportedUser,
+              report.reportedUser?['username'] as String? ??
+                  context.l10n.unknown,
+            ),
             const SizedBox(height: Spacing.xs),
           ],
           if (report.mediaId != null) ...[
-            _buildDetailRow(context, context.l10n.mediaId, report.mediaId.toString()),
+            _buildDetailRow(
+              context,
+              context.l10n.mediaId,
+              report.mediaId.toString(),
+            ),
             const SizedBox(height: Spacing.xs),
           ],
-          _buildDetailRow(context, context.l10n.reporter, report.reporter?['username'] as String? ?? context.l10n.unknown),
+          _buildDetailRow(
+            context,
+            context.l10n.reporter,
+            report.reporter?['username'] as String? ?? context.l10n.unknown,
+          ),
           const SizedBox(height: Spacing.lg),
           if (report.status == 'pending')
             Row(
@@ -421,7 +441,9 @@ class _ActionSheet extends ConsumerWidget {
                       child: Text(context.l10n.cancel),
                     ),
                     FilledButton(
-                      style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
                       onPressed: () => Navigator.of(ctx).pop(true),
                       child: Text(context.l10n.ban),
                     ),
@@ -470,42 +492,58 @@ class _ActionButton extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsetsDirectional.symmetric(vertical: 12, horizontal: 4),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadiusDirectional.all(Radius.circular(10)),
-                ),
-                child: Icon(icon, color: color, size: 22),
-              ),
-              const SizedBox(width: Spacing.lg),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: tt.titleSmall),
-                    const SizedBox(height: 2),
-                    Text(
-                      description,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+    return Semantics(
+      button: true,
+      label: '$label. $description',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+              vertical: 12,
+              horizontal: 4,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadiusDirectional.all(
+                      Radius.circular(10),
                     ),
-                  ],
+                  ),
+                  child: Icon(icon, color: color, size: 22),
                 ),
-              ),
-              Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
-            ],
+                const SizedBox(width: Spacing.lg),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: tt.titleSmall,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        description,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: tt.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
+              ],
+            ),
           ),
         ),
       ),
@@ -533,7 +571,11 @@ class _UsersTab extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.people_outline_rounded, size: 64, color: cs.onSurfaceVariant),
+                Icon(
+                  Icons.people_outline_rounded,
+                  size: 64,
+                  color: cs.onSurfaceVariant,
+                ),
                 const SizedBox(height: Spacing.lg),
                 Text(context.l10n.noUsersFound, style: tt.titleMedium),
               ],
@@ -541,8 +583,14 @@ class _UsersTab extends ConsumerWidget {
           );
         }
 
-        final moderators = users.where((u) => u.role == UserRole.moderator || u.role == UserRole.admin).toList();
-        final regularUsers = users.where((u) => u.role == UserRole.user).toList();
+        final moderators = users
+            .where(
+              (u) => u.role == UserRole.moderator || u.role == UserRole.admin,
+            )
+            .toList();
+        final regularUsers = users
+            .where((u) => u.role == UserRole.user)
+            .toList();
 
         return RefreshIndicator(
           onRefresh: () async => ref.invalidate(reportedUsersProvider),
@@ -550,20 +598,30 @@ class _UsersTab extends ConsumerWidget {
             padding: const EdgeInsetsDirectional.all(Spacing.lg),
             children: [
               if (moderators.isNotEmpty) ...[
-                Text(context.l10n.staff, style: tt.titleSmall?.copyWith(color: cs.onSurfaceVariant)),
+                Text(
+                  context.l10n.staff,
+                  style: tt.titleSmall?.copyWith(color: cs.onSurfaceVariant),
+                ),
                 const SizedBox(height: Spacing.sm),
-                ...moderators.map((user) => Padding(
-                  padding: const EdgeInsetsDirectional.only(bottom: 8),
-                  child: _UserCard(user: user),
-                )),
+                ...moderators.map(
+                  (user) => Padding(
+                    padding: const EdgeInsetsDirectional.only(bottom: 8),
+                    child: _UserCard(user: user),
+                  ),
+                ),
                 const SizedBox(height: Spacing.lg),
               ],
-              Text(context.l10n.users, style: tt.titleSmall?.copyWith(color: cs.onSurfaceVariant)),
+              Text(
+                context.l10n.users,
+                style: tt.titleSmall?.copyWith(color: cs.onSurfaceVariant),
+              ),
               const SizedBox(height: Spacing.sm),
-              ...regularUsers.map((user) => Padding(
-                padding: const EdgeInsetsDirectional.only(bottom: 8),
-                child: _UserCard(user: user),
-              )),
+              ...regularUsers.map(
+                (user) => Padding(
+                  padding: const EdgeInsetsDirectional.only(bottom: 8),
+                  child: _UserCard(user: user),
+                ),
+              ),
             ],
           ),
         );
@@ -585,51 +643,64 @@ class _UserCard extends StatelessWidget {
     final roleColor = user.role == UserRole.admin
         ? Colors.red
         : user.role == UserRole.moderator
-            ? Colors.blue
-            : cs.onSurfaceVariant;
+        ? Colors.blue
+        : cs.onSurfaceVariant;
 
-    return Card(
-      margin: EdgeInsetsDirectional.zero,
-      child: ListTile(
-        contentPadding: const EdgeInsetsDirectional.fromSTEB(Spacing.lg, Spacing.sm, Spacing.lg, Spacing.sm),
-        leading: CircleAvatar(
-          radius: 24,
-          backgroundColor: cs.surfaceContainerHighest,
-          backgroundImage: user.avatarUrl != null ? NetworkImage(user.avatarUrl!) : null,
-          child: user.avatarUrl == null
-              ? Text(
-                  (user.displayName ?? user.username)[0].toUpperCase(),
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
-                  ),
-                )
-              : null,
-        ),
-        title: Text(
-          user.displayName ?? user.username,
-          style: tt.titleSmall,
-        ),
-        subtitle: Text(
-          '@${user.username}',
-          style: tt.bodySmall,
-        ),
-        trailing: Container(
-          padding: const EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: roleColor.withValues(alpha: 0.12),
-            borderRadius: BorderRadiusDirectional.all(Radius.circular(6)),
+    return Semantics(
+      button: true,
+      label:
+          '${user.displayName ?? user.username}, @${user.username}, ${switch (user.role) {
+            UserRole.user => context.l10n.roleUser,
+            UserRole.moderator => context.l10n.roleModerator,
+            UserRole.admin => context.l10n.roleAdmin,
+          }}',
+      child: Card(
+        margin: EdgeInsetsDirectional.zero,
+        child: ListTile(
+          contentPadding: const EdgeInsetsDirectional.fromSTEB(
+            Spacing.lg,
+            Spacing.sm,
+            Spacing.lg,
+            Spacing.sm,
           ),
-          child: Text(
-            switch (user.role) {
-              UserRole.user => context.l10n.roleUser,
-              UserRole.moderator => context.l10n.roleModerator,
-              UserRole.admin => context.l10n.roleAdmin,
-            },
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              color: roleColor,
+          leading: CircleAvatar(
+            radius: 24,
+            backgroundColor: cs.surfaceContainerHighest,
+            backgroundImage: user.avatarUrl != null
+                ? NetworkImage(user.avatarUrl!)
+                : null,
+            child: user.avatarUrl == null
+                ? Text(
+                    (user.displayName ?? user.username)[0].toUpperCase(),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
+                    ),
+                  )
+                : null,
+          ),
+          title: Text(user.displayName ?? user.username, style: tt.titleSmall),
+          subtitle: Text('@${user.username}', style: tt.bodySmall),
+          trailing: Container(
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: 8,
+              vertical: 4,
+            ),
+            decoration: BoxDecoration(
+              color: roleColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadiusDirectional.all(Radius.circular(6)),
+            ),
+            child: Text(
+              switch (user.role) {
+                UserRole.user => context.l10n.roleUser,
+                UserRole.moderator => context.l10n.roleModerator,
+                UserRole.admin => context.l10n.roleAdmin,
+              },
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: roleColor,
+              ),
             ),
           ),
         ),

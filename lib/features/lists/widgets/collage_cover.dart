@@ -15,7 +15,10 @@ class CollageCover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final urls = imageUrls.where((u) => u != null && u.isNotEmpty).take(4).toList();
+    final urls = imageUrls
+        .where((u) => u != null && u.isNotEmpty)
+        .take(4)
+        .toList();
     final colorScheme = Theme.of(context).colorScheme;
 
     if (urls.isEmpty) {
@@ -23,7 +26,10 @@ class CollageCover extends StatelessWidget {
         height: height,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [colorScheme.primaryContainer, colorScheme.secondaryContainer],
+            colors: [
+              colorScheme.primaryContainer,
+              colorScheme.secondaryContainer,
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -40,10 +46,7 @@ class CollageCover extends StatelessWidget {
         topStart: Radius.circular(borderRadius),
         topEnd: Radius.circular(borderRadius),
       ),
-      child: SizedBox(
-        height: height,
-        child: _buildLayout(urls.cast<String>()),
-      ),
+      child: SizedBox(height: height, child: _buildLayout(urls.cast<String>())),
     );
   }
 
@@ -61,52 +64,52 @@ class CollageCover extends StatelessWidget {
   }
 
   Widget _image(String url) => CachedNetworkImage(
-        imageUrl: url,
-        fit: BoxFit.cover,
-        errorWidget: (_, __, ___) => const SizedBox(),
-      );
+    imageUrl: url,
+    fit: BoxFit.cover,
+    errorWidget: (_, __, ___) => const SizedBox(),
+  );
 
   Widget _single(String url) => _image(url);
 
   Widget _two(String a, String b) => Row(
-        children: [
-          Expanded(child: _image(a)),
-          Expanded(child: _image(b)),
-        ],
-      );
+    children: [
+      Expanded(child: _image(a)),
+      Expanded(child: _image(b)),
+    ],
+  );
 
   Widget _three(String a, String b, String c) => Column(
-        children: [
-          Expanded(child: _image(a)),
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(child: _image(b)),
-                Expanded(child: _image(c)),
-              ],
-            ),
-          ),
-        ],
-      );
+    children: [
+      Expanded(child: _image(a)),
+      Expanded(
+        child: Row(
+          children: [
+            Expanded(child: _image(b)),
+            Expanded(child: _image(c)),
+          ],
+        ),
+      ),
+    ],
+  );
 
   Widget _four(String a, String b, String c, String d) => Column(
-        children: [
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(child: _image(a)),
-                Expanded(child: _image(b)),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(child: _image(c)),
-                Expanded(child: _image(d)),
-              ],
-            ),
-          ),
-        ],
-      );
+    children: [
+      Expanded(
+        child: Row(
+          children: [
+            Expanded(child: _image(a)),
+            Expanded(child: _image(b)),
+          ],
+        ),
+      ),
+      Expanded(
+        child: Row(
+          children: [
+            Expanded(child: _image(c)),
+            Expanded(child: _image(d)),
+          ],
+        ),
+      ),
+    ],
+  );
 }

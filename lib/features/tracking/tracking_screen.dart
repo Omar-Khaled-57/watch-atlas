@@ -46,92 +46,195 @@ class _TrackingScreenState extends ConsumerState<TrackingScreen>
     final recentlyUpdated = ref.watch(recentlyUpdatedProvider);
     final isDesktop = context.isDesktop;
     final isTablet = context.isTablet;
+    final isOffline = ref.watch(isOfflineBannerProvider);
 
-    final crossAxisCount = isDesktop ? 5 : isTablet ? 4 : 3;
+    final crossAxisCount = isDesktop
+        ? 5
+        : isTablet
+        ? 4
+        : 3;
 
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.tracking)),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(userMediaProvider);
-        },
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(Spacing.lg, Spacing.lg, Spacing.lg, Spacing.sm),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _StatsRow(stats: stats, colorScheme: colorScheme, textTheme: textTheme),
-                  ],
-                ).animate().fadeIn(duration: 350.ms).slideY(begin: 0.03, curve: Curves.easeOutCubic),
-              ),
-            ),
-            if (recentlyUpdated.isNotEmpty)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(Spacing.lg, Spacing.sm, Spacing.lg, Spacing.xs),
-                  child: Text(
-                    context.l10n.recentlyUpdated,
-                    style: textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant),
-                  ),
+      appBar: AppBar(
+        title: Text(context.l10n.tracking),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bar_chart_rounded),
+            tooltip: context.l10n.viewAnalytics,
+            onPressed: () => context.push('/analytics'),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          if (isOffline)
+            MaterialBanner(
+              content: Text(
+                context.l10n.noInternet,
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface,
                 ),
               ),
-            if (recentlyUpdated.isNotEmpty)
-              SliverToBoxAdapter(
-                child: HorizontalCarousel(
-                  height: 180,
-                  itemCount: recentlyUpdated.length,
-                  separatorWidth: Spacing.sm,
-                  padding: const EdgeInsetsDirectional.fromSTEB(Spacing.md, 0, Spacing.md, Spacing.sm),
-                  itemBuilder: (context, index) {
-                    final item = recentlyUpdated[index];
-                    return SizedBox(
-                      width: 120,
-                      child: _MediaTile(
-                        userMedia: item,
-                        onTap: () => _navigateToDetail(item.mediaId, item.mediaType),
-                        onLongPress: () => _showQuickStatus(context, item),
-                      ),
-                    );
+              leading: Icon(
+                Icons.cloud_off_rounded,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    ref.invalidate(userMediaProvider);
                   },
+                  child: Text(context.l10n.retry),
                 ),
-              ),
-            SliverToBoxAdapter(
-              child: TabBar(
-                controller: _tabController,
-                isScrollable: true,
-                tabAlignment: TabAlignment.start,
-                labelColor: colorScheme.onSurface,
-                unselectedLabelColor: colorScheme.onSurfaceVariant,
-                indicatorColor: colorScheme.primary,
-                labelStyle: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
-                unselectedLabelStyle: textTheme.bodySmall,
-                tabs: [
-                  _BadgeTab(label: context.l10n.watching, status: WatchStatus.watching),
-                  _BadgeTab(label: context.l10n.completed, status: WatchStatus.completed),
-                  _BadgeTab(label: context.l10n.onHold, status: WatchStatus.onHold),
-                  _BadgeTab(label: context.l10n.dropped, status: WatchStatus.dropped),
-                  _BadgeTab(label: context.l10n.planToWatch, status: WatchStatus.planToWatch),
+              ],
+              backgroundColor: colorScheme.surfaceContainerHighest,
+            ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(userMediaProvider);
+              },
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                        Spacing.lg,
+                        Spacing.lg,
+                        Spacing.lg,
+                        Spacing.sm,
+                      ),
+                      child:
+                          Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _StatsRow(
+                                    stats: stats,
+                                    colorScheme: colorScheme,
+                                    textTheme: textTheme,
+                                  ),
+                                ],
+                              )
+                              .animate()
+                              .fadeIn(duration: 350.ms)
+                              .slideY(begin: 0.03, curve: Curves.easeOutCubic),
+                    ),
+                  ),
+                  if (recentlyUpdated.isNotEmpty)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                          Spacing.lg,
+                          Spacing.sm,
+                          Spacing.lg,
+                          Spacing.xs,
+                        ),
+                        child: Text(
+                          context.l10n.recentlyUpdated,
+                          style: textTheme.titleSmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (recentlyUpdated.isNotEmpty)
+                    SliverToBoxAdapter(
+                      child: HorizontalCarousel(
+                        height: 180,
+                        itemCount: recentlyUpdated.length,
+                        separatorWidth: Spacing.sm,
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                          Spacing.md,
+                          0,
+                          Spacing.md,
+                          Spacing.sm,
+                        ),
+                        itemBuilder: (context, index) {
+                          final item = recentlyUpdated[index];
+                          return SizedBox(
+                            width: 120,
+                            child: _MediaTile(
+                              userMedia: item,
+                              onTap: () => _navigateToDetail(
+                                item.mediaId,
+                                item.mediaType,
+                              ),
+                              onLongPress: () =>
+                                  _showQuickStatus(context, item),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  SliverToBoxAdapter(
+                    child: TabBar(
+                      controller: _tabController,
+                      isScrollable: true,
+                      tabAlignment: TabAlignment.start,
+                      labelColor: colorScheme.onSurface,
+                      unselectedLabelColor: colorScheme.onSurfaceVariant,
+                      indicatorColor: colorScheme.primary,
+                      labelStyle: textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      unselectedLabelStyle: textTheme.bodySmall,
+                      tabs: [
+                        _BadgeTab(
+                          label: context.l10n.watching,
+                          status: WatchStatus.watching,
+                        ),
+                        _BadgeTab(
+                          label: context.l10n.completed,
+                          status: WatchStatus.completed,
+                        ),
+                        _BadgeTab(
+                          label: context.l10n.onHold,
+                          status: WatchStatus.onHold,
+                        ),
+                        _BadgeTab(
+                          label: context.l10n.dropped,
+                          status: WatchStatus.dropped,
+                        ),
+                        _BadgeTab(
+                          label: context.l10n.planToWatch,
+                          status: WatchStatus.planToWatch,
+                        ),
+                      ],
+                    ),
+                  ),
+                  SliverFillRemaining(
+                    hasScrollBody: true,
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _MediaGrid(
+                          status: WatchStatus.watching,
+                          crossAxisCount: crossAxisCount,
+                        ),
+                        _MediaGrid(
+                          status: WatchStatus.completed,
+                          crossAxisCount: crossAxisCount,
+                        ),
+                        _MediaGrid(
+                          status: WatchStatus.onHold,
+                          crossAxisCount: crossAxisCount,
+                        ),
+                        _MediaGrid(
+                          status: WatchStatus.dropped,
+                          crossAxisCount: crossAxisCount,
+                        ),
+                        _MediaGrid(
+                          status: WatchStatus.planToWatch,
+                          crossAxisCount: crossAxisCount,
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-            SliverFillRemaining(
-              hasScrollBody: true,
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _MediaGrid(status: WatchStatus.watching, crossAxisCount: crossAxisCount),
-                  _MediaGrid(status: WatchStatus.completed, crossAxisCount: crossAxisCount),
-                  _MediaGrid(status: WatchStatus.onHold, crossAxisCount: crossAxisCount),
-                  _MediaGrid(status: WatchStatus.dropped, crossAxisCount: crossAxisCount),
-                  _MediaGrid(status: WatchStatus.planToWatch, crossAxisCount: crossAxisCount),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -217,7 +320,9 @@ class _StatItem extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
-            style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+            style: textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -256,7 +361,10 @@ class _MediaGrid extends ConsumerWidget {
       error: (error, stack) => Center(
         child: Padding(
           padding: const EdgeInsetsDirectional.all(Spacing.xxl),
-          child: Text(context.l10n.failedToLoadTracking, style: textTheme.bodyMedium?.copyWith(color: colorScheme.error)),
+          child: Text(
+            context.l10n.failedToLoadTracking,
+            style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
+          ),
         ),
       ),
       data: (allMedia) {
@@ -268,11 +376,17 @@ class _MediaGrid extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.inbox_rounded, size: 64, color: colorScheme.onSurfaceVariant),
+                  Icon(
+                    Icons.inbox_rounded,
+                    size: 64,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                   const SizedBox(height: Spacing.lg),
                   Text(
                     context.l10n.noMediaInList,
-                    style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
+                    style: textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -287,8 +401,8 @@ class _MediaGrid extends ConsumerWidget {
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
               childAspectRatio: 0.6,
-            crossAxisSpacing: Spacing.sm,
-            mainAxisSpacing: Spacing.sm,
+              crossAxisSpacing: Spacing.sm,
+              mainAxisSpacing: Spacing.sm,
             ),
             itemCount: filtered.length,
             itemBuilder: (context, index) {
@@ -297,7 +411,9 @@ class _MediaGrid extends ConsumerWidget {
                 index: index,
                 child: _MediaTile(
                   userMedia: item,
-                  onTap: () => context.push('/media/${item.mediaType.name}/${item.mediaId}'),
+                  onTap: () => context.push(
+                    '/media/${item.mediaType.name}/${item.mediaId}',
+                  ),
                   onLongPress: () {
                     showDialog(
                       context: context,
@@ -319,15 +435,16 @@ class _MediaTile extends ConsumerWidget {
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
 
-  const _MediaTile({
-    required this.userMedia,
-    this.onTap,
-    this.onLongPress,
-  });
+  const _MediaTile({required this.userMedia, this.onTap, this.onLongPress});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mediaAsync = ref.watch(mediaByIdProvider((mediaId: userMedia.mediaId, mediaType: userMedia.mediaType)));
+    final mediaAsync = ref.watch(
+      mediaByIdProvider((
+        mediaId: userMedia.mediaId,
+        mediaType: userMedia.mediaType,
+      )),
+    );
 
     return mediaAsync.when(
       loading: () => ProgressCard(
@@ -348,7 +465,9 @@ class _MediaTile extends ConsumerWidget {
             : null;
         return ProgressCard(
           userMedia: userMedia,
-          title: media?.title ?? context.l10n.mediaWithId(userMedia.mediaId.toString()),
+          title:
+              media?.title ??
+              context.l10n.mediaWithId(userMedia.mediaId.toString()),
           posterUrl: posterUrl,
           onTap: onTap,
           onLongPress: onLongPress,
@@ -368,29 +487,34 @@ class _BadgeTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final count = ref.watch(userMediaByStatusProvider(status)).length;
     return Tab(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(label),
-          if (count > 0) ...[
-            const SizedBox(width: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                '$count',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 10,
+      child: Semantics(
+        label: '$label${count > 0 ? ', $count items' : ''}',
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(label),
+            if (count > 0) ...[
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: ExcludeSemantics(
+                  child: Text(
+                    '$count',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 10,
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -404,26 +528,32 @@ class _ShimmerGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final base = isDark ? const Color(0xFF20242E) : const Color(0xFFE5E7EB);
-    final highlight = isDark ? const Color(0xFF2A2F3A) : const Color(0xFFF3F4F6);
-    return Padding(
-      padding: const EdgeInsetsDirectional.all(Spacing.md),
-      child: GridView.builder(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          childAspectRatio: 0.6,
-          crossAxisSpacing: Spacing.sm,
-          mainAxisSpacing: Spacing.sm,
-        ),
-        itemCount: crossAxisCount * 3,
-        itemBuilder: (context, index) => Shimmer.fromColors(
-          baseColor: base,
-          highlightColor: highlight,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: base,
-              borderRadius: BorderRadiusDirectional.all(Radius.circular(Spacing.cardRadiusSm)),
+    final highlight = isDark
+        ? const Color(0xFF2A2F3A)
+        : const Color(0xFFF3F4F6);
+    return ExcludeSemantics(
+      child: Padding(
+        padding: const EdgeInsetsDirectional.all(Spacing.md),
+        child: GridView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            childAspectRatio: 0.6,
+            crossAxisSpacing: Spacing.sm,
+            mainAxisSpacing: Spacing.sm,
+          ),
+          itemCount: crossAxisCount * 3,
+          itemBuilder: (context, index) => Shimmer.fromColors(
+            baseColor: base,
+            highlightColor: highlight,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: base,
+                borderRadius: BorderRadiusDirectional.all(
+                  Radius.circular(Spacing.cardRadiusSm),
+                ),
+              ),
             ),
           ),
         ),

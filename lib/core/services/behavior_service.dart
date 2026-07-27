@@ -13,11 +13,9 @@ import 'auth_service.dart';
 class BehaviorService {
   static final BehaviorService instance = BehaviorService();
 
-  BehaviorService({
-    SupabaseService? supabase,
-    AuthService? auth,
-  })  : _supabase = supabase ?? SupabaseService.instance,
-        _auth = auth ?? AuthService.instance;
+  BehaviorService({SupabaseService? supabase, AuthService? auth})
+    : _supabase = supabase ?? SupabaseService.instance,
+      _auth = auth ?? AuthService.instance;
 
   final SupabaseService _supabase;
   final AuthService _auth;
@@ -60,15 +58,16 @@ class BehaviorService {
 
   Future<void> trackMediaView(int mediaId, {Map<String, dynamic>? extra}) =>
       trackEvent(
-          eventType: EventType.mediaView,
-          mediaId: mediaId,
-          metadata: extra ?? {});
+        eventType: EventType.mediaView,
+        mediaId: mediaId,
+        metadata: extra ?? {},
+      );
 
-  Future<void> trackMediaViewDuration(int mediaId, int seconds) =>
-      trackEvent(
-          eventType: EventType.mediaViewDuration,
-          mediaId: mediaId,
-          metadata: {'duration_seconds': seconds});
+  Future<void> trackMediaViewDuration(int mediaId, int seconds) => trackEvent(
+    eventType: EventType.mediaViewDuration,
+    mediaId: mediaId,
+    metadata: {'duration_seconds': seconds},
+  );
 
   Future<void> trackMediaSave(int mediaId) =>
       trackEvent(eventType: EventType.mediaSave, mediaId: mediaId);
@@ -87,36 +86,42 @@ class BehaviorService {
 
   Future<void> trackSearch(String query, {Map<String, dynamic>? filters}) =>
       trackEvent(
-          eventType: EventType.search,
-          metadata: {'query': query, 'filters': filters ?? {}});
+        eventType: EventType.search,
+        metadata: {'query': query, 'filters': filters ?? {}},
+      );
 
   Future<void> trackGenreBrowse(String genre) =>
-      trackEvent(
-          eventType: EventType.genreBrowse, metadata: {'genre': genre});
+      trackEvent(eventType: EventType.genreBrowse, metadata: {'genre': genre});
 
   Future<void> trackRecommendationClick(int mediaId, String category) =>
       trackEvent(
-          eventType: EventType.recommendationClick,
-          mediaId: mediaId,
-          metadata: {'category': category});
+        eventType: EventType.recommendationClick,
+        mediaId: mediaId,
+        metadata: {'category': category},
+      );
 
   Future<void> trackRecommendationDismiss(int mediaId, String category) =>
       trackEvent(
-          eventType: EventType.recommendationDismiss,
-          mediaId: mediaId,
-          metadata: {'category': category});
+        eventType: EventType.recommendationDismiss,
+        mediaId: mediaId,
+        metadata: {'category': category},
+      );
 
-  Future<void> trackRecommendationFeedback(int mediaId, String category, bool isPositive) =>
-      trackEvent(
-          eventType: EventType.recommendationFeedback,
-          mediaId: mediaId,
-          metadata: {'category': category, 'is_positive': isPositive});
+  Future<void> trackRecommendationFeedback(
+    int mediaId,
+    String category,
+    bool isPositive,
+  ) => trackEvent(
+    eventType: EventType.recommendationFeedback,
+    mediaId: mediaId,
+    metadata: {'category': category, 'is_positive': isPositive},
+  );
 
-  Future<void> trackRating(int mediaId, double rating) =>
-      trackEvent(
-          eventType: EventType.rating,
-          mediaId: mediaId,
-          metadata: {'rating': rating});
+  Future<void> trackRating(int mediaId, double rating) => trackEvent(
+    eventType: EventType.rating,
+    mediaId: mediaId,
+    metadata: {'rating': rating},
+  );
 
   // ---------------------------------------------------------------
   // Privacy controls
@@ -138,19 +143,15 @@ class BehaviorService {
     }
   }
 
-  Future<void> enableRecommendations() async =>
-      _setRecsEnabled(true);
+  Future<void> enableRecommendations() async => _setRecsEnabled(true);
 
-  Future<void> disableRecommendations() async =>
-      _setRecsEnabled(false);
+  Future<void> disableRecommendations() async => _setRecsEnabled(false);
 
   Future<void> _setRecsEnabled(bool enabled) async {
     final uid = _auth.userId;
     if (uid.isEmpty) return;
     try {
-      await _supabase.profiles
-          .update({'recs_enabled': enabled})
-          .eq('id', uid);
+      await _supabase.profiles.update({'recs_enabled': enabled}).eq('id', uid);
     } catch (e) {
       debugPrint('BehaviorService: setRecsEnabled($enabled) failed: $e');
     }
@@ -161,10 +162,13 @@ class BehaviorService {
     final uid = _auth.userId;
     if (uid.isEmpty) return true;
     try {
-      final result =
-          await _supabase.profiles.select('recs_enabled').eq('id', uid).single();
+      final result = await _supabase.profiles
+          .select('recs_enabled')
+          .eq('id', uid)
+          .single();
       return result['recs_enabled'] as bool? ?? true;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('BehaviorService.isRecsEnabled: $e');
       return true;
     }
   }
@@ -174,23 +178,29 @@ class BehaviorService {
   // ---------------------------------------------------------------
 
   String _detectDevice() {
+    if (kIsWeb) return 'web';
     try {
       if (Platform.isAndroid) return 'android';
       if (Platform.isIOS) return 'ios';
       if (Platform.isMacOS) return 'macos';
       if (Platform.isWindows) return 'windows';
       if (Platform.isLinux) return 'linux';
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('BehaviorService._detectDevice: $e');
+    }
     return 'unknown';
   }
 
   String _detectPlatform() {
+    if (kIsWeb) return 'web';
     try {
       if (Platform.isAndroid || Platform.isIOS) return 'mobile';
       if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
         return 'desktop';
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('BehaviorService._detectPlatform: $e');
+    }
     return 'unknown';
   }
 }

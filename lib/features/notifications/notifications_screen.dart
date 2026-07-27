@@ -17,7 +17,8 @@ class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
 
   @override
-  ConsumerState<NotificationsScreen> createState() => _NotificationsScreenState();
+  ConsumerState<NotificationsScreen> createState() =>
+      _NotificationsScreenState();
 }
 
 class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
@@ -103,7 +104,10 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               itemBuilder: (context, index) {
                 final entry = grouped.entries.elementAt(index);
                 return _buildDateSection(
-                  entry.key, entry.value, colorScheme, textTheme,
+                  entry.key,
+                  entry.value,
+                  colorScheme,
+                  textTheme,
                 );
               },
             ),
@@ -123,7 +127,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(Spacing.lg, Spacing.lg, Spacing.lg, Spacing.sm),
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            Spacing.lg,
+            Spacing.lg,
+            Spacing.lg,
+            Spacing.sm,
+          ),
           child: Text(
             dateLabel,
             style: textTheme.titleSmall?.copyWith(
@@ -132,7 +141,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             ),
           ),
         ),
-        ...notifications.map((n) => _buildNotificationTile(n, colorScheme, textTheme)),
+        ...notifications.map(
+          (n) => _buildNotificationTile(n, colorScheme, textTheme),
+        ),
       ],
     );
   }
@@ -142,104 +153,120 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     ColorScheme colorScheme,
     TextTheme textTheme,
   ) {
-    return InkWell(
-      onTap: () {
-        if (!notification.isRead) {
-          ref.read(markNotificationReadProvider(notification.id));
-        }
-        _handleNavigation(notification);
-      },
-      child: Container(
-        padding: const EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: !notification.isRead
-              ? colorScheme.primary.withValues(alpha: 0.05)
-              : null,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildNotificationIcon(notification.type, colorScheme),
-            const SizedBox(width: Spacing.md),
-            if (notification.imageUrl != null)
-              ClipRRect(
-                borderRadius: BorderRadiusDirectional.all(Radius.circular(6)),
-                child: SizedBox(
-                  width: 44,
-                  height: 44,
-                  child: CachedNetworkImage(
-                    imageUrl: notification.imageUrl!,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      color: colorScheme.surfaceContainerHighest,
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: colorScheme.surfaceContainerHighest,
-                      child: Icon(
-                        Icons.notifications_rounded,
-                        color: colorScheme.onSurfaceVariant,
-                        size: 20,
+    return Semantics(
+      button: true,
+      label:
+          '${notification.isRead ? '' : 'Unread, '}${notification.title}, ${notification.body}',
+      child: InkWell(
+        onTap: () {
+          if (!notification.isRead) {
+            ref.read(markNotificationReadProvider(notification.id));
+          }
+          _handleNavigation(notification);
+        },
+        child: Container(
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
+          decoration: BoxDecoration(
+            color: !notification.isRead
+                ? colorScheme.primary.withValues(alpha: 0.05)
+                : null,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildNotificationIcon(notification.type, colorScheme),
+              const SizedBox(width: Spacing.md),
+              if (notification.imageUrl != null)
+                ClipRRect(
+                  borderRadius: BorderRadiusDirectional.all(Radius.circular(6)),
+                  child: SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: Semantics(
+                      label: 'Notification image',
+                      image: true,
+                      child: CachedNetworkImage(
+                        imageUrl: notification.imageUrl!,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: colorScheme.surfaceContainerHighest,
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: colorScheme.surfaceContainerHighest,
+                          child: Icon(
+                            Icons.notifications_rounded,
+                            color: colorScheme.onSurfaceVariant,
+                            size: 20,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            if (notification.imageUrl != null) const SizedBox(width: Spacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    notification.title,
-                    style: textTheme.bodyMedium?.copyWith(
-                      fontWeight: !notification.isRead
-                          ? FontWeight.w600
-                          : FontWeight.w400,
-                      color: colorScheme.onSurface,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    notification.body,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (notification.createdAt != null) ...[
-                    const SizedBox(height: Spacing.xs),
+              if (notification.imageUrl != null)
+                const SizedBox(width: Spacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      _formatTime(notification.createdAt!),
-                      style: textTheme.labelSmall?.copyWith(
+                      notification.title,
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: !notification.isRead
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                        color: colorScheme.onSurface,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      notification.body,
+                      style: textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                    if (notification.createdAt != null) ...[
+                      const SizedBox(height: Spacing.xs),
+                      Text(
+                        _formatTime(notification.createdAt!),
+                        style: textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ],
-                ],
-              ),
-            ),
-            if (!notification.isRead)
-              Padding(
-                padding: const EdgeInsetsDirectional.only(start: 8),
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: colorScheme.primary,
-                    shape: BoxShape.circle,
-                  ),
                 ),
               ),
-          ],
+              if (!notification.isRead)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 8),
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildNotificationIcon(NotificationType type, ColorScheme colorScheme) {
+  Widget _buildNotificationIcon(
+    NotificationType type,
+    ColorScheme colorScheme,
+  ) {
     IconData icon;
     Color color;
     switch (type) {
@@ -287,9 +314,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(context.l10n.clearAllNotificationsConfirm),
-        content: Text(
-          context.l10n.clearAllWarning,
-        ),
+        content: Text(context.l10n.clearAllWarning),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

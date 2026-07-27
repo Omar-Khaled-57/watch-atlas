@@ -27,9 +27,10 @@ class _SplashScreenState extends State<SplashScreen>
       parent: _controller,
       curve: Curves.easeInOut,
     );
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
     _controller.forward();
   }
 
@@ -43,7 +44,9 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0F1115) : const Color(0xFFFFFFFF),
+      backgroundColor: isDark
+          ? const Color(0xFF0F1115)
+          : const Color(0xFFFFFFFF),
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
@@ -63,11 +66,13 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Image.asset(
                     'assets/images/logo/logo.png',
                     fit: BoxFit.contain,
+                    semanticLabel: 'WatchAtlas logo',
                   ),
                 ),
                 const SizedBox(height: Spacing.xl),
                 ShaderMask(
-                  shaderCallback: (bounds) => AppTheme.logoGradient.createShader(bounds),
+                  shaderCallback: (bounds) =>
+                      AppTheme.logoGradient.createShader(bounds),
                   child: Text(
                     context.l10n.appName,
                     style: TextStyle(

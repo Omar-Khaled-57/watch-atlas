@@ -35,6 +35,7 @@
   "navDiscover": "Discover",
   "navSearch": "Search",
   "navLists": "Lists",
+  "navTracking": "Tracking",
   "navProfile": "Profile",
 
   "@_Auth": {
@@ -123,6 +124,11 @@
   "publicList": "Public",
   "privateList": "Private",
   "collaborative": "Collaborative",
+  "inviteCollaborator": "Invite Collaborator",
+  "inviteCollaboratorHint": "Enter username to invite",
+  "collaborators": "{count} collaborators",
+  "noCollaborators": "No collaborators yet",
+  "inviteSent": "Invitation sent",
   "addToListTitle": "Add {title} to List",
   "noListsYet": "No lists yet",
   "createFirstList": "Create your first list",
@@ -197,6 +203,11 @@
   "changePassword": "Change Password",
   "moderation": "Moderation",
   "recommendationsAndPrivacy": "Recommendations & Privacy",
+  "privacySettings": "Privacy Settings",
+  "publicProfile": "Public Profile",
+  "publicProfileDesc": "Allow other users to view your profile",
+  "showActivity": "Show Activity",
+  "showActivityDesc": "Display your recently watched items to others",
   "personalizedRecommendations": "Personalized Recommendations",
   "activityImprovesSuggestions": "Let your activity improve suggestions",
   "clearRecommendationHistory": "Clear Recommendation History",
@@ -638,6 +649,7 @@
     }
   },
   "likeLabel": "Like",
+  "dislikeLabel": "Dislike",
   "previousSlide": "Previous slide",
   "nextSlide": "Next slide",
   "errorWithDetails": "Error: {error}",
@@ -777,6 +789,40 @@
     "description": "Expandable text widget strings"
   },
   "showMore": "Show more",
-  "showLess": "Show less"
+  "showLess": "Show less",
+
+  "@_ReviewCard": {
+    "description": "Review card widget strings"
+  },
+  "containsSpoilers": "Contains spoilers",
+  "allReviews": "All Reviews",
+  "noUserReviews": "You haven't written any reviews yet.",
+  "clearSearch": "Clear search",
+  "clearAllFilters": "Clear all filters",
+  "votes": "{count} votes",
+  "@votes": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "percentScore": "{percent} percent score",
+  "@percentScore": {
+    "placeholders": {
+      "percent": { "type": "int" }
+    }
+  },
+  "tapToRate": "Tap to rate, currently {current} out of {total} stars",
+  "@tapToRate": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "ratingLabel": "Rating: {rating} out of 10",
+  "@ratingLabel": {
+    "placeholders": {
+      "rating": { "type": "String" }
+    }
+  }
 }
 

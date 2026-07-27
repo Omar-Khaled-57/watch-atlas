@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/constants/app_colors.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/shared/loading_widget.dart';
@@ -24,12 +25,12 @@ class FilteredAnalyticsScreen extends ConsumerWidget {
     final cs = context.colorScheme;
     final tt = context.textTheme;
 
-    final filteredMediaAsync = ref.watch(filteredMediaProvider((filterType, filterKey)));
+    final filteredMediaAsync = ref.watch(
+      filteredMediaProvider((filterType, filterKey)),
+    );
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_getTitle(context)),
-      ),
+      appBar: AppBar(title: Text(_getTitle(context))),
       body: filteredMediaAsync.when(
         loading: () => const FullScreenLoader(),
         error: (e, _) => Center(
@@ -41,7 +42,9 @@ class FilteredAnalyticsScreen extends ConsumerWidget {
               Text(context.l10n.failedToLoadMedia, style: tt.bodyLarge),
               const SizedBox(height: Spacing.sm),
               TextButton(
-                onPressed: () => ref.invalidate(filteredMediaProvider((filterType, filterKey))),
+                onPressed: () => ref.invalidate(
+                  filteredMediaProvider((filterType, filterKey)),
+                ),
                 child: Text(context.l10n.retry),
               ),
             ],
@@ -53,7 +56,11 @@ class FilteredAnalyticsScreen extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.movie_outlined, size: 64, color: cs.onSurfaceVariant),
+                  Icon(
+                    Icons.movie_outlined,
+                    size: 64,
+                    color: cs.onSurfaceVariant,
+                  ),
                   const SizedBox(height: Spacing.lg),
                   Text(context.l10n.noMediaForPeriod, style: tt.titleMedium),
                 ],
@@ -90,11 +97,17 @@ class FilteredAnalyticsScreen extends ConsumerWidget {
                       ? Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.star_rounded, size: 16, color: Colors.amber),
+                            Icon(
+                              Icons.star_rounded,
+                              size: 16,
+                              color: AppColors.star,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               (media['vote_average'] as num).toStringAsFixed(1),
-                              style: tt.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                              style: tt.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         )
@@ -124,7 +137,9 @@ class FilteredAnalyticsScreen extends ConsumerWidget {
       if (parts.length >= 2) {
         final monthIndex = int.tryParse(parts[1]) ?? 0;
         if (monthIndex > 0 && monthIndex <= 12) {
-          final monthName = DateFormat.MMMM().format(DateTime(2024, monthIndex));
+          final monthName = DateFormat.MMMM().format(
+            DateTime(2024, monthIndex),
+          );
           return '${l10n.mediaFor} $monthName ${parts[0]}';
         }
       }

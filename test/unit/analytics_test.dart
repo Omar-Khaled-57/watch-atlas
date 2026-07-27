@@ -54,16 +54,28 @@ void main() {
     test('computes average rating correctly', () {
       final userMedia = [
         const UserMediaModel(
-          id: '1', mediaId: 1, userId: 'u', mediaType: MediaType.movie,
-          status: WatchStatus.completed, userRating: 6.0,
+          id: '1',
+          mediaId: 1,
+          userId: 'u',
+          mediaType: MediaType.movie,
+          status: WatchStatus.completed,
+          userRating: 6.0,
         ),
         const UserMediaModel(
-          id: '2', mediaId: 2, userId: 'u', mediaType: MediaType.movie,
-          status: WatchStatus.completed, userRating: 8.0,
+          id: '2',
+          mediaId: 2,
+          userId: 'u',
+          mediaType: MediaType.movie,
+          status: WatchStatus.completed,
+          userRating: 8.0,
         ),
         const UserMediaModel(
-          id: '3', mediaId: 3, userId: 'u', mediaType: MediaType.movie,
-          status: WatchStatus.completed, userRating: 10.0,
+          id: '3',
+          mediaId: 3,
+          userId: 'u',
+          mediaType: MediaType.movie,
+          status: WatchStatus.completed,
+          userRating: 10.0,
         ),
       ];
 
@@ -76,12 +88,19 @@ void main() {
     test('averageRating is 0 when no ratings given', () {
       final userMedia = [
         const UserMediaModel(
-          id: '1', mediaId: 1, userId: 'u', mediaType: MediaType.tv,
+          id: '1',
+          mediaId: 1,
+          userId: 'u',
+          mediaType: MediaType.tv,
           status: WatchStatus.completed,
         ),
         const UserMediaModel(
-          id: '2', mediaId: 2, userId: 'u', mediaType: MediaType.tv,
-          status: WatchStatus.watching, episodeProgress: 3,
+          id: '2',
+          mediaId: 2,
+          userId: 'u',
+          mediaType: MediaType.tv,
+          status: WatchStatus.watching,
+          episodeProgress: 3,
         ),
       ];
 
@@ -95,11 +114,17 @@ void main() {
     test('drops and rewatching statuses are not counted', () {
       final userMedia = [
         const UserMediaModel(
-          id: '1', mediaId: 1, userId: 'u', mediaType: MediaType.movie,
+          id: '1',
+          mediaId: 1,
+          userId: 'u',
+          mediaType: MediaType.movie,
           status: WatchStatus.dropped,
         ),
         const UserMediaModel(
-          id: '2', mediaId: 2, userId: 'u', mediaType: MediaType.movie,
+          id: '2',
+          mediaId: 2,
+          userId: 'u',
+          mediaType: MediaType.movie,
           status: WatchStatus.onHold,
         ),
       ];
@@ -112,8 +137,12 @@ void main() {
     test('rewatching status IS counted as watched', () {
       final userMedia = [
         const UserMediaModel(
-          id: '1', mediaId: 1, userId: 'u', mediaType: MediaType.movie,
-          status: WatchStatus.rewatching, episodeProgress: 4,
+          id: '1',
+          mediaId: 1,
+          userId: 'u',
+          mediaType: MediaType.movie,
+          status: WatchStatus.rewatching,
+          episodeProgress: 4,
         ),
       ];
 

@@ -21,15 +21,15 @@ class UserActivity {
   });
 
   factory UserActivity.fromJson(Map<String, dynamic> json) => UserActivity(
-        id: json['id'] as String,
-        type: json['type'] as String? ?? 'unknown',
-        description: json['description'] as String? ?? '',
-        mediaTitle: json['media_title'] as String?,
-        mediaPoster: json['media_poster'] as String?,
-        createdAt: json['created_at'] != null
-            ? DateTime.tryParse(json['created_at'] as String)
-            : null,
-      );
+    id: json['id'] as String,
+    type: json['type'] as String? ?? 'unknown',
+    description: json['description'] as String? ?? '',
+    mediaTitle: json['media_title'] as String?,
+    mediaPoster: json['media_poster'] as String?,
+    createdAt: json['created_at'] != null
+        ? DateTime.tryParse(json['created_at'] as String)
+        : null,
+  );
 }
 
 final currentUserProfileProvider = FutureProvider<UserModel?>((ref) async {
@@ -42,25 +42,30 @@ final currentUserProfileProvider = FutureProvider<UserModel?>((ref) async {
   return profile;
 });
 
-final userProfileProvider = FutureProvider.family<UserModel?, String>((ref, userId) async {
+final userProfileProvider = FutureProvider.family<UserModel?, String>((
+  ref,
+  userId,
+) async {
   try {
     final supabase = ref.watch(supabaseServiceProvider);
-    final response = await supabase.profiles
-        .select()
-        .eq('id', userId)
-        .single();
+    final response = await supabase.profiles.select().eq('id', userId).single();
     return UserModel.fromJson(response);
   } catch (e) {
     return null;
   }
 });
 
-final updateProfileProvider = FutureProvider.family<void, Map<String, dynamic>>((ref, updates) async {
-  final auth = ref.watch(authServiceProvider);
-  await auth.updateProfile(updates);
-});
+final updateProfileProvider = FutureProvider.family<void, Map<String, dynamic>>(
+  (ref, updates) async {
+    final auth = ref.watch(authServiceProvider);
+    await auth.updateProfile(updates);
+  },
+);
 
-final userActivityProvider = FutureProvider.family<List<UserActivity>, String>((ref, userId) async {
+final userActivityProvider = FutureProvider.family<List<UserActivity>, String>((
+  ref,
+  userId,
+) async {
   final supabase = ref.watch(supabaseServiceProvider);
   final response = await supabase.activityLogs
       .select()
@@ -68,10 +73,14 @@ final userActivityProvider = FutureProvider.family<List<UserActivity>, String>((
       .order('created_at', ascending: false)
       .limit(50);
   final list = response as List<dynamic>;
-  return list.map((e) => UserActivity.fromJson(e as Map<String, dynamic>)).toList();
+  return list
+      .map((e) => UserActivity.fromJson(e as Map<String, dynamic>))
+      .toList();
 });
 
-final currentUserActivityProvider = FutureProvider<List<UserActivity>>((ref) async {
+final currentUserActivityProvider = FutureProvider<List<UserActivity>>((
+  ref,
+) async {
   ref.watch(authStateProvider);
   ref.watch(authNotifierProvider);
   final auth = ref.watch(authServiceProvider);
@@ -84,5 +93,7 @@ final currentUserActivityProvider = FutureProvider<List<UserActivity>>((ref) asy
       .order('created_at', ascending: false)
       .limit(50);
   final list = response as List<dynamic>;
-  return list.map((e) => UserActivity.fromJson(e as Map<String, dynamic>)).toList();
+  return list
+      .map((e) => UserActivity.fromJson(e as Map<String, dynamic>))
+      .toList();
 });

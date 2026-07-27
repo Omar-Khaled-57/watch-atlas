@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/l10n.dart';
+import '../../core/constants/app_colors.dart';
 import '../../core/constants/dimensions.dart';
-import '../../core/services/auth_service.dart';
+import '../../core/providers/service_providers.dart';
 import 'providers/auth_providers.dart';
 import 'widgets/auth_text_field.dart';
 import 'widgets/google_account_picker.dart';
 import 'widgets/social_button.dart';
 
+/// Authentication screen with email/password sign-in and Google OAuth.
+///
+/// Toggles between sign-in and sign-up modes with animated transitions.
+/// Includes guest mode for quick access without creating an account.
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
 
@@ -36,7 +41,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
       parent: _animationController,
       curve: Curves.easeInOut,
     );
-    _animationController.forward();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (MediaQuery.disableAnimationsOf(context)) {
+        _animationController.value = 1.0;
+      } else {
+        _animationController.forward();
+      }
+    });
   }
 
   @override
@@ -64,11 +76,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
               builder: (context, constraints) {
                 if (constraints.maxWidth >= 680) {
                   return _buildLandscape(
-                    authState, authNotifier, colorScheme, textTheme,
+                    authState,
+                    authNotifier,
+                    colorScheme,
+                    textTheme,
                   );
                 }
                 return _buildPortrait(
-                  authState, authNotifier, colorScheme, textTheme,
+                  authState,
+                  authNotifier,
+                  colorScheme,
+                  textTheme,
                 );
               },
             ),
@@ -85,7 +103,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
     TextTheme textTheme,
   ) {
     return SingleChildScrollView(
-      padding: const EdgeInsetsDirectional.symmetric(horizontal: Spacing.xl, vertical: Spacing.xxl),
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: Spacing.xl,
+        vertical: Spacing.xxl,
+      ),
       child: Form(
         key: _formKey,
         child: Column(
@@ -108,15 +129,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
     TextTheme textTheme,
   ) {
     return SingleChildScrollView(
-      padding: const EdgeInsetsDirectional.symmetric(horizontal: 40, vertical: 48),
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: 40,
+        vertical: 48,
+      ),
       child: Form(
         key: _formKey,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Expanded(
-              child: _buildHeader(colorScheme, textTheme, large: true),
-            ),
+            Expanded(child: _buildHeader(colorScheme, textTheme, large: true)),
             Container(
               width: 1,
               height: 320,
@@ -127,7 +149,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
             ),
             Expanded(
               child: _buildFormSection(
-                authState, authNotifier, colorScheme, textTheme,
+                authState,
+                authNotifier,
+                colorScheme,
+                textTheme,
                 compact: true,
               ),
             ),
@@ -137,7 +162,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
     );
   }
 
-  Widget _buildHeader(ColorScheme colorScheme, TextTheme textTheme, {bool large = false}) {
+  Widget _buildHeader(
+    ColorScheme colorScheme,
+    TextTheme textTheme, {
+    bool large = false,
+  }) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -148,16 +177,18 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
             borderRadius: BorderRadiusDirectional.circular(large ? 34 : 25),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF8B5CF6).withValues(alpha: 0.3),
+                color: AppColors.logoPurple.withValues(alpha: 0.3),
                 blurRadius: 24,
                 spreadRadius: 0,
               ),
             ],
           ),
           clipBehavior: Clip.antiAlias,
-          child: Image.asset(
-            'assets/images/logo/logo.png',
-            fit: BoxFit.contain,
+          child: ExcludeSemantics(
+            child: Image.asset(
+              'assets/images/logo/logo.png',
+              fit: BoxFit.contain,
+            ),
           ),
         ),
         const SizedBox(height: 20),
@@ -173,12 +204,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                 ?.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ),
-          const SizedBox(height: Spacing.sm),
+        const SizedBox(height: Spacing.sm),
         Text(
           context.l10n.splashSubtitle,
-          style: (large ? textTheme.titleMedium : textTheme.bodyLarge)?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
+          style: (large ? textTheme.titleMedium : textTheme.bodyLarge)
+              ?.copyWith(color: colorScheme.onSurfaceVariant),
         ),
       ],
     );
@@ -222,7 +252,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
           SocialButton(
             type: SocialButtonType.google,
             onPressed: () async {
-              final accounts = await AuthService.instance.getSavedGoogleAccounts();
+              final accounts = await ref
+                  .read(authServiceProvider)
+                  .getSavedGoogleAccounts();
               if (!mounted) return;
               final picked = await showGoogleAccountPicker(
                 context: context,
@@ -255,99 +287,125 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
   ) {
     final isLoading = authState.status == AuthStatus.loading;
 
-    return Column(
-      key: const ValueKey('authForm'),
-      children: [
-        AuthTextField(
-          controller: _emailController,
-          hintText: context.l10n.email,
-          icon: Icons.email_outlined,
-          keyboardType: TextInputType.emailAddress,
-          enabled: !isLoading,
-          validator: (v) {
-            if (v == null || v.trim().isEmpty) return context.l10n.pleaseEnterEmail;
-            if (!v.contains('@')) return context.l10n.pleaseEnterEmail;
-            return null;
-          },
-        ),
-            const SizedBox(height: Spacing.lg),
-            AuthTextField(
-          controller: _passwordController,
-          hintText: context.l10n.password,
-          icon: Icons.lock_outlined,
-          obscureText: true,
-          enabled: !isLoading,
-          validator: (v) {
-            if (v == null || v.isEmpty) return context.l10n.pleaseEnterPassword;
-            if (v.length < 6) return context.l10n.passwordMinLength;
-            return null;
-          },
-        ),
-        if (authState.isSignUpMode) ...[
+    return FocusTraversalGroup(
+      child: Column(
+        key: const ValueKey('authForm'),
+        children: [
+          AuthTextField(
+            controller: _emailController,
+            hintText: context.l10n.email,
+            icon: Icons.email_outlined,
+            keyboardType: TextInputType.emailAddress,
+            enabled: !isLoading,
+            autofocus: true,
+            validator: (v) {
+              if (v == null || v.trim().isEmpty)
+                return context.l10n.pleaseEnterEmail;
+              final email = v.trim();
+              final hasAt = email.indexOf('@');
+              if (hasAt < 1 ||
+                  hasAt == email.length - 1 ||
+                  !email.substring(hasAt + 1).contains('.')) {
+                return context.l10n.pleaseEnterEmail;
+              }
+              return null;
+            },
+          ),
           const SizedBox(height: Spacing.lg),
           AuthTextField(
-            controller: _confirmPasswordController,
-            hintText: context.l10n.confirmPassword,
+            controller: _passwordController,
+            hintText: context.l10n.password,
             icon: Icons.lock_outlined,
             obscureText: true,
             enabled: !isLoading,
             validator: (v) {
-              if (v == null || v.isEmpty) return context.l10n.pleaseConfirmPassword;
-              if (v != _passwordController.text) return context.l10n.passwordsDoNotMatch;
+              if (v == null || v.isEmpty)
+                return context.l10n.pleaseEnterPassword;
+              if (v.length < 6) return context.l10n.passwordMinLength;
               return null;
             },
           ),
-        ],
+          if (authState.isSignUpMode) ...[
+            const SizedBox(height: Spacing.lg),
+            AuthTextField(
+              controller: _confirmPasswordController,
+              hintText: context.l10n.confirmPassword,
+              icon: Icons.lock_outlined,
+              obscureText: true,
+              enabled: !isLoading,
+              validator: (v) {
+                if (v == null || v.isEmpty)
+                  return context.l10n.pleaseConfirmPassword;
+                if (v != _passwordController.text)
+                  return context.l10n.passwordsDoNotMatch;
+                return null;
+              },
+            ),
+          ],
           const SizedBox(height: Spacing.sm),
-        if (!authState.isSignUpMode)
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: TextButton(
-              onPressed: isLoading ? null : () => authNotifier.toggleResetPassword(),
-              child: Text(
-                context.l10n.forgotPassword,
-                style: TextStyle(color: colorScheme.secondary),
+          if (!authState.isSignUpMode)
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: TextButton(
+                onPressed: isLoading
+                    ? null
+                    : () => authNotifier.toggleResetPassword(),
+                child: Text(
+                  context.l10n.forgotPassword,
+                  style: TextStyle(color: colorScheme.secondary),
+                ),
               ),
             ),
-          ),
-        const SizedBox(height: 16),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            onPressed: isLoading
-                ? null
-                : () {
-                    if (_formKey.currentState!.validate()) {
-                      if (authState.isSignUpMode) {
-                        authNotifier.signUp(
-                          _emailController.text.trim(),
-                          _passwordController.text,
-                        );
-                      } else {
-                        authNotifier.signIn(
-                          _emailController.text.trim(),
-                          _passwordController.text,
-                        );
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: isLoading
+                  ? null
+                  : () {
+                      FocusScope.of(context).unfocus();
+                      if (_formKey.currentState!.validate()) {
+                        if (authState.isSignUpMode) {
+                          authNotifier.signUp(
+                            _emailController.text.trim(),
+                            _passwordController.text,
+                          );
+                        } else {
+                          authNotifier.signIn(
+                            _emailController.text.trim(),
+                            _passwordController.text,
+                          );
+                        }
                       }
-                    }
-                  },
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsetsDirectional.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadiusDirectional.circular(12),
+                    },
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsetsDirectional.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadiusDirectional.circular(12),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              child: isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(
+                      authState.isSignUpMode
+                          ? context.l10n.signUp
+                          : context.l10n.signIn,
+                    ),
             ),
-            child: isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                  )
-                : Text(authState.isSignUpMode ? context.l10n.signUp : context.l10n.signIn),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -356,7 +414,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
     ColorScheme colorScheme,
     TextTheme textTheme,
   ) {
-    final isLoading = ref.watch(authNotifierProvider).status == AuthStatus.loading;
+    final isLoading =
+        ref.watch(authNotifierProvider).status == AuthStatus.loading;
 
     return Column(
       key: const ValueKey('resetPassword'),
@@ -370,7 +429,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
             color: colorScheme.onSurface,
           ),
         ),
-          const SizedBox(height: Spacing.sm),
+        const SizedBox(height: Spacing.sm),
         Text(
           context.l10n.enterEmailForReset,
           style: textTheme.bodyMedium?.copyWith(
@@ -378,7 +437,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
           ),
           textAlign: TextAlign.center,
         ),
-          const SizedBox(height: Spacing.xl),
+        const SizedBox(height: Spacing.xl),
         AuthTextField(
           controller: _emailController,
           hintText: context.l10n.email,
@@ -386,8 +445,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
           keyboardType: TextInputType.emailAddress,
           enabled: !isLoading,
           validator: (v) {
-            if (v == null || v.trim().isEmpty) return context.l10n.pleaseEnterEmail;
-            if (!v.contains('@')) return context.l10n.pleaseEnterEmail;
+            if (v == null || v.trim().isEmpty)
+              return context.l10n.pleaseEnterEmail;
+            final email = v.trim();
+            final hasAt = email.indexOf('@');
+            if (hasAt < 1 ||
+                hasAt == email.length - 1 ||
+                !email.substring(hasAt + 1).contains('.')) {
+              return context.l10n.pleaseEnterEmail;
+            }
             return null;
           },
         ),
@@ -407,21 +473,32 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadiusDirectional.circular(12),
               ),
-              textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              textStyle: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             child: isLoading
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
                   )
                 : Text(context.l10n.sendResetLink),
           ),
         ),
-          const SizedBox(height: Spacing.sm),
+        const SizedBox(height: Spacing.sm),
         TextButton(
-          onPressed: isLoading ? null : () => authNotifier.toggleResetPassword(),
-          child: Text(context.l10n.backToSignIn, style: TextStyle(color: colorScheme.secondary)),
+          onPressed: isLoading
+              ? null
+              : () => authNotifier.toggleResetPassword(),
+          child: Text(
+            context.l10n.backToSignIn,
+            style: TextStyle(color: colorScheme.secondary),
+          ),
         ),
       ],
     );
@@ -432,8 +509,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
       children: [
         Expanded(child: Divider(color: colorScheme.outlineVariant)),
         Padding(
-          padding: const EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
-          child: Text(context.l10n.orContinueWith, style: TextStyle(color: colorScheme.onSurfaceVariant)),
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: Spacing.lg,
+          ),
+          child: Text(
+            context.l10n.orContinueWith,
+            style: TextStyle(color: colorScheme.onSurfaceVariant),
+          ),
         ),
         Expanded(child: Divider(color: colorScheme.outlineVariant)),
       ],
@@ -458,7 +540,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
           onPressed: () => authNotifier.toggleMode(),
           child: Text(
             authState.isSignUpMode ? context.l10n.signIn : context.l10n.signUp,
-            style: TextStyle(fontWeight: FontWeight.w600, color: colorScheme.primary),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.primary,
+            ),
           ),
         ),
       ],
@@ -483,14 +568,29 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: colorScheme.onErrorContainer, size: 20),
+          Icon(
+            Icons.error_outline,
+            color: colorScheme.onErrorContainer,
+            size: 20,
+          ),
           const SizedBox(width: Spacing.sm),
           Expanded(
-            child: Text(localizedError, style: TextStyle(color: colorScheme.onErrorContainer)),
+            child: Text(
+              localizedError,
+              style: TextStyle(color: colorScheme.onErrorContainer),
+            ),
           ),
           GestureDetector(
             onTap: () => ref.read(authNotifierProvider.notifier).clearError(),
-            child: Icon(Icons.close, size: 18, color: colorScheme.onErrorContainer),
+            child: Semantics(
+              button: true,
+              label: context.l10n.close,
+              child: Icon(
+                Icons.close,
+                size: 18,
+                color: colorScheme.onErrorContainer,
+              ),
+            ),
           ),
         ],
       ),

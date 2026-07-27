@@ -197,12 +197,24 @@ GRANT INSERT, UPDATE ON public.media TO authenticated;
 -- Recommendation engine columns (needed for personalized recommendations)
 -- ============================================================
 
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS fcm_token TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS recs_enabled BOOLEAN DEFAULT true;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS recs_clear_requested BOOLEAN DEFAULT false;
 
 -- Note: user_events, user_rec_profiles, media_similarity, recommendations_cache
 -- are defined in schema.sql. Run schema.sql in your Supabase SQL editor
 -- if you haven't already done so.
+
+-- ============================================================
+-- Enable RLS on media_external_ids (was missing from schema.sql)
+-- ============================================================
+ALTER TABLE media_external_ids ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "External IDs are publicly readable" ON media_external_ids
+  FOR SELECT USING (true);
+CREATE POLICY "Authenticated users can insert external IDs" ON media_external_ids
+  FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "Authenticated users can update external IDs" ON media_external_ids
+  FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
 
 -- ============================================================
 -- Account deletion RPC — deletes the calling user's auth record,
@@ -244,7 +256,138 @@ BEGIN
       AND conname LIKE '%list_id%sort_order%'
   ) THEN
     ALTER TABLE list_items DROP CONSTRAINT IF EXISTS list_items_list_id_sort_order_key;
-    ALTER TABLE list_items ADD CONSTRAINT list_items_list_id_media_id_key
-      UNIQUE (list_id, media_id);
+    ALTER TABLE list_items ADD CONSTRAINT list_items_list_id_media_id_custom_media_id_key
+      UNIQUE (list_id, media_id, custom_media_id);
+  END IF;
+END $$;
+
+-- Ensure exactly one of media_id or custom_media_id is set
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'public.list_items'::regclass
+      AND contype = 'c'
+      AND conname LIKE '%one_of_media%'
+  ) THEN
+    ALTER TABLE list_items ADD CONSTRAINT list_items_one_of_media
+      CHECK (
+        (media_id IS NOT NULL AND custom_media_id IS NULL) OR
+        (media_id IS NULL AND custom_media_id IS NOT NULL)
+      );
+  END IF;
+END $$;
+
+-- Also grant INSERT on recommendations_cache
+DO $$
+BEGIN
+  IF EXISTS (SELECT FROM pg_tables WHERE schemaname='public' AND tablename='recommendations_cache') THEN
+    GRANT SELECT, INSERT, UPDATE ON public.recommendations_cache TO authenticated;
+  END IF;
+END $$;
+
+-- ============================================================
+-- Fix recommendations_cache: add INSERT policy
+-- Without this, recommendation engine cache writes silently fail.
+-- ============================================================
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE tablename = 'recommendations_cache'
+      AND policyname = 'Users insert own recommendations'
+  ) THEN
+    CREATE POLICY "Users insert own recommendations"
+      ON recommendations_cache
+      FOR INSERT
+      WITH CHECK (auth.uid() = user_id);
+  END IF;
+END $$;
+
+-- ============================================================
+-- Fix recommendations + watch_history: add policies
+-- RLS was enabled but no policies existed, causing all queries
+-- to silently fail. Adding minimal permissive policies.
+-- ============================================================
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE tablename = 'recommendations'
+      AND policyname = 'Users view own legacy recommendations'
+  ) THEN
+    CREATE POLICY "Users view own legacy recommendations"
+      ON recommendations
+      FOR SELECT
+      USING (auth.uid() = user_id);
+
+    CREATE POLICY "Users insert own legacy recommendations"
+      ON recommendations
+      FOR INSERT
+      WITH CHECK (auth.uid() = user_id);
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE tablename = 'watch_history'
+      AND policyname = 'Users view own watch history'
+  ) THEN
+    CREATE POLICY "Users view own watch history"
+      ON watch_history
+      FOR SELECT
+      USING (auth.uid() = user_id);
+
+    CREATE POLICY "Users insert own watch history"
+      ON watch_history
+      FOR INSERT
+      WITH CHECK (auth.uid() = user_id);
+
+    CREATE POLICY "Users update own watch history"
+      ON watch_history
+      FOR UPDATE
+      USING (auth.uid() = user_id);
+
+    CREATE POLICY "Users delete own watch history"
+      ON watch_history
+      FOR DELETE
+      USING (auth.uid() = user_id);
+  END IF;
+END $$;
+
+-- ============================================================
+-- Add INSERT policies for notifications and activity_logs
+-- Previously these tables only had SELECT policies.
+-- ============================================================
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE tablename = 'notifications'
+      AND policyname = 'Users insert own notifications'
+  ) THEN
+    CREATE POLICY "Users insert own notifications"
+      ON notifications
+      FOR INSERT
+      WITH CHECK (auth.uid() = user_id);
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE tablename = 'activity_logs'
+      AND policyname = 'Users insert own activity'
+  ) THEN
+    CREATE POLICY "Users insert own activity"
+      ON activity_logs
+      FOR INSERT
+      WITH CHECK (auth.uid() = user_id);
   END IF;
 END $$;

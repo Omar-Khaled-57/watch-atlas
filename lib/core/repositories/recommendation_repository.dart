@@ -8,11 +8,12 @@ import '../services/tmdb_service.dart';
 /// Data-access layer for the recommendation engine.
 /// Uses TMDB API as fallback when Supabase tables are missing.
 class RecommendationRepository {
-  RecommendationRepository({SupabaseService? supabase})
-      : _supabase = supabase ?? SupabaseService.instance;
+  RecommendationRepository({SupabaseService? supabase, TmdbService? tmdb})
+    : _supabase = supabase ?? SupabaseService.instance,
+      _tmdbService = tmdb ?? TmdbService.instance;
 
   final SupabaseService _supabase;
-  static final TmdbService _tmdbService = TmdbService.instance;
+  final TmdbService _tmdbService;
 
   // ---------------------------------------------------------------
   // User behaviour
@@ -50,8 +51,10 @@ class RecommendationRepository {
   }
 
   /// Returns media IDs ordered by most recent view (max [limit] items).
-  Future<List<int>> fetchRecentViewedMediaIds(String userId,
-      {int limit = RecommendationConfig.dbFetchLimit}) async {
+  Future<List<int>> fetchRecentViewedMediaIds(
+    String userId, {
+    int limit = RecommendationConfig.dbFetchLimit,
+  }) async {
     try {
       final response = await _supabase.userEvents
           .select('media_id, created_at')
@@ -65,7 +68,8 @@ class RecommendationRepository {
           .toList();
     } catch (e) {
       debugPrint(
-          'RecommendationRepository: fetchRecentViewedMediaIds failed: $e');
+        'RecommendationRepository: fetchRecentViewedMediaIds failed: $e',
+      );
       return [];
     }
   }
@@ -82,7 +86,8 @@ class RecommendationRepository {
           .eq('user_id', userId)
           .single();
       return UserRecProfile.fromJson(response);
-    } catch (_) {
+    } catch (e) {
+      debugPrint('RecommendationRepository.fetchRecProfile: $e');
       return null;
     }
   }
@@ -93,7 +98,9 @@ class RecommendationRepository {
 
   /// Finds users who saved at least one of [savedIds] and are not [userId].
   Future<List<String>> findSimilarUsers(
-      String userId, Set<int> savedIds) async {
+    String userId,
+    Set<int> savedIds,
+  ) async {
     try {
       final response = await _supabase.userMedia
           .select('user_id')
@@ -113,7 +120,9 @@ class RecommendationRepository {
 
   /// Returns media saved by [userIds] that are not in [exclude].
   Future<Map<int, int>> fetchCollaborativeCandidates(
-      List<String> userIds, Set<int> exclude) async {
+    List<String> userIds,
+    Set<int> exclude,
+  ) async {
     try {
       final response = await _supabase.userMedia
           .select('media_id')
@@ -133,7 +142,8 @@ class RecommendationRepository {
       return counts;
     } catch (e) {
       debugPrint(
-          'RecommendationRepository: fetchCollaborativeCandidates failed: $e');
+        'RecommendationRepository: fetchCollaborativeCandidates failed: $e',
+      );
       return {};
     }
   }
@@ -145,8 +155,9 @@ class RecommendationRepository {
   /// Returns genres for a list of media IDs.
   Future<Set<String>> fetchGenresForMedia(List<int> ids) async {
     try {
-      final response =
-          await _supabase.media.select('genres').inFilter('id', ids);
+      final response = await _supabase.media
+          .select('genres')
+          .inFilter('id', ids);
       final genres = <String>{};
       for (final s in response as List) {
         final itemGenres = (s['genres'] as List?)?.cast<String>() ?? [];
@@ -169,17 +180,12 @@ class RecommendationRepository {
       final response = await _supabase.media
           .select('id, genres, vote_average, popularity')
           .overlaps('genres', targetGenres.toList())
-          .not(
-            'id',
-            'in',
-            exclude.isEmpty ? '(0)' : '(${exclude.join(",")})',
-          )
+          .not('id', 'in', exclude.isEmpty ? '(0)' : '(${exclude.join(",")})')
           .order('vote_average', ascending: false)
           .limit(limit);
       return (response as List).cast<Map<String, dynamic>>();
     } catch (e) {
-      debugPrint(
-          'RecommendationRepository: findSimilarByGenres failed: $e');
+      debugPrint('RecommendationRepository: findSimilarByGenres failed: $e');
       return [];
     }
   }
@@ -203,7 +209,9 @@ class RecommendationRepository {
     int limit = RecommendationConfig.maxItemsPerCategory,
   }) async {
     final cutoff = DateTime.now()
-        .subtract(const Duration(days: RecommendationConfig.newReleaseWindowDays))
+        .subtract(
+          const Duration(days: RecommendationConfig.newReleaseWindowDays),
+        )
         .toIso8601String()
         .split('T')
         .first;
@@ -211,11 +219,7 @@ class RecommendationRepository {
       final response = await _supabase.media
           .select('id, title, popularity, release_date, genres, poster_path')
           .gte('release_date', cutoff)
-          .not(
-            'id',
-            'in',
-            exclude.isEmpty ? '(0)' : '(${exclude.join(",")})',
-          )
+          .not('id', 'in', exclude.isEmpty ? '(0)' : '(${exclude.join(",")})')
           .order('release_date', ascending: false)
           .limit(limit);
       return (response as List).cast<Map<String, dynamic>>();
@@ -233,11 +237,7 @@ class RecommendationRepository {
     try {
       final response = await _supabase.media
           .select('id, title, vote_average, genres, poster_path')
-          .not(
-            'id',
-            'in',
-            exclude.isEmpty ? '(0)' : '(${exclude.join(",")})',
-          )
+          .not('id', 'in', exclude.isEmpty ? '(0)' : '(${exclude.join(",")})')
           .gte('vote_average', RecommendationConfig.topRatedMinVoteAverage)
           .order('vote_average', ascending: false)
           .limit(limit);
@@ -256,11 +256,7 @@ class RecommendationRepository {
     try {
       final response = await _supabase.media
           .select('id, title, vote_average, popularity, genres, poster_path')
-          .not(
-            'id',
-            'in',
-            exclude.isEmpty ? '(0)' : '(${exclude.join(",")})',
-          )
+          .not('id', 'in', exclude.isEmpty ? '(0)' : '(${exclude.join(",")})')
           .gte('vote_average', RecommendationConfig.hiddenGemMinVoteAverage)
           .lt('popularity', RecommendationConfig.hiddenGemMaxPopularity)
           .order('vote_average', ascending: false)
@@ -279,13 +275,8 @@ class RecommendationRepository {
   }) async {
     try {
       final response = await _supabase.media
-          .select(
-              'id, title, vote_average, vote_count, genres, poster_path')
-          .not(
-            'id',
-            'in',
-            exclude.isEmpty ? '(0)' : '(${exclude.join(",")})',
-          )
+          .select('id, title, vote_average, vote_count, genres, poster_path')
+          .not('id', 'in', exclude.isEmpty ? '(0)' : '(${exclude.join(",")})')
           .gte('vote_average', RecommendationConfig.acclaimedMinVoteAverage)
           .gte('vote_count', RecommendationConfig.acclaimedMinVoteCount)
           .order('vote_average', ascending: false)
@@ -307,11 +298,7 @@ class RecommendationRepository {
       final response = await _supabase.media
           .select('id, title, vote_average, genres, poster_path')
           .contains('genres', [genre])
-          .not(
-            'id',
-            'in',
-            exclude.isEmpty ? '(0)' : '(${exclude.join(",")})',
-          )
+          .not('id', 'in', exclude.isEmpty ? '(0)' : '(${exclude.join(",")})')
           .order('vote_average', ascending: false)
           .limit(limit);
       return (response as List).cast<Map<String, dynamic>>();
@@ -332,13 +319,15 @@ class RecommendationRepository {
       return results
           .where((item) => !exclude.contains(item['id']))
           .take(limit)
-          .map((item) => {
-                'id': item['id'] as int,
-                'title': item['title'] as String? ?? '',
-                'popularity': item['popularity'] as num? ?? 0,
-                'poster_path': item['poster_path'] as String?,
-                'genres': item['genre_ids'] as List<dynamic>? ?? [],
-              })
+          .map(
+            (item) => {
+              'id': item['id'] as int,
+              'title': item['title'] as String? ?? '',
+              'popularity': item['popularity'] as num? ?? 0,
+              'poster_path': item['poster_path'] as String?,
+              'genres': item['genre_ids'] as List<dynamic>? ?? [],
+            },
+          )
           .toList();
     } catch (e) {
       debugPrint('RecommendationRepository: TMDB fallback failed: $e');
@@ -352,7 +341,8 @@ class RecommendationRepository {
 
   /// Reads cached recommendations for [userId] that haven't expired.
   Future<Map<RecCategory, List<ScoredMedia>>?> fetchCached(
-      String userId) async {
+    String userId,
+  ) async {
     try {
       final response = await _supabase.recommendationsCache
           .select()
@@ -378,18 +368,27 @@ class RecommendationRepository {
   /// Stores recommendation results in the cache (batched upsert).
   /// Silently fails if cache table does not exist (expected for dev environments).
   Future<void> cacheResults(
-      String userId, Map<RecCategory, List<ScoredMedia>> results) async {
+    String userId,
+    Map<RecCategory, List<ScoredMedia>> results,
+  ) async {
     try {
       await _supabase.recommendationsCache.delete().eq('user_id', userId);
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Failed to clear recommendations cache: $e');
+    }
 
     for (final entry in results.entries) {
       if (entry.value.isEmpty) continue;
       final rows = entry.value.map(_buildCacheRow(userId)).toList();
-      for (var i = 0; i < rows.length;
-          i += RecommendationConfig.cacheBatchSize) {
+      for (
+        var i = 0;
+        i < rows.length;
+        i += RecommendationConfig.cacheBatchSize
+      ) {
         final end = math.min(
-            i + RecommendationConfig.cacheBatchSize, rows.length);
+          i + RecommendationConfig.cacheBatchSize,
+          rows.length,
+        );
         final batch = rows.sublist(i, end);
         try {
           await _supabase.recommendationsCache.insert(batch);
@@ -402,21 +401,20 @@ class RecommendationRepository {
 
   Map<String, dynamic> Function(ScoredMedia) _buildCacheRow(String userId) {
     return (s) => {
-          'user_id': userId,
-          'category': s.category.dbValue,
-          'media_id': s.mediaId,
-          'score': s.score,
-          'reason': s.reason,
-          'reason_type': s.reasonType,
-          'expires_at': DateTime.now()
-              .add(const Duration(hours: RecommendationConfig.cacheTtlHours))
-              .toIso8601String(),
-        };
+      'user_id': userId,
+      'category': s.category.dbValue,
+      'media_id': s.mediaId,
+      'score': s.score,
+      'reason': s.reason,
+      'reason_type': s.reasonType,
+      'expires_at': DateTime.now()
+          .add(const Duration(hours: RecommendationConfig.cacheTtlHours))
+          .toIso8601String(),
+    };
   }
 
   /// Marks a single recommendation as dismissed by the user.
-  Future<void> dismissRecommendation(
-      String userId, ScoredMedia item) async {
+  Future<void> dismissRecommendation(String userId, ScoredMedia item) async {
     try {
       await _supabase.recommendationsCache
           .update({'is_dismissed': true})
@@ -424,8 +422,7 @@ class RecommendationRepository {
           .eq('category', item.category.dbValue)
           .eq('media_id', item.mediaId);
     } catch (e) {
-      debugPrint(
-          'RecommendationRepository: dismissRecommendation failed: $e');
+      debugPrint('RecommendationRepository: dismissRecommendation failed: $e');
     }
   }
 }

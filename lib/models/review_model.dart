@@ -18,5 +18,6 @@ abstract class ReviewModel with _$ReviewModel {
     DateTime? updatedAt,
   }) = _ReviewModel;
 
-  factory ReviewModel.fromJson(Map<String, dynamic> json) => _$ReviewModelFromJson(json);
+  factory ReviewModel.fromJson(Map<String, dynamic> json) =>
+      _$ReviewModelFromJson(json);
 }

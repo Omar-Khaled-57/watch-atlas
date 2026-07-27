@@ -3,11 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('App smoke test', (tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Text('WatchAtlas'),
-      ),
-    );
+    await tester.pumpWidget(const MaterialApp(home: Text('WatchAtlas')));
     expect(find.text('WatchAtlas'), findsOneWidget);
   });
 }

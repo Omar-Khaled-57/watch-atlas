@@ -4,10 +4,19 @@ import 'package:watch_atlas/core/models/recommendation_models.dart';
 void main() {
   group('RecCategory', () {
     test('fromDb resolves known db values', () {
-      expect(RecCategory.fromDb('because_you_saved'), RecCategory.becauseYouSaved);
-      expect(RecCategory.fromDb('trending_near_you'), RecCategory.trendingNearYou);
+      expect(
+        RecCategory.fromDb('because_you_saved'),
+        RecCategory.becauseYouSaved,
+      );
+      expect(
+        RecCategory.fromDb('trending_near_you'),
+        RecCategory.trendingNearYou,
+      );
       expect(RecCategory.fromDb('hidden_gems'), RecCategory.hiddenGems);
-      expect(RecCategory.fromDb('upcoming_releases'), RecCategory.upcomingReleases);
+      expect(
+        RecCategory.fromDb('upcoming_releases'),
+        RecCategory.upcomingReleases,
+      );
     });
 
     test('dbValue and displayName are correct', () {
@@ -23,7 +32,10 @@ void main() {
     });
 
     test('fromDb throws on unknown value', () {
-      expect(() => RecCategory.fromDb('nonexistent'), throwsA(isA<StateError>()));
+      expect(
+        () => RecCategory.fromDb('nonexistent'),
+        throwsA(isA<StateError>()),
+      );
     });
   });
 
@@ -66,11 +78,7 @@ void main() {
     });
 
     test('fromJson handles null optional fields', () {
-      final json = {
-        'media_id': 1,
-        'score': 5.0,
-        'category': 'top_rated',
-      };
+      final json = {'media_id': 1, 'score': 5.0, 'category': 'top_rated'};
 
       final model = ScoredMedia.fromJson(json);
 
@@ -121,7 +129,11 @@ void main() {
     });
 
     test('constructor defaults', () {
-      const model = ScoredMedia(mediaId: 1, score: 0.0, category: RecCategory.hiddenGems);
+      const model = ScoredMedia(
+        mediaId: 1,
+        score: 0.0,
+        category: RecCategory.hiddenGems,
+      );
 
       expect(model.reason, isNull);
       expect(model.reasonType, isNull);
@@ -176,10 +188,7 @@ void main() {
     });
 
     test('metadata defaults to empty map', () {
-      const event = BehaviorEvent(
-        userId: 'u',
-        eventType: EventType.search,
-      );
+      const event = BehaviorEvent(userId: 'u', eventType: EventType.search);
 
       expect(event.metadata, {});
     });
@@ -223,9 +232,7 @@ void main() {
     });
 
     test('fromJson handles null/missing fields with defaults', () {
-      final json = {
-        'user_id': 'user_2',
-      };
+      final json = {'user_id': 'user_2'};
 
       final profile = UserRecProfile.fromJson(json);
 

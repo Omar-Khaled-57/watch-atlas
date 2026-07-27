@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/services/anilist_service.dart';
 import '../../../core/services/tmdb_service.dart';
+import '../../../core/providers/service_providers.dart';
 import '../../../models/media_model.dart';
 import '../../../core/models/media_enums.dart';
 
@@ -16,7 +18,10 @@ class Genre {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Genre && runtimeType == other.runtimeType && id == other.id && name == other.name;
+      other is Genre &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name;
 
   @override
   int get hashCode => id.hashCode ^ name.hashCode;
@@ -111,18 +116,19 @@ class DiscoverFilterNotifier extends Notifier<DiscoverFilters> {
       state = state.copyWith(yearFrom: from, yearTo: to);
   void setRatingRange(double? from, double? to) =>
       state = state.copyWith(ratingFrom: from, ratingTo: to);
-  void setSearchQuery(String? query) => state = state.copyWith(searchQuery: query);
+  void setSearchQuery(String? query) =>
+      state = state.copyWith(searchQuery: query);
   void clearAll() => state = state.clearAll();
 }
 
 final discoverFilterProvider =
     NotifierProvider<DiscoverFilterNotifier, DiscoverFilters>(
-  DiscoverFilterNotifier.new,
-);
+      DiscoverFilterNotifier.new,
+    );
 
 final genreListProvider = FutureProvider<List<Genre>>((ref) async {
   final filters = ref.watch(discoverFilterProvider);
-  final tmdb = TmdbService.instance;
+  final tmdb = ref.read(tmdbServiceProvider);
 
   try {
     switch (filters.tab) {
@@ -134,7 +140,8 @@ final genreListProvider = FutureProvider<List<Genre>>((ref) async {
         final data = await tmdb.tvGenres();
         return _parseGenres(data);
     }
-  } catch (_) {
+  } catch (e) {
+    debugPrint('discoverGenresProvider: $e');
     return [];
   }
 });
@@ -150,23 +157,23 @@ Future<List<MediaModel>> fetchDiscoverPage({
   required int page,
   required DiscoverFilters filters,
   required AnilistService anilist,
+  required TmdbService tmdb,
 }) async {
   switch (filters.tab) {
     case DiscoverMediaTab.anime:
       return _fetchAnimePage(page, filters, anilist);
     case DiscoverMediaTab.movies:
-      return _fetchMoviePage(page, filters);
+      return _fetchMoviePage(page, filters, tmdb);
     case DiscoverMediaTab.tv:
-      return _fetchTvPage(page, filters);
+      return _fetchTvPage(page, filters, tmdb);
   }
 }
 
 Future<List<MediaModel>> _fetchMoviePage(
   int page,
   DiscoverFilters filters,
+  TmdbService tmdb,
 ) async {
-  final tmdb = TmdbService.instance;
-
   if (filters.searchQuery != null && filters.searchQuery!.isNotEmpty) {
     final json = await tmdb.searchMovie(filters.searchQuery!, page: page);
     return _tmdbResultsToMediaModels(
@@ -175,10 +182,7 @@ Future<List<MediaModel>> _fetchMoviePage(
     );
   }
 
-  final params = <String, dynamic>{
-    'page': page,
-    'sort_by': 'popularity.desc',
-  };
+  final params = <String, dynamic>{'page': page, 'sort_by': 'popularity.desc'};
 
   if (filters.genreId != null) {
     params['with_genres'] = filters.genreId.toString();
@@ -209,9 +213,8 @@ Future<List<MediaModel>> _fetchMoviePage(
 Future<List<MediaModel>> _fetchTvPage(
   int page,
   DiscoverFilters filters,
+  TmdbService tmdb,
 ) async {
-  final tmdb = TmdbService.instance;
-
   if (filters.searchQuery != null && filters.searchQuery!.isNotEmpty) {
     final json = await tmdb.searchTv(filters.searchQuery!, page: page);
     return _tmdbResultsToMediaModels(
@@ -220,10 +223,7 @@ Future<List<MediaModel>> _fetchTvPage(
     );
   }
 
-  final params = <String, dynamic>{
-    'page': page,
-    'sort_by': 'popularity.desc',
-  };
+  final params = <String, dynamic>{'page': page, 'sort_by': 'popularity.desc'};
 
   if (filters.genreId != null) {
     params['with_genres'] = filters.genreId.toString();
@@ -257,8 +257,13 @@ Future<List<MediaModel>> _fetchAnimePage(
   AnilistService anilist,
 ) async {
   if (filters.searchQuery != null && filters.searchQuery!.isNotEmpty) {
-    final mediaList = await anilist.searchAnime(filters.searchQuery!, page: page);
-    return mediaList.map((m) => _animeToMediaModel(m as Map<String, dynamic>)).toList();
+    final mediaList = await anilist.searchAnime(
+      filters.searchQuery!,
+      page: page,
+    );
+    return mediaList
+        .map((m) => _animeToMediaModel(m as Map<String, dynamic>))
+        .toList();
   }
 
   const gql = '''
@@ -281,10 +286,7 @@ Future<List<MediaModel>> _fetchAnimePage(
     }
   ''';
 
-  final variables = <String, dynamic>{
-    'page': page,
-    'perPage': 20,
-  };
+  final variables = <String, dynamic>{'page': page, 'perPage': 20};
   if (filters.genreId != null) {
     final genre = _animeGenreById(filters.genreId!);
     if (genre != null) variables['genre'] = genre;
@@ -293,7 +295,9 @@ Future<List<MediaModel>> _fetchAnimePage(
   final raw = await anilist.query(gql, variables: variables);
   final mediaList = raw['data']['Page']['media'] as List<dynamic>;
 
-  return mediaList.map((m) => _animeToMediaModel(m as Map<String, dynamic>)).toList();
+  return mediaList
+      .map((m) => _animeToMediaModel(m as Map<String, dynamic>))
+      .toList();
 }
 
 MediaModel _animeToMediaModel(Map<String, dynamic> map) {

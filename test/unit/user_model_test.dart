@@ -46,11 +46,7 @@ void main() {
     });
 
     test('toJson produces correct map', () {
-      final model = UserModel(
-        id: 'u1',
-        email: 'a@b.com',
-        username: 'user',
-      );
+      final model = UserModel(id: 'u1', email: 'a@b.com', username: 'user');
 
       final json = model.toJson();
 

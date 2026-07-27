@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../constants/app_colors.dart';
 import '../constants/dimensions.dart';
 import '../../l10n/l10n.dart';
 
@@ -62,55 +63,72 @@ class _StarRating extends StatelessWidget {
   });
 
   int get _fullStars => rating.floor();
-  bool get _hasHalfStar => rating - _fullStars >= 0.25 && rating - _fullStars < 0.75;
+  bool get _hasHalfStar =>
+      rating - _fullStars >= 0.25 && rating - _fullStars < 0.75;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (!tappable)
-          ...List.generate(5, (index) {
-            if (index < _fullStars) {
-              return Icon(Icons.star_rounded, color: Colors.amber, size: starSize);
-            } else if (index == _fullStars && _hasHalfStar) {
-              return Icon(Icons.star_half_rounded, color: Colors.amber, size: starSize);
-            }
-            return Icon(Icons.star_outline_rounded, color: Colors.amber.withValues(alpha: 0.4), size: starSize);
-          }),
-        if (tappable)
-          ...List.generate(5, (index) {
-            return GestureDetector(
-              onTap: () => _onStarTap(context, index + 1),
-              child: Icon(
-                index < _fullStars
-                    ? Icons.star_rounded
-                    : index == _fullStars && _hasHalfStar
-                        ? Icons.star_half_rounded
-                        : Icons.star_outline_rounded,
-                color: Colors.amber,
-                size: starSize + 8,
-              ),
-            );
-          }),
-        const SizedBox(width: 6),
-        Text(
-          rating.toStringAsFixed(1),
-          style: textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: colorScheme.onSurface,
-          ),
-        ),
-        if (voteCount != null) ...[
-          const SizedBox(width: Spacing.xs),
+    return Semantics(
+      label:
+          '${context.l10n.ratingLabel(rating.toStringAsFixed(1))}${voteCount != null ? ', ${context.l10n.votes(voteCount!)}' : ''}',
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!tappable)
+            ...List.generate(5, (index) {
+              if (index < _fullStars) {
+                return Icon(
+                  Icons.star_rounded,
+                  color: AppColors.star,
+                  size: starSize,
+                );
+              } else if (index == _fullStars && _hasHalfStar) {
+                return Icon(
+                  Icons.star_half_rounded,
+                  color: AppColors.star,
+                  size: starSize,
+                );
+              }
+              return Icon(
+                Icons.star_outline_rounded,
+                color: AppColors.star.withValues(alpha: 0.4),
+                size: starSize,
+              );
+            }),
+          if (tappable)
+            ...List.generate(5, (index) {
+              return GestureDetector(
+                onTap: () => _onStarTap(context, index + 1),
+                child: Icon(
+                  index < _fullStars
+                      ? Icons.star_rounded
+                      : index == _fullStars && _hasHalfStar
+                      ? Icons.star_half_rounded
+                      : Icons.star_outline_rounded,
+                  color: AppColors.star,
+                  size: starSize + 8,
+                ),
+              );
+            }),
+          const SizedBox(width: 6),
           Text(
-            '($voteCount)',
-            style: textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+            rating.toStringAsFixed(1),
+            style: textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
             ),
           ),
+          if (voteCount != null) ...[
+            const SizedBox(width: Spacing.xs),
+            Text(
+              '($voteCount)',
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 
@@ -147,50 +165,46 @@ class _PercentageScore extends StatelessWidget {
   Widget build(BuildContext context) {
     final percentage = (rating / 10 * 100).round();
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: 44,
-          height: 44,
-          child: Stack(
-            alignment: AlignmentDirectional.center,
-            children: [
-              CircularProgressIndicator(
-                value: rating / 10,
-                strokeWidth: 3,
-                backgroundColor: colorScheme.surfaceContainerHighest,
-                valueColor: AlwaysStoppedAnimation<Color>(_scoreColor),
-              ),
-              Text(
-                '$percentage%',
-                style: textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: colorScheme.onSurface,
-                  fontSize: 10,
+    return Semantics(
+      label: context.l10n.percentScore(percentage),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 44,
+            height: 44,
+            child: Stack(
+              alignment: AlignmentDirectional.center,
+              children: [
+                CircularProgressIndicator(
+                  value: rating / 10,
+                  strokeWidth: 3,
+                  backgroundColor: colorScheme.surfaceContainerHighest,
+                  valueColor: AlwaysStoppedAnimation<Color>(_scoreColor),
                 ),
-              ),
-            ],
-          ),
-        ),
-        if (voteCount != null) ...[
-          const SizedBox(width: 6),
-          Text(
-            '${_formatVoteCount(voteCount!)} votes',
-            style: textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+                Text(
+                  '$percentage%',
+                  style: textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: colorScheme.onSurface,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
             ),
           ),
+          if (voteCount != null) ...[
+            const SizedBox(width: 6),
+            Text(
+              context.l10n.votes(voteCount!),
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
-  }
-
-  String _formatVoteCount(int count) {
-    if (count >= 1000) {
-      return '${(count / 1000).toStringAsFixed(1)}K';
-    }
-    return count.toString();
   }
 }
 
@@ -221,22 +235,27 @@ class _TappableStarRatingState extends State<TappableStarRating> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(5, (index) {
-        final starValue = index + 1;
-        return GestureDetector(
-          onTap: () {
-            setState(() => _rating = starValue.toDouble());
-            widget.onRatingChanged?.call(starValue.toDouble());
-          },
-          child: Icon(
-            starValue <= _rating ? Icons.star_rounded : Icons.star_outline_rounded,
-            color: Colors.amber,
-            size: widget.starSize,
-          ),
-        );
-      }),
+    return Semantics(
+      label: context.l10n.tapToRate(_rating.round(), 5),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(5, (index) {
+          final starValue = index + 1;
+          return GestureDetector(
+            onTap: () {
+              setState(() => _rating = starValue.toDouble());
+              widget.onRatingChanged?.call(starValue.toDouble());
+            },
+            child: Icon(
+              starValue <= _rating
+                  ? Icons.star_rounded
+                  : Icons.star_outline_rounded,
+              color: AppColors.star,
+              size: widget.starSize,
+            ),
+          );
+        }),
+      ),
     );
   }
 }

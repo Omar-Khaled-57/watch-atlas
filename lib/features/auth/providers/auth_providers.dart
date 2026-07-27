@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/services/auth_service.dart';
-import '../../../core/services/notification_service.dart';
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated, error }
 
@@ -94,7 +93,8 @@ class AuthNotifier extends Notifier<AuthState> {
       if (!kIsWeb) {
         await _authService.importOAuthProfile();
         final profile = await _authService.getProfile();
-        final needsOnboarding = profile?.gender == null && profile?.dateOfBirth == null;
+        final needsOnboarding =
+            profile?.gender == null && profile?.dateOfBirth == null;
         state = state.copyWith(
           status: AuthStatus.authenticated,
           isNewUser: needsOnboarding,
@@ -115,7 +115,8 @@ class AuthNotifier extends Notifier<AuthState> {
       if (!kIsWeb) {
         await _authService.importOAuthProfile();
         final profile = await _authService.getProfile();
-        final needsOnboarding = profile?.gender == null && profile?.dateOfBirth == null;
+        final needsOnboarding =
+            profile?.gender == null && profile?.dateOfBirth == null;
         state = state.copyWith(
           status: AuthStatus.authenticated,
           isNewUser: needsOnboarding,
@@ -132,7 +133,7 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> signOut() async {
     state = state.copyWith(status: AuthStatus.loading);
     try {
-      await NotificationService.instance.clearToken();
+      await ref.read(notificationServiceProvider).clearToken();
       await _authService.signOut();
       state = const AuthState(status: AuthStatus.unauthenticated);
     } catch (e) {
@@ -206,4 +207,6 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 }
 
-final authNotifierProvider = NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);
+final authNotifierProvider = NotifierProvider<AuthNotifier, AuthState>(
+  AuthNotifier.new,
+);

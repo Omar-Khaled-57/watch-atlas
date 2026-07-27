@@ -10,8 +10,6 @@ import '../../../models/user_media_model.dart';
 import '../../tracking/providers/tracking_providers.dart';
 import '../../recommendations/providers/recommendation_providers.dart';
 
-final _tmdbService = TmdbService.instance;
-
 class ContinueWatchingData {
   final UserMediaModel userMedia;
   final MediaModel media;
@@ -19,8 +17,9 @@ class ContinueWatchingData {
 }
 
 final trendingProvider = FutureProvider<List<MediaModel>>((ref) async {
-  final moviesJson = await _tmdbService.trendingMovies();
-  final tvJson = await _tmdbService.trendingTv();
+  final tmdb = ref.read(tmdbServiceProvider);
+  final moviesJson = await tmdb.trendingMovies();
+  final tvJson = await tmdb.trendingTv();
 
   final movies = _tmdbResultsToMediaModels(
     moviesJson['results'] as List<dynamic>,
@@ -36,26 +35,34 @@ final trendingProvider = FutureProvider<List<MediaModel>>((ref) async {
   return combined.take(20).toList();
 });
 
-final continueWatchingProvider = FutureProvider<List<ContinueWatchingData>>((ref) async {
-  final userMediaList = ref.watch(userMediaByStatusProvider(WatchStatus.watching));
+final continueWatchingProvider = FutureProvider<List<ContinueWatchingData>>((
+  ref,
+) async {
+  final tmdb = ref.read(tmdbServiceProvider);
+  final userMediaList = ref.watch(
+    userMediaByStatusProvider(WatchStatus.watching),
+  );
   if (userMediaList.isEmpty) return [];
 
   final results = <ContinueWatchingData>[];
   for (final um in userMediaList) {
     try {
       final json = um.mediaType == MediaType.tv
-          ? await _tmdbService.tvDetails(um.mediaId)
-          : await _tmdbService.movieDetails(um.mediaId);
+          ? await tmdb.tvDetails(um.mediaId)
+          : await tmdb.movieDetails(um.mediaId);
       final media = _jsonToMediaModel(json, um.mediaType);
       results.add(ContinueWatchingData(userMedia: um, media: media));
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Failed to load continue-watching item ${um.mediaId}: $e');
+    }
   }
   return results;
 });
 
 final popularThisWeekProvider = FutureProvider<List<MediaModel>>((ref) async {
-  final moviesJson = await _tmdbService.popularMovies();
-  final tvJson = await _tmdbService.popularTv();
+  final tmdb = ref.read(tmdbServiceProvider);
+  final moviesJson = await tmdb.popularMovies();
+  final tvJson = await tmdb.popularTv();
 
   final movies = _tmdbResultsToMediaModels(
     moviesJson['results'] as List<dynamic>,
@@ -72,7 +79,8 @@ final popularThisWeekProvider = FutureProvider<List<MediaModel>>((ref) async {
 });
 
 final recentlyAddedProvider = FutureProvider<List<MediaModel>>((ref) async {
-  final json = await _tmdbService.nowPlaying();
+  final tmdb = ref.read(tmdbServiceProvider);
+  final json = await tmdb.nowPlaying();
 
   return _tmdbResultsToMediaModels(
     json['results'] as List<dynamic>,
@@ -81,7 +89,8 @@ final recentlyAddedProvider = FutureProvider<List<MediaModel>>((ref) async {
 });
 
 final upcomingReleasesProvider = FutureProvider<List<MediaModel>>((ref) async {
-  final json = await _tmdbService.upcoming();
+  final tmdb = ref.read(tmdbServiceProvider);
+  final json = await tmdb.upcoming();
 
   return _tmdbResultsToMediaModels(
     json['results'] as List<dynamic>,
@@ -110,7 +119,7 @@ final recommendedProvider = FutureProvider<List<MediaModel>>((ref) async {
 
     allItems.sort((a, b) => b.score.compareTo(a.score));
     final topItems = allItems.take(20).toList();
-    return _fetchMediaForScored(topItems);
+    return _fetchMediaForScored(topItems, ref.read(tmdbServiceProvider));
   } catch (e) {
     debugPrint('recommendedProvider: $e');
     return [];
@@ -119,34 +128,40 @@ final recommendedProvider = FutureProvider<List<MediaModel>>((ref) async {
 
 Future<List<MediaModel>> _fetchMediaForScored(
   List<ScoredMedia> items,
+  TmdbService tmdb,
 ) async {
-  final tmdb = TmdbService.instance;
   final results = <MediaModel>[];
   for (final item in items) {
     try {
       final json = await tmdb.movieDetails(item.mediaId);
-      results.add(MediaModel(
-        id: item.mediaId,
-        mediaType: MediaType.movie,
-        title: json['title'] as String? ?? '',
-        posterPath: json['poster_path'] as String?,
-        backdropPath: json['backdrop_path'] as String?,
-        voteAverage: (json['vote_average'] as num?)?.toDouble(),
-        popularity: (json['popularity'] as num?)?.toDouble() ?? 0,
-      ));
-    } catch (_) {
-      try {
-        final json = await tmdb.tvDetails(item.mediaId);
-        results.add(MediaModel(
+      results.add(
+        MediaModel(
           id: item.mediaId,
-          mediaType: MediaType.tv,
-          title: json['name'] as String? ?? '',
+          mediaType: MediaType.movie,
+          title: json['title'] as String? ?? '',
           posterPath: json['poster_path'] as String?,
           backdropPath: json['backdrop_path'] as String?,
           voteAverage: (json['vote_average'] as num?)?.toDouble(),
           popularity: (json['popularity'] as num?)?.toDouble() ?? 0,
-        ));
-      } catch (_) {
+        ),
+      );
+    } catch (e) {
+      debugPrint('recommendationsForItems movieDetails ${item.mediaId}: $e');
+      try {
+        final json = await tmdb.tvDetails(item.mediaId);
+        results.add(
+          MediaModel(
+            id: item.mediaId,
+            mediaType: MediaType.tv,
+            title: json['name'] as String? ?? '',
+            posterPath: json['poster_path'] as String?,
+            backdropPath: json['backdrop_path'] as String?,
+            voteAverage: (json['vote_average'] as num?)?.toDouble(),
+            popularity: (json['popularity'] as num?)?.toDouble() ?? 0,
+          ),
+        );
+      } catch (e) {
+        debugPrint('recommendationsForItems tvDetails ${item.mediaId}: $e');
         continue;
       }
     }
@@ -158,7 +173,9 @@ List<MediaModel> _tmdbResultsToMediaModels(
   List<dynamic> results,
   MediaType type,
 ) {
-  return results.map((json) => _jsonToMediaModel(json as Map<String, dynamic>, type)).toList();
+  return results
+      .map((json) => _jsonToMediaModel(json as Map<String, dynamic>, type))
+      .toList();
 }
 
 MediaModel _jsonToMediaModel(Map<String, dynamic> map, MediaType type) {
@@ -187,21 +204,25 @@ class _HomeSearchQueryNotifier extends Notifier<String> {
   void update(String value) => state = value;
 }
 
-final homeSearchQueryProvider = NotifierProvider<_HomeSearchQueryNotifier, String>(_HomeSearchQueryNotifier.new);
+final homeSearchQueryProvider =
+    NotifierProvider<_HomeSearchQueryNotifier, String>(
+      _HomeSearchQueryNotifier.new,
+    );
 
 final homeSearchResultsProvider = FutureProvider<List<MediaModel>>((ref) async {
   final query = ref.watch(homeSearchQueryProvider);
   if (query.trim().length < 2) return [];
 
   try {
-    final results = await _tmdbService.search(query, page: 1);
+    final results = await ref.read(tmdbServiceProvider).search(query, page: 1);
     return results.map((json) {
       final map = json as Map<String, dynamic>;
       return MediaModel(
         id: map['id'] as int,
         mediaType: _parseSearchMediaType(map['media_type'] as String?),
         title: map['title'] as String? ?? map['name'] as String? ?? '',
-        originalTitle: map['original_title'] as String? ?? map['original_name'] as String?,
+        originalTitle:
+            map['original_title'] as String? ?? map['original_name'] as String?,
         overview: map['overview'] as String?,
         posterPath: map['poster_path'] as String?,
         backdropPath: map['backdrop_path'] as String?,

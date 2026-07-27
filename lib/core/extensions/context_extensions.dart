@@ -14,8 +14,10 @@ extension ContextExtensions on BuildContext {
   bool get isDesktop => screenWidth >= 1024;
   bool get isTablet => screenWidth >= 768 && screenWidth < 1024;
   bool get isMobile => screenWidth < 768;
+  bool get disableAnimations => mediaQuery.disableAnimations;
 
-  void hideKeyboard() => SystemChannels.textInput.invokeMethod('TextInput.hide');
+  void hideKeyboard() =>
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
 
   ScaffoldMessengerState get showSnackBar => ScaffoldMessenger.of(this);
 

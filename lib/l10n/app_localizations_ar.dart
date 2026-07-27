@@ -84,6 +84,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navLists => 'القوائم';
 
   @override
+  String get navTracking => 'التتبع';
+
+  @override
   String get navProfile => 'الملف الشخصي';
 
   @override
@@ -292,6 +295,23 @@ class AppLocalizationsAr extends AppLocalizations {
   String get collaborative => 'تعاوني';
 
   @override
+  String get inviteCollaborator => 'دعوة متعاون';
+
+  @override
+  String get inviteCollaboratorHint => 'أدخل اسم المستخدم للدعوة';
+
+  @override
+  String collaborators(Object count) {
+    return '$count متعاونين';
+  }
+
+  @override
+  String get noCollaborators => 'لا يوجد متعاونون بعد';
+
+  @override
+  String get inviteSent => 'تم إرسال الدعوة';
+
+  @override
   String addToListTitle(Object title) {
     return 'أضف $title إلى القائمة';
   }
@@ -464,6 +484,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get recommendationsAndPrivacy => 'التوصيات والخصوصية';
+
+  @override
+  String get privacySettings => 'إعدادات الخصوصية';
+
+  @override
+  String get publicProfile => 'الملف العام';
+
+  @override
+  String get publicProfileDesc => 'السماح للمستخدمين الآخرين بعرض ملفك الشخصي';
+
+  @override
+  String get showActivity => 'إظهار النشاط';
+
+  @override
+  String get showActivityDesc => 'عرض عناصر المشاهدة الأخيرة للآخرين';
 
   @override
   String get personalizedRecommendations => 'توصيات مخصصة';
@@ -1575,6 +1610,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get likeLabel => 'إعجاب';
 
   @override
+  String get dislikeLabel => 'عدم إعجاب';
+
+  @override
   String get previousSlide => 'الشريحة السابقة';
 
   @override
@@ -1776,4 +1814,39 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get showLess => 'عرض أقل';
+
+  @override
+  String get containsSpoilers => 'يحتوي على حرق للأحداث';
+
+  @override
+  String get allReviews => 'جميع المراجعات';
+
+  @override
+  String get noUserReviews => 'لم تكتب أي مراجعات بعد.';
+
+  @override
+  String get clearSearch => 'مسح البحث';
+
+  @override
+  String get clearAllFilters => 'مسح جميع الفلاتر';
+
+  @override
+  String votes(int count) {
+    return '$count تقييم';
+  }
+
+  @override
+  String percentScore(int percent) {
+    return '$percent درجة النسبة المئوية';
+  }
+
+  @override
+  String tapToRate(int current, int total) {
+    return 'اضغط للتقييم، حالياً $current من $total نجوم';
+  }
+
+  @override
+  String ratingLabel(String rating) {
+    return 'التقييم: $rating من 10';
+  }
 }

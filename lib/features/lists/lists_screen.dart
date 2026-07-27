@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/constants/app_colors.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/extensions/string_extensions.dart';
@@ -27,19 +28,13 @@ class ListsScreen extends ConsumerStatefulWidget {
 class _ListsScreenState extends ConsumerState<ListsScreen> {
   String? _selectedListId;
 
-  bool get _isWide => context.isDesktop || (context.isTablet && MediaQuery.of(context).orientation == Orientation.landscape);
+  bool get _isWide =>
+      context.isDesktop ||
+      (context.isTablet &&
+          MediaQuery.of(context).orientation == Orientation.landscape);
 
   Future<void> _onRefresh() async {
-    debugPrint('\x1B[36m[Lists]\x1B[0m \x1B[33m→\x1B[0m refresh button tapped on ListsScreen');
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Refreshing lists…'), duration: Duration(seconds: 1)),
-    );
     await ref.read(userListsProvider.notifier).refresh();
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Refreshed at ListsScreen — ${ref.read(userListsProvider).value?.length ?? 0} lists'), duration: const Duration(seconds: 2)),
-      );
-    }
   }
 
   @override
@@ -61,28 +56,63 @@ class _ListsScreenState extends ConsumerState<ListsScreen> {
           ),
         ],
       ),
-      body: _isWide ? _buildWideLayout(lists, listsAsync, totalTitles, colorScheme, textTheme) : _buildNarrowLayout(listsAsync, totalTitles, colorScheme, textTheme),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showCreateDialog(),
-        child: const Icon(Icons.add_rounded),
+      body: _isWide
+          ? _buildWideLayout(
+              lists,
+              listsAsync,
+              totalTitles,
+              colorScheme,
+              textTheme,
+            )
+          : _buildNarrowLayout(listsAsync, totalTitles, colorScheme, textTheme),
+      floatingActionButton: Semantics(
+        button: true,
+        label: context.l10n.createList,
+        child: FloatingActionButton(
+          onPressed: () => _showCreateDialog(),
+          child: const Icon(Icons.add_rounded),
+        ),
       ),
     );
   }
 
-  Widget _buildNarrowLayout(AsyncValue<List<UserListModel>> listsAsync, int totalTitles, ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildNarrowLayout(
+    AsyncValue<List<UserListModel>> listsAsync,
+    int totalTitles,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
     final isDesktop = context.isDesktop;
     final isTablet = context.isTablet;
-    final crossAxisCount = isDesktop ? 4 : isTablet ? 3 : 2;
+    final crossAxisCount = isDesktop
+        ? 4
+        : isTablet
+        ? 3
+        : 2;
 
     return RefreshIndicator(
       onRefresh: _onRefresh,
       child: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child: _buildHero(totalTitles, listsAsync.value?.length ?? 0, colorScheme, textTheme)),
+          SliverToBoxAdapter(
+            child: _buildHero(
+              totalTitles,
+              listsAsync.value?.length ?? 0,
+              colorScheme,
+              textTheme,
+            ),
+          ),
           listsAsync.when(
             loading: () => const SliverFillRemaining(child: FullScreenLoader()),
             error: (error, _) => SliverFillRemaining(
-              child: Center(child: Text(context.l10n.failedToLoadList, style: textTheme.bodyMedium?.copyWith(color: colorScheme.error))),
+              child: Center(
+                child: Text(
+                  context.l10n.failedToLoadList,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.error,
+                  ),
+                ),
+              ),
             ),
             data: (lists) {
               if (lists.isEmpty) {
@@ -105,24 +135,27 @@ class _ListsScreenState extends ConsumerState<ListsScreen> {
                     crossAxisSpacing: 14,
                     mainAxisSpacing: 14,
                   ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      if (index == 0) {
-                        return StaggeredItem(index: index, child: _AllCollectionCard(totalTitles: totalTitles, onTap: () => _openAllItems()));
-                      }
-                      final list = lists[index - 1];
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    if (index == 0) {
                       return StaggeredItem(
                         index: index,
-                        child: _ListCardWithMenu(
-                          listData: list,
-                          onTap: () => _navigateToDetail(list.id),
-                          onRename: () => _showRenameDialog(list),
-                          onDelete: () => _confirmDeleteList(list),
+                        child: _AllCollectionCard(
+                          totalTitles: totalTitles,
+                          onTap: () => _openAllItems(),
                         ),
                       );
-                    },
-                    childCount: lists.length + 1,
-                  ),
+                    }
+                    final list = lists[index - 1];
+                    return StaggeredItem(
+                      index: index,
+                      child: _ListCardWithMenu(
+                        listData: list,
+                        onTap: () => _navigateToDetail(list.id),
+                        onRename: () => _showRenameDialog(list),
+                        onDelete: () => _confirmDeleteList(list),
+                      ),
+                    );
+                  }, childCount: lists.length + 1),
                 ),
               );
             },
@@ -132,14 +165,25 @@ class _ListsScreenState extends ConsumerState<ListsScreen> {
     );
   }
 
-  Widget _buildWideLayout(List<UserListModel> lists, AsyncValue<List<UserListModel>> listsAsync, int totalTitles, ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildWideLayout(
+    List<UserListModel> lists,
+    AsyncValue<List<UserListModel>> listsAsync,
+    int totalTitles,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
     return Row(
       children: [
         SizedBox(
           width: 320,
           child: listsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, __) => Center(child: Text(context.l10n.error, style: textTheme.bodyMedium?.copyWith(color: colorScheme.error))),
+            error: (_, __) => Center(
+              child: Text(
+                context.l10n.error,
+                style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
+              ),
+            ),
             data: (data) {
               if (data.isEmpty) {
                 return EmptyState(
@@ -151,27 +195,42 @@ class _ListsScreenState extends ConsumerState<ListsScreen> {
               return RefreshIndicator(
                 onRefresh: _onRefresh,
                 child: ListView(
-                  padding: const EdgeInsetsDirectional.fromSTEB(Spacing.lg, Spacing.lg, 0, 80),
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                    Spacing.lg,
+                    Spacing.lg,
+                    0,
+                    80,
+                  ),
                   children: [
                     Padding(
-                      padding: const EdgeInsetsDirectional.only(bottom: Spacing.lg),
-                      child: Text(context.l10n.yourCollections, style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+                      padding: const EdgeInsetsDirectional.only(
+                        bottom: Spacing.lg,
+                      ),
+                      child: Text(
+                        context.l10n.yourCollections,
+                        style: textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                     ),
                     _AllCollectionListTile(
                       totalTitles: totalTitles,
                       onTap: () => _openAllItems(),
                       isSelected: _selectedListId == null,
                     ),
-                    ...data.asMap().entries.map((entry) => StaggeredItem(
-                      index: entry.key + 2,
-                      child: _CompactListTile(
-                        listData: entry.value,
-                        isSelected: _selectedListId == entry.value.id,
-                        onTap: () => setState(() => _selectedListId = entry.value.id),
-                        onRename: () => _showRenameDialog(entry.value),
-                        onDelete: () => _confirmDeleteList(entry.value),
+                    ...data.asMap().entries.map(
+                      (entry) => StaggeredItem(
+                        index: entry.key + 2,
+                        child: _CompactListTile(
+                          listData: entry.value,
+                          isSelected: _selectedListId == entry.value.id,
+                          onTap: () =>
+                              setState(() => _selectedListId = entry.value.id),
+                          onRename: () => _showRenameDialog(entry.value),
+                          onDelete: () => _confirmDeleteList(entry.value),
+                        ),
                       ),
-                    )),
+                    ),
                   ],
                 ),
               );
@@ -180,7 +239,9 @@ class _ListsScreenState extends ConsumerState<ListsScreen> {
         ),
         const VerticalDivider(width: 1),
         Expanded(
-          child: _selectedListId != null ? _ListDetailPanel(listId: _selectedListId!) : _buildPlaceholder(colorScheme, textTheme),
+          child: _selectedListId != null
+              ? _ListDetailPanel(listId: _selectedListId!)
+              : _buildPlaceholder(colorScheme, textTheme),
         ),
       ],
     );
@@ -191,30 +252,59 @@ class _ListsScreenState extends ConsumerState<ListsScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.collections_bookmark_rounded, size: 64, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.3)),
+          Icon(
+            Icons.collections_bookmark_rounded,
+            size: 64,
+            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+          ),
           const SizedBox(height: Spacing.lg),
-          Text(context.l10n.selectList, style: textTheme.titleMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
+          Text(
+            context.l10n.selectList,
+            style: textTheme.titleMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
           const SizedBox(height: Spacing.xs),
-          Text(context.l10n.chooseListFromSidebar, style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+          Text(
+            context.l10n.chooseListFromSidebar,
+            style: textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildHero(int totalTitles, int listCount, ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildHero(
+    int totalTitles,
+    int listCount,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(Spacing.xl, Spacing.lg, Spacing.xl, Spacing.xs),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        Spacing.xl,
+        Spacing.lg,
+        Spacing.xl,
+        Spacing.xs,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             context.l10n.yourCollections,
-            style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.5),
+            style: textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+            ),
           ),
           const SizedBox(height: Spacing.sm),
           Text(
             '${totalTitles == 1 ? '$totalTitles ${context.l10n.item}' : '$totalTitles ${context.l10n.items}'} \u2022 $listCount List${listCount == 1 ? '' : 's'}',
-            style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+            style: textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -247,14 +337,24 @@ class _ListsScreenState extends ConsumerState<ListsScreen> {
         title: Text(context.l10n.deleteListConfirm(list.title)),
         content: Text(context.l10n.deleteListWarning),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(context.l10n.cancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(context.l10n.cancel),
+          ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
             onPressed: () {
               ref.read(userListsProvider.notifier).deleteList(list);
-              if (_selectedListId == list.id) setState(() => _selectedListId = null);
+              if (_selectedListId == list.id)
+                setState(() => _selectedListId = null);
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.listDeletedTitle(list.title))));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(context.l10n.listDeletedTitle(list.title)),
+                ),
+              );
             },
             child: Text(context.l10n.delete),
           ),
@@ -268,9 +368,9 @@ class _ListsScreenState extends ConsumerState<ListsScreen> {
   }
 
   void _openAllItems() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const AllItemsScreen()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const AllItemsScreen()));
   }
 }
 
@@ -291,21 +391,36 @@ class _ListCardWithMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onLongPressStart: (details) => _showContextMenu(context, details),
-      child: ListCard(
-        listData: listData,
-        posterUrls: null,
-        onTap: onTap,
-      ),
+      child: ListCard(listData: listData, posterUrls: null, onTap: onTap),
     );
   }
 
   void _showContextMenu(BuildContext context, LongPressStartDetails details) {
     showMenu<String>(
       context: context,
-      position: RelativeRect.fromLTRB(details.globalPosition.dx, details.globalPosition.dy, details.globalPosition.dx, details.globalPosition.dy),
+      position: RelativeRect.fromLTRB(
+        details.globalPosition.dx,
+        details.globalPosition.dy,
+        details.globalPosition.dx,
+        details.globalPosition.dy,
+      ),
       items: [
-        PopupMenuItem(value: 'rename', child: ListTile(leading: Icon(Icons.edit_rounded), title: Text(context.l10n.rename), dense: true)),
-        PopupMenuItem(value: 'delete', child: ListTile(leading: Icon(Icons.delete_rounded), title: Text(context.l10n.delete), dense: true)),
+        PopupMenuItem(
+          value: 'rename',
+          child: ListTile(
+            leading: Icon(Icons.edit_rounded),
+            title: Text(context.l10n.rename),
+            dense: true,
+          ),
+        ),
+        PopupMenuItem(
+          value: 'delete',
+          child: ListTile(
+            leading: Icon(Icons.delete_rounded),
+            title: Text(context.l10n.delete),
+            dense: true,
+          ),
+        ),
       ],
     ).then((value) {
       if (value == 'rename') onRename();
@@ -338,24 +453,57 @@ class _CompactListTile extends StatelessWidget {
       color: isSelected ? colorScheme.primaryContainer : null,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadiusDirectional.all(Radius.circular(12)),
-        side: BorderSide(color: isSelected ? colorScheme.primary : colorScheme.outline.withValues(alpha: 0.1)),
-      ),
-      child: ListTile(
-        leading: Icon(isSelected ? Icons.folder_open_rounded : Icons.folder_rounded, size: 20),
-        title: Text(listData.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400)),
-        subtitle: Text(context.l10n.itemCount(listData.itemCount)),
-        trailing: PopupMenuButton<String>(
-          icon: Icon(Icons.more_vert_rounded, size: 18),
-          onSelected: (value) {
-            if (value == 'rename') onRename();
-            if (value == 'delete') onDelete();
-          },
-          itemBuilder: (_) => [
-            PopupMenuItem(value: 'rename', child: ListTile(leading: Icon(Icons.edit_rounded), title: Text(context.l10n.rename), dense: true)),
-            PopupMenuItem(value: 'delete', child: ListTile(leading: Icon(Icons.delete_rounded), title: Text(context.l10n.delete), dense: true)),
-          ],
+        side: BorderSide(
+          color: isSelected
+              ? colorScheme.primary
+              : colorScheme.outline.withValues(alpha: 0.1),
         ),
-        onTap: onTap,
+      ),
+      child: Semantics(
+        button: true,
+        label:
+            '${listData.title}, ${context.l10n.itemCount(listData.itemCount)}${isSelected ? ', selected' : ''}',
+        child: ListTile(
+          leading: Icon(
+            isSelected ? Icons.folder_open_rounded : Icons.folder_rounded,
+            size: 20,
+          ),
+          title: Text(
+            listData.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            ),
+          ),
+          subtitle: Text(context.l10n.itemCount(listData.itemCount)),
+          trailing: PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert_rounded, size: 18),
+            onSelected: (value) {
+              if (value == 'rename') onRename();
+              if (value == 'delete') onDelete();
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'rename',
+                child: ListTile(
+                  leading: Icon(Icons.edit_rounded),
+                  title: Text(context.l10n.rename),
+                  dense: true,
+                ),
+              ),
+              PopupMenuItem(
+                value: 'delete',
+                child: ListTile(
+                  leading: Icon(Icons.delete_rounded),
+                  title: Text(context.l10n.delete),
+                  dense: true,
+                ),
+              ),
+            ],
+          ),
+          onTap: onTap,
+        ),
       ),
     );
   }
@@ -366,7 +514,11 @@ class _AllCollectionListTile extends StatelessWidget {
   final VoidCallback onTap;
   final bool isSelected;
 
-  const _AllCollectionListTile({required this.totalTitles, required this.onTap, required this.isSelected});
+  const _AllCollectionListTile({
+    required this.totalTitles,
+    required this.onTap,
+    required this.isSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -377,13 +529,31 @@ class _AllCollectionListTile extends StatelessWidget {
       color: isSelected ? colorScheme.secondaryContainer : null,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadiusDirectional.all(Radius.circular(12)),
-        side: BorderSide(color: isSelected ? colorScheme.secondary : colorScheme.outline.withValues(alpha: 0.1)),
+        side: BorderSide(
+          color: isSelected
+              ? colorScheme.secondary
+              : colorScheme.outline.withValues(alpha: 0.1),
+        ),
       ),
-      child: ListTile(
-        leading: Icon(Icons.collections_bookmark_rounded, size: 20, color: isSelected ? colorScheme.onSecondaryContainer : null),
-        title: Text(context.l10n.allCollections, style: TextStyle(fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400)),
-        subtitle: Text(context.l10n.itemCount(totalTitles)),
-        onTap: onTap,
+      child: Semantics(
+        button: true,
+        label:
+            '${context.l10n.allCollections}, ${context.l10n.itemCount(totalTitles)}${isSelected ? ', selected' : ''}',
+        child: ListTile(
+          leading: Icon(
+            Icons.collections_bookmark_rounded,
+            size: 20,
+            color: isSelected ? colorScheme.onSecondaryContainer : null,
+          ),
+          title: Text(
+            context.l10n.allCollections,
+            style: TextStyle(
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            ),
+          ),
+          subtitle: Text(context.l10n.itemCount(totalTitles)),
+          onTap: onTap,
+        ),
       ),
     );
   }
@@ -407,7 +577,9 @@ class _ListDetailPanelState extends ConsumerState<_ListDetailPanel> {
     final textTheme = Theme.of(context).textTheme;
     final listsAsync = ref.watch(userListsProvider);
     final itemsAsync = ref.watch(listItemsProvider(widget.listId));
-    final list = listsAsync.value?.where((l) => l.id == widget.listId).firstOrNull;
+    final list = listsAsync.value
+        ?.where((l) => l.id == widget.listId)
+        .firstOrNull;
     if (list == null) return const SizedBox.shrink();
 
     final itemCount = itemsAsync.value?.length ?? list.itemCount;
@@ -417,7 +589,11 @@ class _ListDetailPanelState extends ConsumerState<_ListDetailPanel> {
         Container(
           padding: const EdgeInsetsDirectional.fromSTEB(24, 16, 16, 12),
           decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(color: colorScheme.outline.withValues(alpha: 0.1))),
+            border: Border(
+              bottom: BorderSide(
+                color: colorScheme.outline.withValues(alpha: 0.1),
+              ),
+            ),
           ),
           child: Row(
             children: [
@@ -425,17 +601,36 @@ class _ListDetailPanelState extends ConsumerState<_ListDetailPanel> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(list.title, style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(
+                      list.title,
+                      style: textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     const SizedBox(height: 2),
-                    Text(context.l10n.itemCount(itemCount), style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+                    Text(
+                      context.l10n.itemCount(itemCount),
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                   ],
                 ),
               ),
               IconButton(
-                icon: Icon(_viewMode == MasterDetailViewMode.grid ? Icons.view_list_rounded : Icons.grid_view_rounded, size: 20),
+                icon: Icon(
+                  _viewMode == MasterDetailViewMode.grid
+                      ? Icons.view_list_rounded
+                      : Icons.grid_view_rounded,
+                  size: 20,
+                ),
                 tooltip: context.l10n.toggleView,
                 onPressed: () => setState(() {
-                  _viewMode = _viewMode == MasterDetailViewMode.grid ? MasterDetailViewMode.list : MasterDetailViewMode.grid;
+                  _viewMode = _viewMode == MasterDetailViewMode.grid
+                      ? MasterDetailViewMode.list
+                      : MasterDetailViewMode.grid;
                 }),
               ),
             ],
@@ -466,7 +661,12 @@ class _ListDetailItems extends ConsumerWidget {
 
     return itemsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => Center(child: Text(context.l10n.failedToLoadItems, style: textTheme.bodyMedium?.copyWith(color: colorScheme.error))),
+      error: (_, __) => Center(
+        child: Text(
+          context.l10n.failedToLoadItems,
+          style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
+        ),
+      ),
       data: (items) {
         if (items.isEmpty) {
           return EmptyState(
@@ -490,14 +690,18 @@ class _ListDetailItems extends ConsumerWidget {
               item: items[index],
               userMedia: userMedia,
               onTap: () {
-                final mediaData = items[index]['media'] as Map<String, dynamic>?;
+                final mediaData =
+                    items[index]['media'] as Map<String, dynamic>?;
                 final mediaId = items[index]['media_id'] as int;
-                final mediaType = mediaData?['media_type'] as String? ?? 'movie';
+                final mediaType =
+                    mediaData?['media_type'] as String? ?? 'movie';
                 context.push('/media/$mediaType/$mediaId');
               },
               onRemove: () => _confirmRemoveItem(context, ref, items[index]),
-              onMove: () => _showMoveCopyDialog(context, ref, items[index], move: true),
-              onCopy: () => _showMoveCopyDialog(context, ref, items[index], move: false),
+              onMove: () =>
+                  _showMoveCopyDialog(context, ref, items[index], move: true),
+              onCopy: () =>
+                  _showMoveCopyDialog(context, ref, items[index], move: false),
             ),
           );
         }
@@ -509,99 +713,203 @@ class _ListDetailItems extends ConsumerWidget {
             final item = items[index];
             final mediaId = item['media_id'] as int;
             final mediaData = item['media'] as Map<String, dynamic>?;
-            final title = mediaData?['title'] as String? ?? context.l10n.mediaWithId(mediaId.toString());
+            final title =
+                mediaData?['title'] as String? ??
+                context.l10n.mediaWithId(mediaId.toString());
             final posterPath = mediaData?['poster_path'] as String?;
-            final mediaType = mediaData?['media_type'] as String? ?? item['media_type'] as String? ?? 'movie';
+            final mediaType =
+                mediaData?['media_type'] as String? ??
+                item['media_type'] as String? ??
+                'movie';
             final um = userMedia.where((u) => u.mediaId == mediaId).firstOrNull;
 
-            return Card(
-              clipBehavior: Clip.antiAlias,
-              elevation: 0,
-              margin: const EdgeInsetsDirectional.only(bottom: 6),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadiusDirectional.all(Radius.circular(12)),
-                side: BorderSide(color: colorScheme.outline.withValues(alpha: 0.1)),
-              ),
-              child: InkWell(
-                onTap: () {
-                  context.push('/media/$mediaType/$mediaId');
-                },
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.all(14),
-                  child: Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadiusDirectional.all(Radius.circular(8)),
-                        child: Container(
-                          width: 56,
-                          height: 72,
-                          color: colorScheme.surfaceContainerHighest,
-                          child: posterPath != null
-                              ? CachedNetworkImage(
-                                  imageUrl: posterPath.posterUrl,
-                                  fit: BoxFit.cover,
-                                  errorWidget: (_, __, ___) => Icon(Icons.movie_outlined, size: 24, color: colorScheme.onSurfaceVariant),
-                                )
-                              : Center(child: Icon(Icons.movie_outlined, size: 24, color: colorScheme.onSurfaceVariant)),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(title, style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
-                            const SizedBox(height: 6),
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsetsDirectional.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.primaryContainer.withValues(alpha: 0.5),
-                                    borderRadius: BorderRadiusDirectional.all(Radius.circular(4)),
-                                  ),
-                                  child: Text(mediaType.toUpperCase(), style: textTheme.labelSmall?.copyWith(fontSize: 9, color: colorScheme.onPrimaryContainer)),
-                                ),
-                                if (um != null) ...[
-                                  const SizedBox(width: Spacing.sm),
-                                  Container(width: 8, height: 8, decoration: BoxDecoration(color: _statusColor(um.status.name, colorScheme), shape: BoxShape.circle)),
-                                  const SizedBox(width: Spacing.xs),
-                                  Flexible(
-                                    child: Text(
-                                      switch (um.status.name) {
-                                        'watching' => context.l10n.watching,
-                                        'completed' => context.l10n.completed,
-                                        'planToWatch' => context.l10n.planToWatch,
-                                        'onHold' => context.l10n.onHold,
-                                        'dropped' => context.l10n.dropped,
-                                        'rewatching' => context.l10n.rewatching,
-                                        _ => um.status.name,
-                                      },
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: textTheme.labelSmall?.copyWith(color: _statusColor(um.status.name, colorScheme)),
+            return Semantics(
+              button: true,
+              label:
+                  '$title${um != null ? ', ${switch (um.status.name) {
+                          'watching' => context.l10n.watching,
+                          'completed' => context.l10n.completed,
+                          'planToWatch' => context.l10n.planToWatch,
+                          'onHold' => context.l10n.onHold,
+                          'dropped' => context.l10n.dropped,
+                          _ => um.status.name,
+                        }}' : ''}',
+              child: Card(
+                clipBehavior: Clip.antiAlias,
+                elevation: 0,
+                margin: const EdgeInsetsDirectional.only(bottom: 6),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadiusDirectional.all(
+                    Radius.circular(12),
+                  ),
+                  side: BorderSide(
+                    color: colorScheme.outline.withValues(alpha: 0.1),
+                  ),
+                ),
+                child: InkWell(
+                  onTap: () {
+                    context.push('/media/$mediaType/$mediaId');
+                  },
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.all(14),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadiusDirectional.all(
+                            Radius.circular(8),
+                          ),
+                          child: Container(
+                            width: 56,
+                            height: 72,
+                            color: colorScheme.surfaceContainerHighest,
+                            child: posterPath != null
+                                ? CachedNetworkImage(
+                                    imageUrl: posterPath.posterUrl,
+                                    fit: BoxFit.cover,
+                                    errorWidget: (_, __, ___) => Icon(
+                                      Icons.movie_outlined,
+                                      size: 24,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  )
+                                : Center(
+                                    child: Icon(
+                                      Icons.movie_outlined,
+                                      size: 24,
+                                      color: colorScheme.onSurfaceVariant,
                                     ),
                                   ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                title,
+                                style: textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding:
+                                        const EdgeInsetsDirectional.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.primaryContainer
+                                          .withValues(alpha: 0.5),
+                                      borderRadius: BorderRadiusDirectional.all(
+                                        Radius.circular(4),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      mediaType.toUpperCase(),
+                                      style: textTheme.labelSmall?.copyWith(
+                                        fontSize: 9,
+                                        color: colorScheme.onPrimaryContainer,
+                                      ),
+                                    ),
+                                  ),
+                                  if (um != null) ...[
+                                    const SizedBox(width: Spacing.sm),
+                                    Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: um.status.color,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: Spacing.xs),
+                                    Flexible(
+                                      child: Text(
+                                        switch (um.status.name) {
+                                          'watching' => context.l10n.watching,
+                                          'completed' => context.l10n.completed,
+                                          'planToWatch' =>
+                                            context.l10n.planToWatch,
+                                          'onHold' => context.l10n.onHold,
+                                          'dropped' => context.l10n.dropped,
+                                          'rewatching' =>
+                                            context.l10n.rewatching,
+                                          _ => um.status.name,
+                                        },
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: textTheme.labelSmall?.copyWith(
+                                          color: um.status.color,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ],
-                              ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        PopupMenuButton<String>(
+                          icon: Icon(
+                            Icons.more_vert_rounded,
+                            size: 18,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                          onSelected: (value) {
+                            if (value == 'remove')
+                              _confirmRemoveItem(context, ref, item);
+                            if (value == 'move')
+                              _showMoveCopyDialog(
+                                context,
+                                ref,
+                                item,
+                                move: true,
+                              );
+                            if (value == 'copy')
+                              _showMoveCopyDialog(
+                                context,
+                                ref,
+                                item,
+                                move: false,
+                              );
+                          },
+                          itemBuilder: (_) => [
+                            PopupMenuItem(
+                              value: 'remove',
+                              child: ListTile(
+                                leading: Icon(
+                                  Icons.remove_circle_outline_rounded,
+                                ),
+                                title: Text(context.l10n.remove),
+                                dense: true,
+                              ),
+                            ),
+                            PopupMenuItem(
+                              value: 'move',
+                              child: ListTile(
+                                leading: Icon(Icons.drive_file_move_rounded),
+                                title: Text(context.l10n.move),
+                                dense: true,
+                              ),
+                            ),
+                            PopupMenuItem(
+                              value: 'copy',
+                              child: ListTile(
+                                leading: Icon(Icons.copy_rounded),
+                                title: Text(context.l10n.copy),
+                                dense: true,
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                      PopupMenuButton<String>(
-                        icon: Icon(Icons.more_vert_rounded, size: 18, color: colorScheme.onSurfaceVariant),
-                        onSelected: (value) {
-                          if (value == 'remove') _confirmRemoveItem(context, ref, item);
-                          if (value == 'move') _showMoveCopyDialog(context, ref, item, move: true);
-                          if (value == 'copy') _showMoveCopyDialog(context, ref, item, move: false);
-                        },
-                        itemBuilder: (_) => [
-                          PopupMenuItem(value: 'remove', child: ListTile(leading: Icon(Icons.remove_circle_outline_rounded), title: Text(context.l10n.remove), dense: true)),
-                          PopupMenuItem(value: 'move', child: ListTile(leading: Icon(Icons.drive_file_move_rounded), title: Text(context.l10n.move), dense: true)),
-                          PopupMenuItem(value: 'copy', child: ListTile(leading: Icon(Icons.copy_rounded), title: Text(context.l10n.copy), dense: true)),
-                        ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -612,18 +920,11 @@ class _ListDetailItems extends ConsumerWidget {
     );
   }
 
-  Color _statusColor(String status, ColorScheme colorScheme) {
-    return switch (status) {
-      'watching' => const Color(0xFF4CAF50),
-      'completed' => const Color(0xFF2196F3),
-      'planToWatch' => const Color(0xFF9C27B0),
-      'onHold' => const Color(0xFFFF9800),
-      'dropped' => const Color(0xFFF44336),
-      _ => colorScheme.onSurfaceVariant,
-    };
-  }
-
-  void _confirmRemoveItem(BuildContext context, WidgetRef ref, Map<String, dynamic> item) {
+  void _confirmRemoveItem(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> item,
+  ) {
     final mediaId = item['media_id'] as int;
     final mediaData = item['media'] as Map<String, dynamic>?;
     final title = mediaData?['title'] as String? ?? 'this item';
@@ -633,13 +934,22 @@ class _ListDetailItems extends ConsumerWidget {
         title: Text(context.l10n.removeListTitle(title)),
         content: Text(context.l10n.removeFromListWarning),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(context.l10n.cancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(context.l10n.cancel),
+          ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
             onPressed: () {
-              ref.read(userListsProvider.notifier).removeItemFromList(listId, mediaId);
+              ref
+                  .read(userListsProvider.notifier)
+                  .removeItemFromList(listId, mediaId);
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.removedFromList)));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(context.l10n.removedFromList)),
+              );
             },
             child: Text(context.l10n.remove),
           ),
@@ -648,14 +958,25 @@ class _ListDetailItems extends ConsumerWidget {
     );
   }
 
-  void _showMoveCopyDialog(BuildContext context, WidgetRef ref, Map<String, dynamic> item, {required bool move}) {
+  void _showMoveCopyDialog(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> item, {
+    required bool move,
+  }) {
     final mediaId = item['media_id'] as int;
     final lists = ref.read(userListsProvider).value ?? [];
     final otherLists = lists.where((l) => l.id != listId).toList();
 
     if (otherLists.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(move ? context.l10n.noOtherListsToMoveTo : context.l10n.noOtherListsToCopyTo)),
+        SnackBar(
+          content: Text(
+            move
+                ? context.l10n.noOtherListsToMoveTo
+                : context.l10n.noOtherListsToCopyTo,
+          ),
+        ),
       );
       return;
     }
@@ -668,25 +989,44 @@ class _ListDetailItems extends ConsumerWidget {
           width: double.maxFinite,
           child: ListView(
             shrinkWrap: true,
-            children: otherLists.map((list) => ListTile(
-              leading: const Icon(Icons.folder_rounded),
-              title: Text(list.title),
-              subtitle: Text(context.l10n.itemCount(list.itemCount)),
-              onTap: () {
-                if (move) {
-                  ref.read(userListsProvider.notifier).moveItemToList(listId, list.id, mediaId);
-                } else {
-                  ref.read(userListsProvider.notifier).copyItemToList(list.id, mediaId);
-                }
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(move ? context.l10n.movedToTitle(list.title) : context.l10n.copiedToTitle(list.title))),
-                );
-              },
-            )).toList(),
+            children: otherLists
+                .map(
+                  (list) => ListTile(
+                    leading: const Icon(Icons.folder_rounded),
+                    title: Text(list.title),
+                    subtitle: Text(context.l10n.itemCount(list.itemCount)),
+                    onTap: () {
+                      if (move) {
+                        ref
+                            .read(userListsProvider.notifier)
+                            .moveItemToList(listId, list.id, mediaId);
+                      } else {
+                        ref
+                            .read(userListsProvider.notifier)
+                            .copyItemToList(list.id, mediaId);
+                      }
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            move
+                                ? context.l10n.movedToTitle(list.title)
+                                : context.l10n.copiedToTitle(list.title),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                )
+                .toList(),
           ),
         ),
-        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text(context.l10n.cancel))],
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(context.l10n.cancel),
+          ),
+        ],
       ),
     );
   }
@@ -719,67 +1059,93 @@ class _LandscapeGridTile extends StatelessWidget {
     final title = mediaData?['title'] as String? ?? 'ID: $mediaId';
     final um = userMedia.where((u) => u.mediaId == mediaId).firstOrNull;
 
-    return GestureDetector(
-      onLongPressStart: (details) => _showMenu(context, details),
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadiusDirectional.all(Radius.circular(10)),
-          side: BorderSide(color: colorScheme.outline.withValues(alpha: 0.1)),
-        ),
-        child: InkWell(
-          onTap: onTap,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: posterPath != null
-                    ? CachedNetworkImage(
-                        imageUrl: posterPath.posterUrl,
-                        fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => Container(
+    return Semantics(
+      button: true,
+      label: '$title${um != null ? ', ${um.status.name}' : ''}',
+      child: GestureDetector(
+        onLongPressStart: (details) => _showMenu(context, details),
+        child: Card(
+          clipBehavior: Clip.antiAlias,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadiusDirectional.all(Radius.circular(10)),
+            side: BorderSide(color: colorScheme.outline.withValues(alpha: 0.1)),
+          ),
+          child: InkWell(
+            onTap: onTap,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: posterPath != null
+                      ? CachedNetworkImage(
+                          imageUrl: posterPath.posterUrl,
+                          fit: BoxFit.cover,
+                          errorWidget: (_, __, ___) => Container(
+                            color: colorScheme.surfaceContainerHighest,
+                            child: Center(
+                              child: Icon(
+                                Icons.movie_outlined,
+                                size: 32,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Container(
                           color: colorScheme.surfaceContainerHighest,
-                          child: Center(child: Icon(Icons.movie_outlined, size: 32, color: colorScheme.onSurfaceVariant)),
+                          child: Center(
+                            child: Icon(
+                              Icons.movie_outlined,
+                              size: 32,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                         ),
-                      )
-                    : Container(
-                        color: colorScheme.surfaceContainerHighest,
-                        child: Center(child: Icon(Icons.movie_outlined, size: 32, color: colorScheme.onSurfaceVariant)),
-                      ),
-              ),
-              Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(6, 4, 6, 4),
-                child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600)),
-              ),
-              if (um != null)
-                Container(
-                  padding: const EdgeInsetsDirectional.symmetric(horizontal: 6, vertical: 3),
-                  color: colorScheme.surfaceContainerLow,
-                  child: Row(
-                    children: [
-                      _statusDot(um.status.name, colorScheme),
-                      const SizedBox(width: Spacing.xs),
-                      Expanded(
-                        child: Text(
-                          switch (um.status.name) {
-                            'watching' => context.l10n.watching,
-                            'completed' => context.l10n.completed,
-                            'planToWatch' => context.l10n.planToWatch,
-                            'onHold' => context.l10n.onHold,
-                            'dropped' => context.l10n.dropped,
-                            'rewatching' => context.l10n.rewatching,
-                            _ => um.status.name,
-                          },
-                          style: textTheme.labelSmall?.copyWith(fontSize: 9),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+                ),
+                Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(6, 4, 6, 4),
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-            ],
+                if (um != null)
+                  Container(
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: 6,
+                      vertical: 3,
+                    ),
+                    color: colorScheme.surfaceContainerLow,
+                    child: Row(
+                      children: [
+                        _statusDot(um.status.name, colorScheme),
+                        const SizedBox(width: Spacing.xs),
+                        Expanded(
+                          child: Text(
+                            switch (um.status.name) {
+                              'watching' => context.l10n.watching,
+                              'completed' => context.l10n.completed,
+                              'planToWatch' => context.l10n.planToWatch,
+                              'onHold' => context.l10n.onHold,
+                              'dropped' => context.l10n.dropped,
+                              'rewatching' => context.l10n.rewatching,
+                              _ => um.status.name,
+                            },
+                            style: textTheme.labelSmall?.copyWith(fontSize: 9),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -795,17 +1161,47 @@ class _LandscapeGridTile extends StatelessWidget {
       'dropped' => const Color(0xFFF44336),
       _ => colorScheme.onSurfaceVariant,
     };
-    return Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle));
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    );
   }
 
   void _showMenu(BuildContext context, LongPressStartDetails details) {
     showMenu<String>(
       context: context,
-      position: RelativeRect.fromLTRB(details.globalPosition.dx, details.globalPosition.dy, details.globalPosition.dx, details.globalPosition.dy),
+      position: RelativeRect.fromLTRB(
+        details.globalPosition.dx,
+        details.globalPosition.dy,
+        details.globalPosition.dx,
+        details.globalPosition.dy,
+      ),
       items: [
-        PopupMenuItem(value: 'remove', child: ListTile(leading: Icon(Icons.remove_circle_outline_rounded), title: Text(context.l10n.remove), dense: true)),
-        PopupMenuItem(value: 'move', child: ListTile(leading: Icon(Icons.drive_file_move_rounded), title: Text(context.l10n.move), dense: true)),
-        PopupMenuItem(value: 'copy', child: ListTile(leading: Icon(Icons.copy_rounded), title: Text(context.l10n.copy), dense: true)),
+        PopupMenuItem(
+          value: 'remove',
+          child: ListTile(
+            leading: Icon(Icons.remove_circle_outline_rounded),
+            title: Text(context.l10n.remove),
+            dense: true,
+          ),
+        ),
+        PopupMenuItem(
+          value: 'move',
+          child: ListTile(
+            leading: Icon(Icons.drive_file_move_rounded),
+            title: Text(context.l10n.move),
+            dense: true,
+          ),
+        ),
+        PopupMenuItem(
+          value: 'copy',
+          child: ListTile(
+            leading: Icon(Icons.copy_rounded),
+            title: Text(context.l10n.copy),
+            dense: true,
+          ),
+        ),
       ],
     ).then((value) {
       if (value == 'remove') onRemove();
@@ -826,72 +1222,96 @@ class _AllCollectionCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadiusDirectional.all(Radius.circular(16)),
-        side: BorderSide(color: colorScheme.outline.withValues(alpha: 0.15)),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [colorScheme.primaryContainer, colorScheme.secondaryContainer],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: Center(
-                  child: Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.25),
-                      shape: BoxShape.circle,
+    return Semantics(
+      button: true,
+      label:
+          '${context.l10n.allCollections}, ${totalTitles == 1 ? '$totalTitles ${context.l10n.item}' : '$totalTitles ${context.l10n.items}'}',
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadiusDirectional.all(Radius.circular(16)),
+          side: BorderSide(color: colorScheme.outline.withValues(alpha: 0.15)),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        colorScheme.primaryContainer,
+                        colorScheme.secondaryContainer,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    child: Icon(Icons.collections_bookmark_rounded, size: 28, color: Colors.white),
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.25),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.collections_bookmark_rounded,
+                        size: 28,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(14, 10, 14, 4),
-              child:               Text(
-                context.l10n.allCollections,
-                style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(14, 0, 14, 4),
-              child: Text(
-                '${totalTitles == 1 ? '$totalTitles ${context.l10n.item}' : '$totalTitles ${context.l10n.items}'}',
-                style: textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(14, 0, 14, 10),
-              child: Container(
-                padding: const EdgeInsetsDirectional.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadiusDirectional.all(Radius.circular(6)),
-                ),
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(14, 10, 14, 4),
                 child: Text(
-                  context.l10n.allItems,
-                  style: textTheme.labelSmall?.copyWith(fontSize: 9, color: colorScheme.onPrimaryContainer),
+                  context.l10n.allCollections,
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(14, 0, 14, 4),
+                child: Text(
+                  '${totalTitles == 1 ? '$totalTitles ${context.l10n.item}' : '$totalTitles ${context.l10n.items}'}',
+                  style: textTheme.labelSmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(14, 0, 14, 10),
+                child: Container(
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    borderRadius: BorderRadiusDirectional.all(
+                      Radius.circular(6),
+                    ),
+                  ),
+                  child: Text(
+                    context.l10n.allItems,
+                    style: textTheme.labelSmall?.copyWith(
+                      fontSize: 9,
+                      color: colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -248,6 +248,12 @@ abstract class AppLocalizations {
   /// **'Lists'**
   String get navLists;
 
+  /// No description provided for @navTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking'**
+  String get navTracking;
+
   /// No description provided for @navProfile.
   ///
   /// In en, this message translates to:
@@ -632,6 +638,36 @@ abstract class AppLocalizations {
   /// **'Collaborative'**
   String get collaborative;
 
+  /// No description provided for @inviteCollaborator.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite Collaborator'**
+  String get inviteCollaborator;
+
+  /// No description provided for @inviteCollaboratorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter username to invite'**
+  String get inviteCollaboratorHint;
+
+  /// No description provided for @collaborators.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} collaborators'**
+  String collaborators(Object count);
+
+  /// No description provided for @noCollaborators.
+  ///
+  /// In en, this message translates to:
+  /// **'No collaborators yet'**
+  String get noCollaborators;
+
+  /// No description provided for @inviteSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation sent'**
+  String get inviteSent;
+
   /// No description provided for @addToListTitle.
   ///
   /// In en, this message translates to:
@@ -955,6 +991,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recommendations & Privacy'**
   String get recommendationsAndPrivacy;
+
+  /// No description provided for @privacySettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Settings'**
+  String get privacySettings;
+
+  /// No description provided for @publicProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Public Profile'**
+  String get publicProfile;
+
+  /// No description provided for @publicProfileDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow other users to view your profile'**
+  String get publicProfileDesc;
+
+  /// No description provided for @showActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Activity'**
+  String get showActivity;
+
+  /// No description provided for @showActivityDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Display your recently watched items to others'**
+  String get showActivityDesc;
 
   /// No description provided for @personalizedRecommendations.
   ///
@@ -3026,6 +3092,12 @@ abstract class AppLocalizations {
   /// **'Like'**
   String get likeLabel;
 
+  /// No description provided for @dislikeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dislike'**
+  String get dislikeLabel;
+
   /// No description provided for @previousSlide.
   ///
   /// In en, this message translates to:
@@ -3367,6 +3439,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show less'**
   String get showLess;
+
+  /// No description provided for @containsSpoilers.
+  ///
+  /// In en, this message translates to:
+  /// **'Contains spoilers'**
+  String get containsSpoilers;
+
+  /// No description provided for @allReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'All Reviews'**
+  String get allReviews;
+
+  /// No description provided for @noUserReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t written any reviews yet.'**
+  String get noUserReviews;
+
+  /// No description provided for @clearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get clearSearch;
+
+  /// No description provided for @clearAllFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all filters'**
+  String get clearAllFilters;
+
+  /// No description provided for @votes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} votes'**
+  String votes(int count);
+
+  /// No description provided for @percentScore.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent} percent score'**
+  String percentScore(int percent);
+
+  /// No description provided for @tapToRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to rate, currently {current} out of {total} stars'**
+  String tapToRate(int current, int total);
+
+  /// No description provided for @ratingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating: {rating} out of 10'**
+  String ratingLabel(String rating);
 }
 
 class _AppLocalizationsDelegate

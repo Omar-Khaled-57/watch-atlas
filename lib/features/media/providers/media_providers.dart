@@ -11,7 +11,9 @@ class _MediaIdNotifier extends Notifier<int?> {
   void update(int? id) => state = id;
 }
 
-final mediaIdProvider = NotifierProvider<_MediaIdNotifier, int?>(_MediaIdNotifier.new);
+final mediaIdProvider = NotifierProvider<_MediaIdNotifier, int?>(
+  _MediaIdNotifier.new,
+);
 
 class _MediaTypeNotifier extends Notifier<MediaType> {
   @override
@@ -20,7 +22,9 @@ class _MediaTypeNotifier extends Notifier<MediaType> {
   void update(MediaType type) => state = type;
 }
 
-final mediaTypeProvider = NotifierProvider<_MediaTypeNotifier, MediaType>(_MediaTypeNotifier.new);
+final mediaTypeProvider = NotifierProvider<_MediaTypeNotifier, MediaType>(
+  _MediaTypeNotifier.new,
+);
 
 final mediaDetailsProvider = FutureProvider<MediaModel>((ref) async {
   final mediaId = ref.watch(mediaIdProvider);
@@ -33,7 +37,9 @@ final mediaDetailsProvider = FutureProvider<MediaModel>((ref) async {
 
   final tmdb = ref.watch(tmdbServiceProvider);
   final bool isTv = mediaType == MediaType.tv;
-  final data = isTv ? await tmdb.tvDetails(mediaId) : await tmdb.movieDetails(mediaId);
+  final data = isTv
+      ? await tmdb.tvDetails(mediaId)
+      : await tmdb.movieDetails(mediaId);
 
   return MediaModel(
     id: data['id'] as int,
@@ -48,7 +54,8 @@ final mediaDetailsProvider = FutureProvider<MediaModel>((ref) async {
     voteCount: data['vote_count'] as int?,
     popularity: (data['popularity'] as num?)?.toDouble() ?? 0,
     releaseDate: _parseDateTv(data, isTv),
-    runtime: data['runtime'] as int? ??
+    runtime:
+        data['runtime'] as int? ??
         (data['episode_run_time'] as List<dynamic>?)?.firstOrNull as int?,
     genres: (data['genres'] as List<dynamic>?)
         ?.map((g) => g['name'] as String)
@@ -64,14 +71,18 @@ final mediaDetailsProvider = FutureProvider<MediaModel>((ref) async {
 });
 
 /// Caches the raw TMDB/AniList response so sub-providers don't re-fetch.
-final _rawMediaDetailsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final _rawMediaDetailsProvider = FutureProvider<Map<String, dynamic>>((
+  ref,
+) async {
   final mediaId = ref.watch(mediaIdProvider);
   final mediaType = ref.watch(mediaTypeProvider);
   if (mediaId == null) throw Exception('No media ID provided');
   if (mediaType == MediaType.anime) return {};
   final tmdb = ref.watch(tmdbServiceProvider);
   final isTv = mediaType == MediaType.tv;
-  return isTv ? await tmdb.tvDetails(mediaId) : await tmdb.movieDetails(mediaId);
+  return isTv
+      ? await tmdb.tvDetails(mediaId)
+      : await tmdb.movieDetails(mediaId);
 });
 
 final mediaCreditsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
@@ -85,7 +96,9 @@ final mediaCreditsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   };
 });
 
-final mediaRecommendationsProvider = FutureProvider<List<MediaModel>>((ref) async {
+final mediaRecommendationsProvider = FutureProvider<List<MediaModel>>((
+  ref,
+) async {
   final mediaId = ref.watch(mediaIdProvider);
   final mediaType = ref.watch(mediaTypeProvider);
   if (mediaId == null) throw Exception('No media ID provided');
@@ -138,7 +151,10 @@ final mediaReviewsProvider = FutureProvider<List<ReviewModel>>((ref) async {
       return ReviewModel(
         id: json['id'] as String,
         mediaId: mediaId,
-        userId: author['username'] as String? ?? json['author'] as String? ?? 'Anonymous',
+        userId:
+            author['username'] as String? ??
+            json['author'] as String? ??
+            'Anonymous',
         content: json['content'] as String? ?? '',
         rating: (author['rating'] as num?)?.toDouble(),
         createdAt: DateTime.tryParse(json['created_at'] as String? ?? ''),
@@ -149,14 +165,20 @@ final mediaReviewsProvider = FutureProvider<List<ReviewModel>>((ref) async {
   }
 });
 
-final mediaTrailersProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final mediaTrailersProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final mediaId = ref.watch(mediaIdProvider);
   if (mediaId == null) throw Exception('No media ID provided');
   final data = await ref.watch(_rawMediaDetailsProvider.future);
   final videos = data['videos'] as Map<String, dynamic>? ?? {};
   final results = videos['results'] as List<dynamic>? ?? [];
   return results
-      .where((v) => (v['site'] as String?) == 'YouTube' && (v['type'] as String?) == 'Trailer')
+      .where(
+        (v) =>
+            (v['site'] as String?) == 'YouTube' &&
+            (v['type'] as String?) == 'Trailer',
+      )
       .map((v) => v as Map<String, dynamic>)
       .take(5)
       .toList();
@@ -169,7 +191,8 @@ Future<MediaModel> _animeDetails(int mediaId, Ref ref) async {
   return MediaModel(
     id: mediaId,
     mediaType: MediaType.anime,
-    title: titleData['userPreferred'] as String? ??
+    title:
+        titleData['userPreferred'] as String? ??
         titleData['romaji'] as String? ??
         titleData['english'] as String? ??
         '',
@@ -195,15 +218,25 @@ Future<MediaModel> _animeDetails(int mediaId, Ref ref) async {
 
 String? _stripHtml(String? html) {
   if (html == null) return null;
-  return html.replaceAll(RegExp(r'<[^>]*>'), '').replaceAll('&nbsp;', ' ').trim();
+  return html
+      .replaceAll(RegExp(r'<[^>]*>'), '')
+      .replaceAll('&nbsp;', ' ')
+      .trim();
 }
 
-String _tmdbField(Map<String, dynamic> data, bool isTv, String movieKey, String tvKey) {
+String _tmdbField(
+  Map<String, dynamic> data,
+  bool isTv,
+  String movieKey,
+  String tvKey,
+) {
   return (data[isTv ? tvKey : movieKey] as String?) ?? '';
 }
 
 DateTime? _parseDateTv(Map<String, dynamic> data, bool isTv) {
-  final dateStr = isTv ? data['first_air_date'] as String? : data['release_date'] as String?;
+  final dateStr = isTv
+      ? data['first_air_date'] as String?
+      : data['release_date'] as String?;
   if (dateStr == null) return null;
   return DateTime.tryParse(dateStr);
 }
@@ -221,7 +254,8 @@ String? _extractTrailerUrl(Map<String, dynamic>? videos) {
   if (videos == null) return null;
   final results = videos['results'] as List<dynamic>? ?? [];
   for (final v in results) {
-    if ((v['site'] as String?) == 'YouTube' && (v['type'] as String?) == 'Trailer') {
+    if ((v['site'] as String?) == 'YouTube' &&
+        (v['type'] as String?) == 'Trailer') {
       final key = v['key'] as String?;
       if (key != null) return 'https://www.youtube.com/watch?v=$key';
     }

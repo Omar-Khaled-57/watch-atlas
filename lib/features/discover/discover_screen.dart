@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +17,6 @@ import '../../models/media_model.dart';
 import 'providers/discover_providers.dart';
 import 'widgets/filter_chip.dart';
 import '../../l10n/l10n.dart';
-// import 'widgets/filter_sheet.dart';
 
 class DiscoverScreen extends ConsumerStatefulWidget {
   const DiscoverScreen({super.key});
@@ -60,9 +58,9 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
       final query = value.trim();
       if (query != _lastSearchQuery) {
         _lastSearchQuery = query;
-        ref.read(discoverFilterProvider.notifier).setSearchQuery(
-              query.isEmpty ? null : query,
-            );
+        ref
+            .read(discoverFilterProvider.notifier)
+            .setSearchQuery(query.isEmpty ? null : query);
       }
     });
   }
@@ -70,10 +68,12 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
   Future<List<MediaModel>> _fetchPage(int pageKey) async {
     final filters = ref.read(discoverFilterProvider);
     final anilist = ref.read(anilistServiceProvider);
+    final tmdb = ref.read(tmdbServiceProvider);
     return fetchDiscoverPage(
       page: pageKey,
       filters: filters,
       anilist: anilist,
+      tmdb: tmdb,
     );
   }
 
@@ -104,16 +104,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
         (screenWidth - gridPadding * 2 - (columns - 1) * spacing) / columns;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.discover),
-        actions: [
-          // IconButton(
-          //   icon: const Icon(Icons.filter_list),
-          //   onPressed: () => _showFilterSheet(context),
-          //   tooltip: 'Filters',
-          // ),
-        ],
-      ),
+      appBar: AppBar(title: Text(context.l10n.discover)),
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(child: SizedBox(height: 4)),
@@ -142,7 +133,12 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
             ),
           ),
           SliverPadding(
-            padding: EdgeInsetsDirectional.fromSTEB(Spacing.lg, 0, Spacing.lg, Spacing.lg),
+            padding: EdgeInsetsDirectional.fromSTEB(
+              Spacing.lg,
+              0,
+              Spacing.lg,
+              Spacing.lg,
+            ),
             sliver: PagingListener<int, MediaModel>(
               controller: _pagingController,
               builder: (context, state, fetchNextPage) {
@@ -156,34 +152,38 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                     mainAxisSpacing: spacing,
                   ),
                   builderDelegate: PagedChildBuilderDelegate<MediaModel>(
-                    itemBuilder: (context, item, index) => MediaCard(
-                      id: item.id,
-                      title: item.title,
-                      posterUrl: AppConstants.mediaImageUrl(item.posterPath),
-                      voteAverage: item.voteAverage,
-                      mediaType: item.mediaType,
-                      width: cardWidth,
-                      onTap: () => _navigateToDetail(item),
-                    ).animate().fadeIn(
-                          duration: 300.ms,
-                          delay: (index % 20 * 30).ms,
-                          curve: Curves.easeOutCubic,
-                        ).slideY(
-                          begin: 0.04,
-                          end: 0,
-                          duration: 300.ms,
-                          delay: (index % 20 * 30).ms,
-                          curve: Curves.easeOutCubic,
-                        ),
-                    firstPageProgressIndicatorBuilder: (_) =>
-                        const Center(
+                    itemBuilder: (context, item, index) =>
+                        MediaCard(
+                              id: item.id,
+                              title: item.title,
+                              posterUrl: AppConstants.mediaImageUrl(
+                                item.posterPath,
+                              ),
+                              voteAverage: item.voteAverage,
+                              mediaType: item.mediaType,
+                              width: cardWidth,
+                              onTap: () => _navigateToDetail(item),
+                            )
+                            .animate()
+                            .fadeIn(
+                              duration: 300.ms,
+                              delay: (index % 20 * 30).ms,
+                              curve: Curves.easeOutCubic,
+                            )
+                            .slideY(
+                              begin: 0.04,
+                              end: 0,
+                              duration: 300.ms,
+                              delay: (index % 20 * 30).ms,
+                              curve: Curves.easeOutCubic,
+                            ),
+                    firstPageProgressIndicatorBuilder: (_) => const Center(
                       child: Padding(
                         padding: EdgeInsets.all(Spacing.xxl),
                         child: CircularProgressIndicator(),
                       ),
                     ),
-                    newPageProgressIndicatorBuilder: (_) =>
-                        const Center(
+                    newPageProgressIndicatorBuilder: (_) => const Center(
                       child: Padding(
                         padding: EdgeInsets.all(Spacing.lg),
                         child: CircularProgressIndicator(),
@@ -230,44 +230,74 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     final colorScheme = context.colorScheme;
     return Padding(
       padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg),
-      child: TextField(
-        controller: _searchController,
-        onChanged: _onSearchChanged,
-        decoration: InputDecoration(
-          hintText: context.l10n.searchMoviesTvAnime,
-          hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-          prefixIcon: Icon(Icons.search_rounded, color: colorScheme.onSurfaceVariant),
-          suffixIcon: _searchController.text.isNotEmpty
-              ? IconButton(
-                  icon: Icon(Icons.clear_rounded, color: colorScheme.onSurfaceVariant),
-                  onPressed: () {
-                    _searchController.clear();
-                    _lastSearchQuery = '';
-                    ref.read(discoverFilterProvider.notifier).setSearchQuery(null);
-                  },
-                )
-              : null,
-          filled: true,
-          fillColor: colorScheme.surfaceContainerHighest,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
-            borderSide: BorderSide.none,
+      child: Semantics(
+        label: context.l10n.searchMoviesTvAnime,
+        child: TextField(
+          controller: _searchController,
+          onChanged: _onSearchChanged,
+          decoration: InputDecoration(
+            hintText: context.l10n.searchMoviesTvAnime,
+            hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+            prefixIcon: Icon(
+              Icons.search_rounded,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            suffixIcon: _searchController.text.isNotEmpty
+                ? Semantics(
+                    button: true,
+                    label: context.l10n.clearSearch,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.clear_rounded,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      onPressed: () {
+                        _searchController.clear();
+                        _lastSearchQuery = '';
+                        ref
+                            .read(discoverFilterProvider.notifier)
+                            .setSearchQuery(null);
+                      },
+                      tooltip: context.l10n.clearSearch,
+                    ),
+                  )
+                : null,
+            filled: true,
+            fillColor: colorScheme.surfaceContainerHighest,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: EdgeInsetsDirectional.symmetric(
+              vertical: Spacing.md,
+            ),
           ),
-          contentPadding: EdgeInsetsDirectional.symmetric(vertical: Spacing.md),
+          style: TextStyle(color: colorScheme.onSurface),
         ),
-        style: TextStyle(color: colorScheme.onSurface),
       ),
     );
   }
 
   Widget _buildTabBar(DiscoverFilters filters) {
     return Padding(
-      padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg, vertical: 2),
+      padding: EdgeInsetsDirectional.symmetric(
+        horizontal: Spacing.lg,
+        vertical: 2,
+      ),
       child: SegmentedButton<DiscoverMediaTab>(
         segments: [
-          ButtonSegment(value: DiscoverMediaTab.movies, label: Text(context.l10n.movies)),
-          ButtonSegment(value: DiscoverMediaTab.tv, label: Text(context.l10n.tvShows)),
-          ButtonSegment(value: DiscoverMediaTab.anime, label: Text(context.l10n.anime)),
+          ButtonSegment(
+            value: DiscoverMediaTab.movies,
+            label: Text(context.l10n.movies),
+          ),
+          ButtonSegment(
+            value: DiscoverMediaTab.tv,
+            label: Text(context.l10n.tvShows),
+          ),
+          ButtonSegment(
+            value: DiscoverMediaTab.anime,
+            label: Text(context.l10n.anime),
+          ),
         ],
         selected: {filters.tab},
         onSelectionChanged: (selected) {
@@ -276,9 +306,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
         style: ButtonStyle(
           visualDensity: VisualDensity.compact,
           shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
       ),
@@ -310,7 +338,10 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
           height: 48,
           itemCount: 8,
           separatorWidth: Spacing.sm,
-          padding: EdgeInsetsDirectional.only(start: Spacing.lg, end: Spacing.lg),
+          padding: EdgeInsetsDirectional.only(
+            start: Spacing.lg,
+            end: Spacing.lg,
+          ),
           itemBuilder: (_, __) => Container(
             width: 80,
             height: 36,
@@ -326,7 +357,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
   }
 
   Widget _buildActiveFilters(DiscoverFilters filters) {
-    final hasActiveFilters = filters.genreId != null ||
+    final hasActiveFilters =
+        filters.genreId != null ||
         filters.country != null ||
         filters.yearFrom != null ||
         filters.yearTo != null ||
@@ -341,29 +373,38 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     if (filters.genreId != null) {
       final genres = ref.watch(genreListProvider).value ?? [];
       final genre = genres.where((g) => g.id == filters.genreId).firstOrNull;
-      chips.add(_buildActiveChip(
-        genre != null ? 'Genre: ${genre.name}' : '#${filters.genreId}',
-        theme,
-      ));
+      chips.add(
+        _buildActiveChip(
+          genre != null ? 'Genre: ${genre.name}' : '#${filters.genreId}',
+          theme,
+        ),
+      );
     }
     if (filters.country != null) {
       chips.add(_buildActiveChip('Country: ${filters.country}', theme));
     }
     if (filters.yearFrom != null || filters.yearTo != null) {
-      chips.add(_buildActiveChip(
-        'Year: ${filters.yearFrom ?? "..."}-${filters.yearTo ?? "..."}',
-        theme,
-      ));
+      chips.add(
+        _buildActiveChip(
+          'Year: ${filters.yearFrom ?? "..."}-${filters.yearTo ?? "..."}',
+          theme,
+        ),
+      );
     }
     if (filters.ratingFrom != null || filters.ratingTo != null) {
-      chips.add(_buildActiveChip(
-        'Rating: ${filters.ratingFrom?.toStringAsFixed(1) ?? "0"}-${filters.ratingTo?.toStringAsFixed(1) ?? "10"}',
-        theme,
-      ));
+      chips.add(
+        _buildActiveChip(
+          'Rating: ${filters.ratingFrom?.toStringAsFixed(1) ?? "0"}-${filters.ratingTo?.toStringAsFixed(1) ?? "10"}',
+          theme,
+        ),
+      );
     }
 
     return Padding(
-      padding: EdgeInsetsDirectional.symmetric(horizontal: Spacing.lg, vertical: Spacing.xs),
+      padding: EdgeInsetsDirectional.symmetric(
+        horizontal: Spacing.lg,
+        vertical: Spacing.xs,
+      ),
       child: Row(
         children: [
           Expanded(
@@ -373,10 +414,17 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
             ),
           ),
           const SizedBox(width: Spacing.sm),
-          GestureDetector(
-            onTap: () =>
-                ref.read(discoverFilterProvider.notifier).clearAll(),
-            child: Icon(Icons.close, size: 18, color: theme.colorScheme.error),
+          Semantics(
+            button: true,
+            label: context.l10n.clearAllFilters,
+            child: GestureDetector(
+              onTap: () => ref.read(discoverFilterProvider.notifier).clearAll(),
+              child: Icon(
+                Icons.close,
+                size: 18,
+                color: theme.colorScheme.error,
+              ),
+            ),
           ),
         ],
       ),
@@ -401,15 +449,6 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
       ),
     );
   }
-
-  // void _showFilterSheet(BuildContext context) {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     isScrollControlled: true,
-  //     backgroundColor: Colors.transparent,
-  //     builder: (_) => const FilterSheet(),
-  //   );
-  // }
 
   void _navigateToDetail(MediaModel media) {
     context.push('/media/${media.mediaType.name}/${media.id}');
@@ -439,7 +478,9 @@ class _GenreChipsCarouselState extends State<_GenreChipsCarousel> {
 
   bool get _useGrabToScroll {
     if (kIsWeb) return true;
-    if (!Platform.isAndroid && !Platform.isIOS) return true;
+    final platform = Theme.of(context).platform;
+    if (platform != TargetPlatform.android && platform != TargetPlatform.iOS)
+      return true;
     return MediaQuery.of(context).orientation == Orientation.landscape;
   }
 
@@ -518,7 +559,9 @@ class _GenreChipsCarouselState extends State<_GenreChipsCarousel> {
     if (!_useGrabToScroll) return _buildList();
 
     return MouseRegion(
-      cursor: _isDragging ? SystemMouseCursors.grabbing : SystemMouseCursors.grab,
+      cursor: _isDragging
+          ? SystemMouseCursors.grabbing
+          : SystemMouseCursors.grab,
       child: GestureDetector(
         onHorizontalDragStart: _onDragStart,
         onHorizontalDragUpdate: _onDragUpdate,

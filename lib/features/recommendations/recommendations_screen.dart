@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
+import '../../core/providers/app_providers.dart';
 import '../../core/shared/horizontal_carousel.dart';
 import '../../l10n/l10n.dart';
 import '../../l10n/app_localizations.dart';
@@ -16,7 +17,10 @@ class _SelectedCategoryNotifier extends Notifier<RecCategory> {
   void select(RecCategory cat) => state = cat;
 }
 
-final _selectedCategoryProvider = NotifierProvider<_SelectedCategoryNotifier, RecCategory>(_SelectedCategoryNotifier.new);
+final _selectedCategoryProvider =
+    NotifierProvider<_SelectedCategoryNotifier, RecCategory>(
+      _SelectedCategoryNotifier.new,
+    );
 
 class RecommendationsScreen extends ConsumerWidget {
   const RecommendationsScreen({super.key});
@@ -29,12 +33,12 @@ class RecommendationsScreen extends ConsumerWidget {
 
     final recommendationsAsync = ref.watch(recommendationsProvider);
     final selectedCategory = ref.watch(_selectedCategoryProvider);
-    final categoryItemsAsync = ref.watch(recommendationCategoryProvider(selectedCategory));
+    final categoryItemsAsync = ref.watch(
+      recommendationCategoryProvider(selectedCategory),
+    );
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.personalizedRecommendations),
-      ),
+      appBar: AppBar(title: Text(l10n.personalizedRecommendations)),
       body: OrientationBuilder(
         builder: (context, orientation) {
           if (orientation == Orientation.landscape) {
@@ -135,11 +139,16 @@ class RecommendationsScreen extends ConsumerWidget {
                       return RecommendationCard(
                         scoredMedia: item,
                         onTap: () {
-                          ref.read(behaviorServiceProvider).trackRecommendationClick(
+                          ref
+                              .read(behaviorServiceProvider)
+                              .trackRecommendationClick(
                                 item.mediaId,
                                 item.category.dbValue,
                               );
-                          context.navigateToMedia('movie', item.mediaId.toString());
+                          context.navigateToMedia(
+                            'movie',
+                            item.mediaId.toString(),
+                          );
                         },
                       );
                     },
@@ -147,7 +156,12 @@ class RecommendationsScreen extends ConsumerWidget {
                   SizedBox(height: Spacing.lg),
                   Center(
                     child: FilledButton.icon(
-                      onPressed: () => _showAllRecommendations(context, ref, recommendationsAsync, l10n),
+                      onPressed: () => _showAllRecommendations(
+                        context,
+                        ref,
+                        recommendationsAsync,
+                        l10n,
+                      ),
                       icon: Icon(Icons.arrow_forward_rounded),
                       label: Text(l10n.seeMore),
                     ),
@@ -230,7 +244,8 @@ class RecommendationsScreen extends ConsumerWidget {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: MediaQuery.of(context).size.width >= 1440 ? 5 : 4,
+                        crossAxisCount:
+                            MediaQuery.of(context).size.width >= 1440 ? 5 : 4,
                         childAspectRatio: 0.65,
                         crossAxisSpacing: Spacing.md,
                         mainAxisSpacing: Spacing.md,
@@ -241,11 +256,16 @@ class RecommendationsScreen extends ConsumerWidget {
                         return RecommendationCard(
                           scoredMedia: item,
                           onTap: () {
-                            ref.read(behaviorServiceProvider).trackRecommendationClick(
+                            ref
+                                .read(behaviorServiceProvider)
+                                .trackRecommendationClick(
                                   item.mediaId,
                                   item.category.dbValue,
                                 );
-                            context.navigateToMedia('movie', item.mediaId.toString());
+                            context.navigateToMedia(
+                              'movie',
+                              item.mediaId.toString(),
+                            );
                           },
                         );
                       },
@@ -256,10 +276,7 @@ class RecommendationsScreen extends ConsumerWidget {
             ),
           ),
         ),
-        Container(
-          width: 1,
-          color: colorScheme.outline.withValues(alpha: 0.2),
-        ),
+        Container(width: 1, color: colorScheme.outline.withValues(alpha: 0.2)),
         Expanded(
           flex: 2,
           child: SingleChildScrollView(
@@ -275,13 +292,25 @@ class RecommendationsScreen extends ConsumerWidget {
                   ),
                 ),
                 SizedBox(height: Spacing.md),
-                ..._buildCategoryTiles(context, ref, selectedCategory, l10n, colorScheme, textTheme),
+                ..._buildCategoryTiles(
+                  context,
+                  ref,
+                  selectedCategory,
+                  l10n,
+                  colorScheme,
+                  textTheme,
+                ),
                 SizedBox(height: Spacing.lg),
                 FilledButton.icon(
-                    onPressed: () => _showAllRecommendations(context, ref, recommendationsAsync, l10n),
-                    icon: Icon(Icons.grid_view_rounded),
-                    label: Text(l10n.viewAllRecommendations),
+                  onPressed: () => _showAllRecommendations(
+                    context,
+                    ref,
+                    recommendationsAsync,
+                    l10n,
                   ),
+                  icon: Icon(Icons.grid_view_rounded),
+                  label: Text(l10n.viewAllRecommendations),
+                ),
               ],
             ),
           ),
@@ -435,7 +464,8 @@ class RecommendationsScreen extends ConsumerWidget {
           height: 400,
           child: recommendationsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, _) => Center(child: Text(l10n.failedToLoadRecommendations)),
+            error: (err, _) =>
+                Center(child: Text(l10n.failedToLoadRecommendations)),
             data: (recs) {
               final allItems = recs.values.expand((e) => e).toList();
               if (allItems.isEmpty) {
@@ -443,7 +473,9 @@ class RecommendationsScreen extends ConsumerWidget {
               }
               return GridView.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: MediaQuery.of(context).size.width >= 600 ? 4 : 3,
+                  crossAxisCount: MediaQuery.of(context).size.width >= 600
+                      ? 4
+                      : 3,
                   childAspectRatio: 0.65,
                   crossAxisSpacing: Spacing.md,
                   mainAxisSpacing: Spacing.md,
@@ -454,7 +486,9 @@ class RecommendationsScreen extends ConsumerWidget {
                   return RecommendationCard(
                     scoredMedia: item,
                     onTap: () {
-                      ref.read(behaviorServiceProvider).trackRecommendationClick(
+                      ref
+                          .read(behaviorServiceProvider)
+                          .trackRecommendationClick(
                             item.mediaId,
                             item.category.dbValue,
                           );
@@ -551,38 +585,54 @@ class _CategoryTile extends StatelessWidget {
         ? colorScheme.primaryContainer
         : Colors.transparent;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.all(Radius.circular(8)),
-      child: Container(
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.all(Radius.circular(8)),
-        ),
-        padding: EdgeInsetsDirectional.symmetric(vertical: Spacing.sm, horizontal: Spacing.xs),
-        child: Row(
-          children: [
-            Icon(
-              Icons.auto_awesome_rounded,
-              size: 20,
-              color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.primary,
-            ),
-            SizedBox(width: Spacing.sm),
-            Expanded(
-              child: Text(
-                label,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurface,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: '$label${isSelected ? ', selected' : ''}',
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+        child: Container(
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+          padding: EdgeInsetsDirectional.symmetric(
+            vertical: Spacing.sm,
+            horizontal: Spacing.xs,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.auto_awesome_rounded,
+                size: 20,
+                color: isSelected
+                    ? colorScheme.onPrimaryContainer
+                    : colorScheme.primary,
+              ),
+              SizedBox(width: Spacing.sm),
+              Expanded(
+                child: Text(
+                  label,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: isSelected
+                        ? colorScheme.onPrimaryContainer
+                        : colorScheme.onSurface,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
+                  ),
                 ),
               ),
-            ),
-            Icon(
-              isSelected ? Icons.check_rounded : Icons.chevron_right_rounded,
-              size: 20,
-              color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant,
-            ),
-          ],
+              Icon(
+                isSelected ? Icons.check_rounded : Icons.chevron_right_rounded,
+                size: 20,
+                color: isSelected
+                    ? colorScheme.onPrimaryContainer
+                    : colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
         ),
       ),
     );

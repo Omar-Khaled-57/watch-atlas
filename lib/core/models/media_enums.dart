@@ -21,37 +21,21 @@ enum MediaType {
 enum WatchStatus {
   watching,
   completed,
-  @JsonValue('on_hold') onHold,
+  @JsonValue('on_hold')
+  onHold,
   dropped,
-  @JsonValue('plan_to_watch') planToWatch,
+  @JsonValue('plan_to_watch')
+  planToWatch,
   rewatching,
 }
 
-enum MediaListType {
-  public,
-  private,
-  collaborative,
-}
+enum MediaListType { public, private, collaborative }
 
-enum UserRole {
-  user,
-  moderator,
-  admin,
-}
+enum UserRole { user, moderator, admin }
 
-enum ReportReason {
-  spam,
-  inappropriate,
-  copyright,
-  incorrect,
-  other,
-}
+enum ReportReason { spam, inappropriate, copyright, incorrect, other }
 
-enum SyncOperation {
-  create,
-  update,
-  delete,
-}
+enum SyncOperation { create, update, delete }
 
 enum NotificationType {
   newSeason,

@@ -17,6 +17,7 @@ CREATE TABLE profiles (
   dob DATE,
   default_avatar TEXT,
   role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'moderator', 'admin')),
+  fcm_token TEXT,
   is_verified BOOLEAN DEFAULT false,
   followers_count INTEGER DEFAULT 0,
   following_count INTEGER DEFAULT 0,
@@ -160,7 +161,11 @@ CREATE TABLE list_items (
   sort_order INTEGER NOT NULL DEFAULT 0,
   note TEXT,
   added_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(list_id, sort_order)
+  CHECK (
+    (media_id IS NOT NULL AND custom_media_id IS NULL) OR
+    (media_id IS NULL AND custom_media_id IS NOT NULL)
+  ),
+  UNIQUE(list_id, media_id, custom_media_id)
 );
 
 -- Followers
@@ -288,6 +293,7 @@ ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE activity_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE custom_media ENABLE ROW LEVEL SECURITY;
+ALTER TABLE media_external_ids ENABLE ROW LEVEL SECURITY;
 ALTER TABLE recommendations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE watch_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sync_queue ENABLE ROW LEVEL SECURITY;
@@ -301,6 +307,13 @@ CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.
 
 -- Media: public read
 CREATE POLICY "Media is publicly readable" ON media FOR SELECT USING (true);
+
+-- Media external IDs: public read, authenticated insert/update
+CREATE POLICY "External IDs are publicly readable" ON media_external_ids FOR SELECT USING (true);
+CREATE POLICY "Authenticated users can insert external IDs" ON media_external_ids
+  FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "Authenticated users can update external IDs" ON media_external_ids
+  FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
 
 -- User media: own CRUD
 CREATE POLICY "Users manage own media tracking" ON user_media
@@ -347,15 +360,19 @@ CREATE POLICY "Comments are readable" ON comments FOR SELECT USING (true);
 CREATE POLICY "Users manage own comments" ON comments
   FOR ALL USING (auth.uid() = user_id);
 
--- Notifications: own read/update
+-- Notifications: own read/write
 CREATE POLICY "Users see own notifications" ON notifications
   FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users insert own notifications" ON notifications
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users update own notifications" ON notifications
   FOR UPDATE USING (auth.uid() = user_id);
 
--- Activity log: own read
+-- Activity log: own read/write
 CREATE POLICY "Users see own activity" ON activity_logs
   FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users insert own activity" ON activity_logs
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Reports: insert own, admin read
 CREATE POLICY "Users can report" ON reports FOR INSERT WITH CHECK (auth.uid() = reporter_id);
@@ -505,9 +522,20 @@ CREATE POLICY "System manages rec profiles" ON user_rec_profiles FOR ALL USING (
 -- Similarity: publicly readable (no PII)
 CREATE POLICY "Similarity is public" ON media_similarity FOR SELECT USING (true);
 
--- Cache: own read, system write
+-- Cache: own read/write, system write
 CREATE POLICY "Users view own recommendations" ON recommendations_cache FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users insert own recommendations" ON recommendations_cache FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users dismiss own recommendations" ON recommendations_cache FOR UPDATE USING (auth.uid() = user_id);
+
+-- Legacy recommendations table (unused by app but kept for data)
+CREATE POLICY "Users view own legacy recommendations" ON recommendations FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users insert own legacy recommendations" ON recommendations FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Watch history (unused by app but kept for data)
+CREATE POLICY "Users view own watch history" ON watch_history FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users insert own watch history" ON watch_history FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users update own watch history" ON watch_history FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users delete own watch history" ON watch_history FOR DELETE USING (auth.uid() = user_id);
 
 -- Auto-create rec profile on signup
 CREATE OR REPLACE FUNCTION handle_new_user_rec_profile()

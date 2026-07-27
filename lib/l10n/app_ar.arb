@@ -35,6 +35,7 @@
   "navDiscover": "اكتشف",
   "navSearch": "بحث",
   "navLists": "القوائم",
+  "navTracking": "التتبع",
   "navProfile": "الملف الشخصي",
 
   "@_Auth": {
@@ -123,6 +124,11 @@
   "publicList": "عام",
   "privateList": "خاص",
   "collaborative": "تعاوني",
+  "inviteCollaborator": "دعوة متعاون",
+  "inviteCollaboratorHint": "أدخل اسم المستخدم للدعوة",
+  "collaborators": "{count} متعاونين",
+  "noCollaborators": "لا يوجد متعاونون بعد",
+  "inviteSent": "تم إرسال الدعوة",
   "addToListTitle": "أضف {title} إلى القائمة",
   "noListsYet": "لا توجد قوائم بعد",
   "createFirstList": "أنشئ قائمتك الأولى",
@@ -201,6 +207,11 @@
   "changePassword": "تغيير كلمة المرور",
   "moderation": "الرقابة",
   "recommendationsAndPrivacy": "التوصيات والخصوصية",
+  "privacySettings": "إعدادات الخصوصية",
+  "publicProfile": "الملف العام",
+  "publicProfileDesc": "السماح للمستخدمين الآخرين بعرض ملفك الشخصي",
+  "showActivity": "إظهار النشاط",
+  "showActivityDesc": "عرض عناصر المشاهدة الأخيرة للآخرين",
   "personalizedRecommendations": "توصيات مخصصة",
   "activityImprovesSuggestions": "اجعل نشاطك يحسن التوصيات",
   "clearRecommendationHistory": "مسح سجل التوصيات",
@@ -612,6 +623,7 @@
     }
   },
   "likeLabel": "إعجاب",
+  "dislikeLabel": "عدم إعجاب",
   "previousSlide": "الشريحة السابقة",
   "nextSlide": "الشريحة التالية",
   "errorWithDetails": "خطأ: {error}",
@@ -769,5 +781,15 @@
   "accuracyDisclaimer": "الدقة",
   "accuracyDisclaimerBody": "على الرغم من سعي واتش أطلس لتقديم معلومات دقيقة ومحدثة، قد تحتوي البيانات الوصفية أحيانًا على أخطاء أو معلومات قديمة بسبب اعتمادها على مصادر طرف ثالث. نشجع المستخدمين على التحقق من التفاصيل المهمة من خلال المصادر الرسمية.",
   "showMore": "عرض المزيد",
-  "showLess": "عرض أقل"
+  "showLess": "عرض أقل",
+
+  "containsSpoilers": "يحتوي على حرق للأحداث",
+  "allReviews": "جميع المراجعات",
+  "noUserReviews": "لم تكتب أي مراجعات بعد.",
+  "clearSearch": "مسح البحث",
+  "clearAllFilters": "مسح جميع الفلاتر",
+  "votes": "{count} تقييم",
+  "percentScore": "{percent} درجة النسبة المئوية",
+  "tapToRate": "اضغط للتقييم، حالياً {current} من {total} نجوم",
+  "ratingLabel": "التقييم: {rating} من 10"
 }

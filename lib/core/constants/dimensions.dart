@@ -24,10 +24,8 @@ class Spacing {
   static const double carouselHeight = 460;
   static const double backdropHeight = 240;
 
-  static double gridPadding(double screenWidth) =>
-      screenWidth >= 768 ? 16 : lg;
-  static double gridSpacing(double screenWidth) =>
-      screenWidth >= 768 ? 12 : sm;
+  static double gridPadding(double screenWidth) => screenWidth >= 768 ? 16 : lg;
+  static double gridSpacing(double screenWidth) => screenWidth >= 768 ? 12 : sm;
 
   static int gridColumns(double width) {
     if (width >= 1024) return 6;

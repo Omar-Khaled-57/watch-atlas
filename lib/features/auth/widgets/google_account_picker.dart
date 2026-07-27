@@ -33,10 +33,12 @@ class _GoogleAccountPicker extends StatelessWidget {
         children: [
           Image(
             image: const AssetImage('assets/images/icons/google.png'),
-            width: 24, height: 24,
+            width: 24,
+            height: 24,
           ),
           const SizedBox(width: Spacing.md),
-          Text(l10n.chooseAccount,
+          Text(
+            l10n.chooseAccount,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -55,12 +57,21 @@ class _GoogleAccountPicker extends StatelessWidget {
           if (accounts.isNotEmpty) ...[
             const Divider(height: 4),
             Padding(
-              padding: const EdgeInsetsDirectional.only(start: 8, top: 8, bottom: 4),
+              padding: const EdgeInsetsDirectional.only(
+                start: 8,
+                top: 8,
+                bottom: 4,
+              ),
               child: Row(
                 children: [
-                  Icon(Icons.history, size: 16, color: theme.colorScheme.onSurfaceVariant),
+                  Icon(
+                    Icons.history,
+                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 6),
-                  Text(l10n.previouslyUsed,
+                  Text(
+                    l10n.previouslyUsed,
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -92,7 +103,10 @@ class _GoogleAccountPicker extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(l10n.cancel, style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
+          child: Text(
+            l10n.cancel,
+            style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+          ),
         ),
       ],
     );
@@ -124,15 +138,22 @@ class _AccountTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsetsDirectional.symmetric(
-          horizontal: 4, vertical: 10,
+          horizontal: 4,
+          vertical: 10,
         ),
         child: Row(
           children: [
             CircleAvatar(
               radius: 18,
-              backgroundColor: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade200,
+              backgroundColor: isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.grey.shade200,
               child: icon != null
-                  ? Icon(icon, size: 20, color: isDark ? Colors.white70 : Colors.black54)
+                  ? Icon(
+                      icon,
+                      size: 20,
+                      color: isDark ? Colors.white70 : Colors.black54,
+                    )
                   : Text(
                       (email![0]).toUpperCase(),
                       style: TextStyle(
@@ -146,12 +167,16 @@ class _AccountTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label,
+                  Text(
+                    label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                  Text(subtitle,
+                  Text(
+                    subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(

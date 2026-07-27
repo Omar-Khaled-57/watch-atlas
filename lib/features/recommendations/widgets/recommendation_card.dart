@@ -3,8 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/media_enums.dart';
 import '../../../core/models/recommendation_models.dart';
 import '../../../core/providers/app_providers.dart';
-import '../../../core/services/tmdb_service.dart';
-import '../providers/recommendation_providers.dart';
+import '../../../core/providers/service_providers.dart';
 import '../../../core/shared/media_card.dart';
 import '../../../l10n/l10n.dart';
 import '../../../l10n/app_localizations.dart';
@@ -31,7 +30,9 @@ class _RecommendationCardState extends ConsumerState<RecommendationCard> {
 
   @override
   Widget build(BuildContext context) {
-    final mediaAsync = ref.watch(_mediaByIdProvider(widget.scoredMedia.mediaId));
+    final mediaAsync = ref.watch(
+      _mediaByIdProvider(widget.scoredMedia.mediaId),
+    );
     final l10n = context.l10n;
     final localizedReason = _localizedReason(widget.scoredMedia.reason, l10n);
     final cs = Theme.of(context).colorScheme;
@@ -64,8 +65,8 @@ class _RecommendationCardState extends ConsumerState<RecommendationCard> {
                       child: Text(
                         localizedReason,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -83,6 +84,7 @@ class _RecommendationCardState extends ConsumerState<RecommendationCard> {
                       isSelected: _feedback == true,
                       color: Colors.green,
                       onTap: () => _submitFeedback(true, cs),
+                      tooltip: context.l10n.likeLabel,
                     ),
                     const SizedBox(width: 4),
                     _FeedbackButton(
@@ -91,6 +93,7 @@ class _RecommendationCardState extends ConsumerState<RecommendationCard> {
                       isSelected: _feedback == false,
                       color: Colors.red,
                       onTap: () => _submitFeedback(false, cs),
+                      tooltip: context.l10n.dislikeLabel,
                     ),
                   ],
                 ),
@@ -112,7 +115,9 @@ class _RecommendationCardState extends ConsumerState<RecommendationCard> {
 
   void _submitFeedback(bool isPositive, ColorScheme cs) {
     setState(() => _feedback = isPositive);
-    ref.read(behaviorServiceProvider).trackRecommendationFeedback(
+    ref
+        .read(behaviorServiceProvider)
+        .trackRecommendationFeedback(
           widget.scoredMedia.mediaId,
           widget.scoredMedia.category.dbValue,
           isPositive,
@@ -126,6 +131,7 @@ class _FeedbackButton extends StatelessWidget {
   final bool isSelected;
   final Color color;
   final VoidCallback onTap;
+  final String tooltip;
 
   const _FeedbackButton({
     required this.icon,
@@ -133,6 +139,7 @@ class _FeedbackButton extends StatelessWidget {
     required this.isSelected,
     required this.color,
     required this.onTap,
+    required this.tooltip,
   });
 
   @override
@@ -143,9 +150,12 @@ class _FeedbackButton extends StatelessWidget {
       child: IconButton(
         padding: EdgeInsets.zero,
         iconSize: 18,
+        tooltip: tooltip,
         icon: Icon(
           isSelected ? selectedIcon : icon,
-          color: isSelected ? color : Theme.of(context).colorScheme.onSurfaceVariant,
+          color: isSelected
+              ? color
+              : Theme.of(context).colorScheme.onSurfaceVariant,
         ),
         onPressed: onTap,
       ),
@@ -183,9 +193,12 @@ String _localizedReason(String? reason, AppLocalizations l10n) {
 
 /// Fetches a [MediaModel] by its integer ID via Supabase or TMDB API.
 /// Falls back to TMDB when Supabase media table is unavailable.
-final _mediaByIdProvider = FutureProvider.family<MediaModel?, int>((ref, id) async {
+final _mediaByIdProvider = FutureProvider.family<MediaModel?, int>((
+  ref,
+  id,
+) async {
   final supabase = ref.watch(supabaseServiceProvider);
-  final tmdb = TmdbService.instance;
+  final tmdb = ref.watch(tmdbServiceProvider);
   try {
     final Map<String, dynamic> data = await supabase.media
         .select('id, title, poster_path, vote_average, media_type')
@@ -219,7 +232,9 @@ final _mediaByIdProvider = FutureProvider.family<MediaModel?, int>((ref, id) asy
           mediaType: MediaType.tv,
         );
       } catch (tmdbError) {
-        debugPrint('Failed to fetch media $id from both Supabase and TMDB: $tmdbError');
+        debugPrint(
+          'Failed to fetch media $id from both Supabase and TMDB: $tmdbError',
+        );
         return null;
       }
     }

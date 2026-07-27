@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../core/models/media_enums.dart';
+import '../constants/app_colors.dart';
+import '../models/media_enums.dart';
 import '../constants/dimensions.dart';
 
 class MediaCard extends StatelessWidget {
@@ -32,39 +33,62 @@ class MediaCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return SizedBox(
-      width: width,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.all(Radius.circular(Spacing.cardRadiusSm)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadiusDirectional.all(Radius.circular(Spacing.cardRadiusSm)),
-                    border: Border.all(
-                      color: colorScheme.brightness == Brightness.dark
-                          ? Colors.white.withValues(alpha: 0.06)
-                          : Colors.black.withValues(alpha: 0.04),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: colorScheme.brightness == Brightness.dark ? 0.3 : 0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+    return Semantics(
+      button: true,
+      label:
+          '$title${voteAverage != null ? ', rated ${voteAverage!.toStringAsFixed(1)} out of 10' : ''}',
+      child: SizedBox(
+        width: width,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.all(
+              Radius.circular(Spacing.cardRadiusSm),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadiusDirectional.all(
+                        Radius.circular(Spacing.cardRadiusSm),
                       ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadiusDirectional.all(Radius.circular(Spacing.cardRadiusSm - 1)),
-                    child: heroTag != null
-                        ? Hero(
-                            tag: heroTag!,
-                            child: _PosterImage(
+                      border: Border.all(
+                        color: colorScheme.brightness == Brightness.dark
+                            ? Colors.white.withValues(alpha: 0.06)
+                            : Colors.black.withValues(alpha: 0.04),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(
+                            alpha: colorScheme.brightness == Brightness.dark
+                                ? 0.3
+                                : 0.08,
+                          ),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadiusDirectional.all(
+                        Radius.circular(Spacing.cardRadiusSm - 1),
+                      ),
+                      child: heroTag != null
+                          ? Hero(
+                              tag: heroTag!,
+                              child: _PosterImage(
+                                posterUrl: posterUrl,
+                                width: width,
+                                voteAverage: voteAverage,
+                                mediaType: mediaType,
+                                colorScheme: colorScheme,
+                                textTheme: textTheme,
+                              ),
+                            )
+                          : _PosterImage(
                               posterUrl: posterUrl,
                               width: width,
                               voteAverage: voteAverage,
@@ -72,31 +96,23 @@ class MediaCard extends StatelessWidget {
                               colorScheme: colorScheme,
                               textTheme: textTheme,
                             ),
-                          )
-                        : _PosterImage(
-                            posterUrl: posterUrl,
-                            width: width,
-                            voteAverage: voteAverage,
-                            mediaType: mediaType,
-                            colorScheme: colorScheme,
-                            textTheme: textTheme,
-                          ),
+                    ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsetsDirectional.only(top: Spacing.sm),
-                child: Text(
-                  title,
-                  style: textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 12,
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(top: Spacing.sm),
+                  child: Text(
+                    title,
+                    style: textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -133,7 +149,8 @@ class _PosterImage extends StatelessWidget {
               imageUrl: posterUrl!,
               fit: BoxFit.cover,
               placeholder: (context, url) => const _ShimmerPlaceholder(),
-              errorWidget: (context, url, error) => _ErrorPlaceholder(colorScheme: colorScheme),
+              errorWidget: (context, url, error) =>
+                  _ErrorPlaceholder(colorScheme: colorScheme),
             )
           else
             _ErrorPlaceholder(colorScheme: colorScheme),
@@ -141,19 +158,23 @@ class _PosterImage extends StatelessWidget {
             PositionedDirectional(
               top: 8,
               start: 8,
-              child: _RatingBadge(
-                voteAverage: voteAverage!,
-                textTheme: textTheme,
+              child: ExcludeSemantics(
+                child: _RatingBadge(
+                  voteAverage: voteAverage!,
+                  textTheme: textTheme,
+                ),
               ),
             ),
           if (mediaType != null && mediaType != MediaType.movie)
             PositionedDirectional(
               top: 8,
               end: 8,
-              child: _TypeBadge(
-                mediaType: mediaType!,
-                colorScheme: colorScheme,
-                textTheme: textTheme,
+              child: ExcludeSemantics(
+                child: _TypeBadge(
+                  mediaType: mediaType!,
+                  colorScheme: colorScheme,
+                  textTheme: textTheme,
+                ),
               ),
             ),
         ],
@@ -170,7 +191,9 @@ class _ShimmerPlaceholder extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Shimmer.fromColors(
       baseColor: isDark ? const Color(0xFF20242E) : const Color(0xFFE5E7EB),
-      highlightColor: isDark ? const Color(0xFF2A2F3A) : const Color(0xFFF3F4F6),
+      highlightColor: isDark
+          ? const Color(0xFF2A2F3A)
+          : const Color(0xFFF3F4F6),
       child: ColoredBox(
         color: isDark ? const Color(0xFF20242E) : const Color(0xFFE5E7EB),
       ),
@@ -181,9 +204,7 @@ class _ShimmerPlaceholder extends StatelessWidget {
 class _ErrorPlaceholder extends StatelessWidget {
   final ColorScheme colorScheme;
 
-  const _ErrorPlaceholder({
-    required this.colorScheme,
-  });
+  const _ErrorPlaceholder({required this.colorScheme});
 
   @override
   Widget build(BuildContext context) {
@@ -204,15 +225,15 @@ class _RatingBadge extends StatelessWidget {
   final double voteAverage;
   final TextTheme textTheme;
 
-  const _RatingBadge({
-    required this.voteAverage,
-    required this.textTheme,
-  });
+  const _RatingBadge({required this.voteAverage, required this.textTheme});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsetsDirectional.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: 6,
+        vertical: 2,
+      ),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.75),
         borderRadius: BorderRadiusDirectional.all(Radius.circular(4)),
@@ -220,11 +241,7 @@ class _RatingBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.star_rounded,
-            size: 12,
-            color: Colors.amber,
-          ),
+          Icon(Icons.star_rounded, size: 12, color: AppColors.star),
           const SizedBox(width: 2),
           Text(
             voteAverage.toStringAsFixed(1),
@@ -290,7 +307,10 @@ class _TypeBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     if (_label.isEmpty) return const SizedBox.shrink();
     return Container(
-      padding: const EdgeInsetsDirectional.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: 6,
+        vertical: 2,
+      ),
       decoration: BoxDecoration(
         color: colorScheme.primary.withValues(alpha: 0.85),
         borderRadius: BorderRadiusDirectional.all(Radius.circular(4)),

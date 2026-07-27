@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../constants/app_colors.dart';
 import '../../l10n/l10n.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
@@ -35,7 +36,8 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
   bool get _showNavButtons {
     if (kIsWeb) return true;
     final platform = Theme.of(context).platform;
-    if (platform != TargetPlatform.android && platform != TargetPlatform.iOS) return true;
+    if (platform != TargetPlatform.android && platform != TargetPlatform.iOS)
+      return true;
     return MediaQuery.of(context).orientation == Orientation.landscape;
   }
 
@@ -98,7 +100,9 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
                 return Stack(
                   children: [
                     MouseRegion(
-                      cursor: _isDragging ? SystemMouseCursors.grabbing : SystemMouseCursors.grab,
+                      cursor: _isDragging
+                          ? SystemMouseCursors.grabbing
+                          : SystemMouseCursors.grab,
                       child: Listener(
                         onPointerDown: (e) {
                           _dragStart = e.position;
@@ -125,29 +129,38 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
                           itemCount: widget.items.length,
                           itemBuilder: (context, index) {
                             final item = widget.items[index];
-                            return Listener(
-                              onPointerUp: (_) {
-                                if (!_gotMoved) item.onTap?.call();
-                              },
-                              child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            margin: EdgeInsetsDirectional.only(
-                              start: index == _currentPage ? 0 : Spacing.sm,
-                              end: index == _currentPage ? 0 : Spacing.sm,
-                              top: index == _currentPage ? 0 : Spacing.md,
-                              bottom: index == _currentPage ? 0 : Spacing.md,
-                            ),
-                            child: _FeaturedItem(
-                              item: item,
-                              colorScheme: colorScheme,
-                              textTheme: textTheme,
-                            ),
-                          ),
-                        );
-                      },
-                  ),
-                  ),
-                  ),
+                            return Semantics(
+                              button: true,
+                              label:
+                                  '${item.title}${item.voteAverage != null ? ', rated ${item.voteAverage!.toStringAsFixed(1)}' : ''}',
+                              child: Listener(
+                                onPointerUp: (_) {
+                                  if (!_gotMoved) item.onTap?.call();
+                                },
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 300),
+                                  margin: EdgeInsetsDirectional.only(
+                                    start: index == _currentPage
+                                        ? 0
+                                        : Spacing.sm,
+                                    end: index == _currentPage ? 0 : Spacing.sm,
+                                    top: index == _currentPage ? 0 : Spacing.md,
+                                    bottom: index == _currentPage
+                                        ? 0
+                                        : Spacing.md,
+                                  ),
+                                  child: _FeaturedItem(
+                                    item: item,
+                                    colorScheme: colorScheme,
+                                    textTheme: textTheme,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
                     if (_showNavButtons && widget.items.length > 1) ...[
                       PositionedDirectional(
                         start: 8,
@@ -185,7 +198,10 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
           ),
           if (widget.items.length > 1)
             Padding(
-              padding: const EdgeInsetsDirectional.only(top: Spacing.lg, bottom: Spacing.sm),
+              padding: const EdgeInsetsDirectional.only(
+                top: Spacing.lg,
+                bottom: Spacing.sm,
+              ),
               child: _DotIndicators(
                 count: widget.items.length,
                 currentIndex: _currentPage,
@@ -252,18 +268,25 @@ class _FeaturedItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadiusDirectional.all(Radius.circular(Spacing.cardRadiusLg)),
+      borderRadius: BorderRadiusDirectional.all(
+        Radius.circular(Spacing.cardRadiusLg),
+      ),
       child: Material(
         color: Colors.transparent,
         child: Stack(
           fit: StackFit.expand,
           children: [
             if (item.backdropUrl != null)
-              CachedNetworkImage(
-                imageUrl: item.backdropUrl!,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => _ShimmerBackdrop(),
-                errorWidget: (context, url, error) => _FallbackBackdrop(colorScheme: colorScheme),
+              Semantics(
+                label: 'Backdrop for ${item.title}',
+                image: true,
+                child: CachedNetworkImage(
+                  imageUrl: item.backdropUrl!,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => _ShimmerBackdrop(),
+                  errorWidget: (context, url, error) =>
+                      _FallbackBackdrop(colorScheme: colorScheme),
+                ),
               )
             else
               _FallbackBackdrop(colorScheme: colorScheme),
@@ -306,7 +329,11 @@ class _FeaturedItem extends StatelessWidget {
                       Row(
                         children: [
                           if (item.voteAverage != null) ...[
-                            Icon(Icons.star_rounded, color: Colors.amber, size: 18),
+                            Icon(
+                              Icons.star_rounded,
+                              color: AppColors.star,
+                              size: 18,
+                            ),
                             const SizedBox(width: Spacing.xs),
                             Text(
                               item.voteAverage!.toStringAsFixed(1),
@@ -315,7 +342,8 @@ class _FeaturedItem extends StatelessWidget {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            if (item.genreTags != null) const SizedBox(width: Spacing.md),
+                            if (item.genreTags != null)
+                              const SizedBox(width: Spacing.md),
                           ],
                           if (item.genreTags != null)
                             Expanded(
@@ -324,17 +352,23 @@ class _FeaturedItem extends StatelessWidget {
                                 child: Row(
                                   children: item.genreTags!.map((tag) {
                                     return Padding(
-                                      padding: const EdgeInsetsDirectional.only(end: 6),
+                                      padding: const EdgeInsetsDirectional.only(
+                                        end: 6,
+                                      ),
                                       child: Container(
-                                        padding: const EdgeInsetsDirectional.symmetric(
-                                          horizontal: 8,
-                                          vertical: 3,
-                                        ),
+                                        padding:
+                                            const EdgeInsetsDirectional.symmetric(
+                                              horizontal: 8,
+                                              vertical: 3,
+                                            ),
                                         decoration: BoxDecoration(
-                                          color: Colors.white.withValues(alpha: 0.2),
-                                          borderRadius: BorderRadiusDirectional.all(
-                                            Radius.circular(12),
+                                          color: Colors.white.withValues(
+                                            alpha: 0.2,
                                           ),
+                                          borderRadius:
+                                              BorderRadiusDirectional.all(
+                                                Radius.circular(12),
+                                              ),
                                         ),
                                         child: Text(
                                           tag,
@@ -380,8 +414,12 @@ class _ShimmerBackdrop extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Shimmer.fromColors(
       baseColor: isDark ? const Color(0xFF20242E) : const Color(0xFFE5E7EB),
-      highlightColor: isDark ? const Color(0xFF2A2F3A) : const Color(0xFFF3F4F6),
-      child: Container(color: isDark ? const Color(0xFF20242E) : const Color(0xFFE5E7EB)),
+      highlightColor: isDark
+          ? const Color(0xFF2A2F3A)
+          : const Color(0xFFF3F4F6),
+      child: Container(
+        color: isDark ? const Color(0xFF20242E) : const Color(0xFFE5E7EB),
+      ),
     );
   }
 }
@@ -396,7 +434,11 @@ class _FallbackBackdrop extends StatelessWidget {
     return Container(
       color: colorScheme.surfaceContainerHighest,
       child: Center(
-        child: Icon(Icons.movie_outlined, size: 48, color: colorScheme.onSurfaceVariant),
+        child: Icon(
+          Icons.movie_outlined,
+          size: 48,
+          color: colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }
@@ -425,7 +467,9 @@ class _DotIndicators extends StatelessWidget {
           width: isActive ? 24 : 8,
           height: 8,
           decoration: BoxDecoration(
-            color: isActive ? colorScheme.primary : colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+            color: isActive
+                ? colorScheme.primary
+                : colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
             borderRadius: BorderRadiusDirectional.all(Radius.circular(4)),
           ),
         );

@@ -23,5 +23,6 @@ abstract class UserMediaModel with _$UserMediaModel {
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
   }) = _UserMediaModel;
 
-  factory UserMediaModel.fromJson(Map<String, dynamic> json) => _$UserMediaModelFromJson(json);
+  factory UserMediaModel.fromJson(Map<String, dynamic> json) =>
+      _$UserMediaModelFromJson(json);
 }

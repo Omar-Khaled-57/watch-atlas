@@ -23,47 +23,79 @@ final reportsProvider = FutureProvider<List<ReportItem>>((ref) async {
       .from('reports')
       .select('*, reporter:reporter_id(*), reported_user:reported_user_id(*)')
       .order('created_at', ascending: false);
-  return (response as List<dynamic>).map((json) => ReportItem.fromJson(json as Map<String, dynamic>)).toList();
+  return (response as List<dynamic>)
+      .map((json) => ReportItem.fromJson(json as Map<String, dynamic>))
+      .toList();
 });
 
-final resolveReportProvider = FutureProvider.family<void, String>((ref, reportId) async {
+final resolveReportProvider = FutureProvider.family<void, String>((
+  ref,
+  reportId,
+) async {
   final supabase = ref.watch(supabaseServiceProvider);
-  await supabase.client.from('reports').update({
-    'status': 'resolved',
-    'resolved_at': DateTime.now().toIso8601String(),
-  }).eq('id', reportId);
+  await supabase.client
+      .from('reports')
+      .update({
+        'status': 'resolved',
+        'resolved_at': DateTime.now().toIso8601String(),
+      })
+      .eq('id', reportId);
   ref.invalidate(reportsProvider);
 });
 
-final hideContentProvider = FutureProvider.family<void, int>((ref, mediaId) async {
+final hideContentProvider = FutureProvider.family<void, int>((
+  ref,
+  mediaId,
+) async {
   final supabase = ref.watch(supabaseServiceProvider);
-  await supabase.client.from('media').update({
-    'status': 'hidden',
-    'updated_at': DateTime.now().toIso8601String(),
-  }).eq('id', mediaId);
+  await supabase.client
+      .from('media')
+      .update({
+        'status': 'hidden',
+        'updated_at': DateTime.now().toIso8601String(),
+      })
+      .eq('id', mediaId);
 });
 
-final deleteContentProvider = FutureProvider.family<void, int>((ref, mediaId) async {
+final deleteContentProvider = FutureProvider.family<void, int>((
+  ref,
+  mediaId,
+) async {
   final supabase = ref.watch(supabaseServiceProvider);
   await supabase.client.from('media').delete().eq('id', mediaId);
 });
 
-final banUserProvider = FutureProvider.family<void, String>((ref, userId) async {
+final banUserProvider = FutureProvider.family<void, String>((
+  ref,
+  userId,
+) async {
   final supabase = ref.watch(supabaseServiceProvider);
-  await supabase.client.from('profiles').update({
-    'role': 'banned',
-    'updated_at': DateTime.now().toIso8601String(),
-  }).eq('id', userId);
+  await supabase.client
+      .from('profiles')
+      .update({
+        'role': 'banned',
+        'updated_at': DateTime.now().toIso8601String(),
+      })
+      .eq('id', userId);
   ref.invalidate(reportsProvider);
 });
 
-final warnUserProvider = FutureProvider.family<void, String>((ref, userId) async {
+final warnUserProvider = FutureProvider.family<void, String>((
+  ref,
+  userId,
+) async {
   final supabase = ref.watch(supabaseServiceProvider);
-  final newCount = await supabase.client.rpc('increment_warning_count', params: {'user_id': userId});
-  await supabase.client.from('profiles').update({
-    'warning_count': newCount,
-    'updated_at': DateTime.now().toIso8601String(),
-  }).eq('id', userId);
+  final newCount = await supabase.client.rpc(
+    'increment_warning_count',
+    params: {'user_id': userId},
+  );
+  await supabase.client
+      .from('profiles')
+      .update({
+        'warning_count': newCount,
+        'updated_at': DateTime.now().toIso8601String(),
+      })
+      .eq('id', userId);
   ref.invalidate(reportsProvider);
 });
 
@@ -75,7 +107,9 @@ final reportedUsersProvider = FutureProvider<List<UserModel>>((ref) async {
       .from('profiles')
       .select()
       .order('created_at', ascending: false);
-  return (response as List<dynamic>).map((json) => UserModel.fromJson(json as Map<String, dynamic>)).toList();
+  return (response as List<dynamic>)
+      .map((json) => UserModel.fromJson(json as Map<String, dynamic>))
+      .toList();
 });
 
 class ReportItem {
@@ -116,7 +150,9 @@ class ReportItem {
       ),
       description: json['description'] as String? ?? '',
       status: json['status'] as String? ?? 'pending',
-      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
+      createdAt:
+          DateTime.tryParse(json['created_at'] as String? ?? '') ??
+          DateTime.now(),
       reporter: json['reporter'] as Map<String, dynamic>?,
       reportedUser: json['reported_user'] as Map<String, dynamic>?,
     );

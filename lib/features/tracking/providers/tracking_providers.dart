@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:postgrest/postgrest.dart';
 import '../../../core/models/media_enums.dart';
 import '../../../core/providers/app_providers.dart';
+import '../../../core/services/cache_service.dart';
+import '../../../core/services/cache_models.dart';
 import '../../../core/services/supabase_service.dart';
 
 import '../../../models/user_media_model.dart';
@@ -13,21 +15,38 @@ class _TrackingStatusFilterNotifier extends Notifier<WatchStatus> {
   WatchStatus build() => WatchStatus.watching;
 }
 
-final trackingStatusFilterProvider = NotifierProvider<_TrackingStatusFilterNotifier, WatchStatus>(_TrackingStatusFilterNotifier.new);
+final trackingStatusFilterProvider =
+    NotifierProvider<_TrackingStatusFilterNotifier, WatchStatus>(
+      _TrackingStatusFilterNotifier.new,
+    );
 
 class UserMediaNotifier extends Notifier<AsyncValue<List<UserMediaModel>>> {
   late final SupabaseService _supabase;
+  late final CacheService _cache;
   late final String _userId;
+  bool _isServingCache = false;
+
+  /// Whether the current data is from cache (network unavailable).
+  bool get isServingCache => _isServingCache;
 
   @override
   AsyncValue<List<UserMediaModel>> build() {
     _supabase = ref.read(supabaseServiceProvider);
+    _cache = ref.read(cacheServiceProvider);
     _userId = ref.read(authServiceProvider).userId;
     _load();
     return const AsyncValue.loading();
   }
 
   Future<void> _load() async {
+    _isServingCache = false;
+    // Serve cached data immediately
+    final cached = await _cache.getCachedUserMedia(_userId);
+    if (cached.isNotEmpty) {
+      state = AsyncValue.data(cached.map(_toModel).toList());
+    }
+
+    // Then fetch from network
     try {
       final response = await _supabase.userMedia
           .select()
@@ -37,12 +56,17 @@ class UserMediaNotifier extends Notifier<AsyncValue<List<UserMediaModel>>> {
           .map((json) => UserMediaModel.fromJson(json as Map<String, dynamic>))
           .toList();
       state = AsyncValue.data(list);
+      _isServingCache = false;
+      // Update cache
+      await _cache.cacheAllUserMedia(list.map(_toCached).toList());
     } catch (e) {
       debugPrint('Failed to load user media: $e');
-      state = AsyncValue.data([]);
+      _isServingCache = cached.isNotEmpty;
+      if (state is! AsyncData) {
+        state = AsyncValue.data([]);
+      }
     }
   }
-
 
   Future<void> updateStatus(UserMediaModel media, WatchStatus newStatus) async {
     final updated = media.copyWith(
@@ -56,12 +80,17 @@ class UserMediaNotifier extends Notifier<AsyncValue<List<UserMediaModel>>> {
     await _save(updated);
   }
 
-  Future<void> updateProgress(UserMediaModel media, {int? episodes, int? seasons}) async {
+  Future<void> updateProgress(
+    UserMediaModel media, {
+    int? episodes,
+    int? seasons,
+  }) async {
     final updated = media.copyWith(
       episodeProgress: episodes ?? media.episodeProgress,
       seasonProgress: seasons ?? media.seasonProgress,
       updatedAt: DateTime.now(),
-      completedAt: media.totalEpisodes > 0 &&
+      completedAt:
+          media.totalEpisodes > 0 &&
               (episodes ?? media.episodeProgress) >= media.totalEpisodes
           ? DateTime.now()
           : media.completedAt,
@@ -102,6 +131,7 @@ class UserMediaNotifier extends Notifier<AsyncValue<List<UserMediaModel>>> {
     final list = state.value ?? [];
     final previousState = List<UserMediaModel>.from(list);
     state = AsyncValue.data(list.where((m) => m.id != media.id).toList());
+    _cache.deleteCachedUserMedia(media.id);
     try {
       await _supabase.userMedia.delete().eq('id', media.id);
     } catch (e) {
@@ -120,6 +150,7 @@ class UserMediaNotifier extends Notifier<AsyncValue<List<UserMediaModel>>> {
       list.add(media);
     }
     state = AsyncValue.data(List.from(list));
+    _cache.cacheUserMedia(_toCached(media));
     try {
       await _supabase.userMedia.upsert(media.toJson());
     } catch (e) {
@@ -127,7 +158,9 @@ class UserMediaNotifier extends Notifier<AsyncValue<List<UserMediaModel>>> {
         debugPrint('Upsert failed, trying insert: $e');
         try {
           await _supabase.userMedia.insert(media.toJson());
-        } catch (_) {}
+        } catch (e) {
+          debugPrint('Fallback insert also failed: $e');
+        }
       }
       if (e is PostgrestException && e.code == '42501') {
         debugPrint('Permission denied, rolling back: $e');
@@ -137,35 +170,103 @@ class UserMediaNotifier extends Notifier<AsyncValue<List<UserMediaModel>>> {
       }
     }
   }
+
+  CachedUserMedia _toCached(UserMediaModel m) => CachedUserMedia(
+    remoteId: m.id,
+    mediaId: m.mediaId,
+    userId: m.userId,
+    mediaType: m.mediaType.name,
+    status: m.status.name,
+    seasonProgress: m.seasonProgress,
+    episodeProgress: m.episodeProgress,
+    totalEpisodes: m.totalEpisodes,
+    rewatchCount: m.rewatchCount,
+    userRating: m.userRating,
+    startedAt: m.startedAt,
+    completedAt: m.completedAt,
+    createdAt: m.createdAt,
+    updatedAt: m.updatedAt,
+  );
+
+  UserMediaModel _toModel(CachedUserMedia c) => UserMediaModel(
+    id: c.remoteId,
+    mediaId: c.mediaId,
+    userId: c.userId,
+    mediaType: MediaType.values.firstWhere(
+      (e) => e.name == c.mediaType,
+      orElse: () => MediaType.movie,
+    ),
+    status: WatchStatus.values.firstWhere(
+      (e) => e.name == c.status,
+      orElse: () => WatchStatus.planToWatch,
+    ),
+    seasonProgress: c.seasonProgress,
+    episodeProgress: c.episodeProgress,
+    totalEpisodes: c.totalEpisodes,
+    rewatchCount: c.rewatchCount,
+    userRating: c.userRating,
+    startedAt: c.startedAt,
+    completedAt: c.completedAt,
+    createdAt: c.createdAt,
+    updatedAt: c.updatedAt,
+  );
 }
 
-final userMediaProvider = NotifierProvider<UserMediaNotifier, AsyncValue<List<UserMediaModel>>>(UserMediaNotifier.new);
+final userMediaProvider =
+    NotifierProvider<UserMediaNotifier, AsyncValue<List<UserMediaModel>>>(
+      UserMediaNotifier.new,
+    );
 
-final userMediaByStatusProvider = Provider.family<List<UserMediaModel>, WatchStatus>((ref, status) {
-  final mediaAsync = ref.watch(userMediaProvider);
-  return mediaAsync.when(
-    data: (list) => list.where((m) => m.status == status).toList(),
-    loading: () => [],
-    error: (_, __) => [],
-  );
+/// Whether the app is currently showing stale cached data.
+final isOfflineBannerProvider = Provider<bool>((ref) {
+  final connectivity = ref.read(connectivityServiceProvider);
+  return !connectivity.isOnline;
 });
+
+final userMediaByStatusProvider =
+    Provider.family<List<UserMediaModel>, WatchStatus>((ref, status) {
+      final mediaAsync = ref.watch(userMediaProvider);
+      return mediaAsync.when(
+        data: (list) => list.where((m) => m.status == status).toList(),
+        loading: () => [],
+        error: (_, __) => [],
+      );
+    });
 
 final trackingStatsProvider = Provider<Map<String, int>>((ref) {
   final mediaAsync = ref.watch(userMediaProvider);
   return mediaAsync.when(
     data: (list) {
-      final watched = list.where((m) =>
-          m.status == WatchStatus.completed || m.status == WatchStatus.watching).toList();
-      final totalWatched = watched.where((m) => m.status == WatchStatus.completed).length;
-      final totalEpisodes = watched.fold<int>(0, (sum, m) => sum + m.episodeProgress);
+      final watched = list
+          .where(
+            (m) =>
+                m.status == WatchStatus.completed ||
+                m.status == WatchStatus.watching,
+          )
+          .toList();
+      final totalWatched = watched
+          .where((m) => m.status == WatchStatus.completed)
+          .length;
+      final totalEpisodes = watched.fold<int>(
+        0,
+        (sum, m) => sum + m.episodeProgress,
+      );
       return {
         'totalWatched': totalWatched,
         'totalEpisodes': totalEpisodes,
         'totalHours': totalEpisodes ~/ 2,
       };
     },
-    loading: () => const {'totalWatched': 0, 'totalEpisodes': 0, 'totalHours': 0},
-    error: (_, __) => const {'totalWatched': 0, 'totalEpisodes': 0, 'totalHours': 0},
+    loading: () => const {
+      'totalWatched': 0,
+      'totalEpisodes': 0,
+      'totalHours': 0,
+    },
+    error: (_, __) => const {
+      'totalWatched': 0,
+      'totalEpisodes': 0,
+      'totalHours': 0,
+    },
   );
 });
 
@@ -186,27 +287,58 @@ final recentlyUpdatedProvider = Provider<List<UserMediaModel>>((ref) {
   );
 });
 
-final mediaByIdProvider = FutureProvider.family<MediaModel?, ({int mediaId, MediaType mediaType})>(
-    (ref, params) async {
-  final tmdb = ref.watch(tmdbServiceProvider);
-  try {
-    final Map<String, dynamic> data;
-    if (params.mediaType == MediaType.movie) {
-      data = await tmdb.movieDetails(params.mediaId);
-    } else {
-      data = await tmdb.tvDetails(params.mediaId);
-    }
-    return MediaModel(
-      id: data['id'] as int,
-      mediaType: params.mediaType,
-      title: data['title'] as String? ?? data['name'] as String? ?? '',
-      posterPath: data['poster_path'] as String?,
-      voteAverage: (data['vote_average'] as num?)?.toDouble(),
-      totalEpisodes: (data['number_of_episodes'] as num?)?.toInt() ?? 0,
-      totalSeasons: (data['number_of_seasons'] as num?)?.toInt() ?? 0,
-    );
-  } catch (e) {
-    debugPrint('Failed to fetch media ${params.mediaId}: $e');
-    return null;
-  }
-});
+final mediaByIdProvider =
+    FutureProvider.family<MediaModel?, ({int mediaId, MediaType mediaType})>((
+      ref,
+      params,
+    ) async {
+      final tmdb = ref.watch(tmdbServiceProvider);
+      final cache = ref.watch(cacheServiceProvider);
+
+      // Try cache first
+      final cached = await cache.getCachedMedia(params.mediaId);
+      if (cached != null) {
+        return MediaModel(
+          id: cached.remoteId,
+          mediaType: params.mediaType,
+          title: cached.title,
+          posterPath: cached.posterPath,
+          voteAverage: cached.voteAverage,
+          totalEpisodes: cached.totalEpisodes,
+          totalSeasons: cached.totalSeasons,
+        );
+      }
+
+      try {
+        final Map<String, dynamic> data;
+        if (params.mediaType == MediaType.movie) {
+          data = await tmdb.movieDetails(params.mediaId);
+        } else {
+          data = await tmdb.tvDetails(params.mediaId);
+        }
+        final model = MediaModel(
+          id: data['id'] as int,
+          mediaType: params.mediaType,
+          title: data['title'] as String? ?? data['name'] as String? ?? '',
+          posterPath: data['poster_path'] as String?,
+          voteAverage: (data['vote_average'] as num?)?.toDouble(),
+          totalEpisodes: (data['number_of_episodes'] as num?)?.toInt() ?? 0,
+          totalSeasons: (data['number_of_seasons'] as num?)?.toInt() ?? 0,
+        );
+        await cache.cacheMedia(
+          CachedMedia(
+            remoteId: model.id,
+            mediaType: params.mediaType.name,
+            title: model.title,
+            posterPath: model.posterPath,
+            voteAverage: model.voteAverage,
+            totalEpisodes: model.totalEpisodes,
+            totalSeasons: model.totalSeasons,
+          ),
+        );
+        return model;
+      } catch (e) {
+        debugPrint('Failed to fetch media ${params.mediaId}: $e');
+        return null;
+      }
+    });

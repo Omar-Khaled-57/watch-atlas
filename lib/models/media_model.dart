@@ -34,5 +34,6 @@ abstract class MediaModel with _$MediaModel {
     DateTime? updatedAt,
   }) = _MediaModel;
 
-  factory MediaModel.fromJson(Map<String, dynamic> json) => _$MediaModelFromJson(json);
+  factory MediaModel.fromJson(Map<String, dynamic> json) =>
+      _$MediaModelFromJson(json);
 }

@@ -2,28 +2,37 @@ import 'package:dio/dio.dart';
 import '../constants/app_constants.dart';
 
 class AnilistService {
-  static final AnilistService instance = AnilistService._();
-  AnilistService._();
+  static final AnilistService instance = AnilistService();
+  AnilistService();
 
   late final Dio _dio;
 
   void init() {
-    _dio = Dio(BaseOptions(
-      baseUrl: AppConstants.anilistGraphqlUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
-    ));
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: AppConstants.anilistGraphqlUrl,
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+      ),
+    );
   }
 
-  Future<Map<String, dynamic>> query(String query, {Map<String, dynamic>? variables}) async {
-    final response = await _dio.post('', data: {
-      'query': query,
-      'variables': variables ?? {},
-    });
+  Future<Map<String, dynamic>> query(
+    String query, {
+    Map<String, dynamic>? variables,
+  }) async {
+    final response = await _dio.post(
+      '',
+      data: {'query': query, 'variables': variables ?? {}},
+    );
     return response.data;
   }
 
-  Future<List<dynamic>> searchAnime(String search, {int page = 1, int perPage = 20}) async {
+  Future<List<dynamic>> searchAnime(
+    String search, {
+    int page = 1,
+    int perPage = 20,
+  }) async {
     const gql = '''
       query (\$search: String, \$page: Int, \$perPage: Int) {
         Page(page: \$page, perPage: \$perPage) {
@@ -49,7 +58,10 @@ class AnilistService {
         }
       }
     ''';
-    final data = await query(gql, variables: {'search': search, 'page': page, 'perPage': perPage});
+    final data = await query(
+      gql,
+      variables: {'search': search, 'page': page, 'perPage': perPage},
+    );
     return data['data']['Page']['media'] as List<dynamic>;
   }
 

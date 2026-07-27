@@ -25,7 +25,9 @@ class QuickStatusDialog extends ConsumerWidget {
           children: [
             Text(
               context.l10n.updateStatus,
-              style: textTheme.titleMedium?.copyWith(color: colorScheme.onSurface),
+              style: textTheme.titleMedium?.copyWith(
+                color: colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 20),
             ...WatchStatus.values.map((status) {
@@ -36,17 +38,28 @@ class QuickStatusDialog extends ConsumerWidget {
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: () {
-                      ref.read(userMediaProvider.notifier).updateStatus(userMedia, status);
+                      ref
+                          .read(userMediaProvider.notifier)
+                          .updateStatus(userMedia, status);
                       Navigator.of(context).pop();
                     },
                     style: OutlinedButton.styleFrom(
-                      backgroundColor: isSelected ? colorScheme.primary.withValues(alpha: 0.1) : null,
+                      backgroundColor: isSelected
+                          ? colorScheme.primary.withValues(alpha: 0.1)
+                          : null,
                       side: BorderSide(
-                        color: isSelected ? colorScheme.primary : colorScheme.outline,
+                        color: isSelected
+                            ? colorScheme.primary
+                            : colorScheme.outline,
                       ),
-                      padding: const EdgeInsetsDirectional.symmetric(vertical: 14, horizontal: 16),
+                      padding: const EdgeInsetsDirectional.symmetric(
+                        vertical: 14,
+                        horizontal: 16,
+                      ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadiusDirectional.all(Radius.circular(10)),
+                        borderRadius: BorderRadiusDirectional.all(
+                          Radius.circular(10),
+                        ),
                       ),
                     ),
                     child: Row(
@@ -54,19 +67,29 @@ class QuickStatusDialog extends ConsumerWidget {
                         Icon(
                           _statusIcon(status),
                           size: 20,
-                          color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                          color: isSelected
+                              ? colorScheme.primary
+                              : colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: Spacing.md),
                         Text(
                           _statusLabel(context, status),
                           style: textTheme.bodyMedium?.copyWith(
-                            color: isSelected ? colorScheme.primary : colorScheme.onSurface,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                            color: isSelected
+                                ? colorScheme.primary
+                                : colorScheme.onSurface,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.w400,
                           ),
                         ),
                         const Spacer(),
                         if (isSelected)
-                          Icon(Icons.check_rounded, size: 18, color: colorScheme.primary),
+                          Icon(
+                            Icons.check_rounded,
+                            size: 18,
+                            color: colorScheme.primary,
+                          ),
                       ],
                     ),
                   ),
@@ -83,7 +106,9 @@ class QuickStatusDialog extends ConsumerWidget {
                 },
                 child: Text(
                   context.l10n.removeFromTrackingList,
-                  style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.error,
+                  ),
                 ),
               ),
             ),
@@ -95,24 +120,36 @@ class QuickStatusDialog extends ConsumerWidget {
 
   IconData _statusIcon(WatchStatus status) {
     switch (status) {
-      case WatchStatus.watching: return Icons.play_circle_rounded;
-      case WatchStatus.completed: return Icons.check_circle_rounded;
-      case WatchStatus.onHold: return Icons.pause_circle_rounded;
-      case WatchStatus.dropped: return Icons.cancel_rounded;
-      case WatchStatus.planToWatch: return Icons.bookmark_add_rounded;
-      case WatchStatus.rewatching: return Icons.replay_rounded;
+      case WatchStatus.watching:
+        return Icons.play_circle_rounded;
+      case WatchStatus.completed:
+        return Icons.check_circle_rounded;
+      case WatchStatus.onHold:
+        return Icons.pause_circle_rounded;
+      case WatchStatus.dropped:
+        return Icons.cancel_rounded;
+      case WatchStatus.planToWatch:
+        return Icons.bookmark_add_rounded;
+      case WatchStatus.rewatching:
+        return Icons.replay_rounded;
     }
   }
 
   String _statusLabel(BuildContext context, WatchStatus status) {
     final l10n = context.l10n;
     switch (status) {
-      case WatchStatus.watching: return l10n.watching;
-      case WatchStatus.completed: return l10n.completed;
-      case WatchStatus.onHold: return l10n.onHold;
-      case WatchStatus.dropped: return l10n.dropped;
-      case WatchStatus.planToWatch: return l10n.planToWatch;
-      case WatchStatus.rewatching: return l10n.rewatching;
+      case WatchStatus.watching:
+        return l10n.watching;
+      case WatchStatus.completed:
+        return l10n.completed;
+      case WatchStatus.onHold:
+        return l10n.onHold;
+      case WatchStatus.dropped:
+        return l10n.dropped;
+      case WatchStatus.planToWatch:
+        return l10n.planToWatch;
+      case WatchStatus.rewatching:
+        return l10n.rewatching;
     }
   }
 }

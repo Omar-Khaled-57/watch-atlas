@@ -1,9 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/services/auth_service.dart';
-import '../../../core/services/supabase_service.dart';
-
-final _supabase = SupabaseService.instance;
-final _authService = AuthService.instance;
+import '../../../core/providers/service_providers.dart';
+import '../../../core/providers/app_providers.dart';
 
 class NotificationPreferences {
   final bool newFollowers;
@@ -34,46 +31,56 @@ class NotificationPreferences {
   }
 
   Map<String, dynamic> toJson() => {
-        'new_followers': newFollowers,
-        'activity_updates': activityUpdates,
-        'recommendations': recommendations,
-        'list_updates': listUpdates,
-        'weekly_digest': weeklyDigest,
-        'marketing_emails': marketingEmails,
-      };
+    'new_followers': newFollowers,
+    'activity_updates': activityUpdates,
+    'recommendations': recommendations,
+    'list_updates': listUpdates,
+    'weekly_digest': weeklyDigest,
+    'marketing_emails': marketingEmails,
+  };
 }
 
-final notificationPreferencesProvider = FutureProvider<NotificationPreferences>((ref) async {
-  if (!_authService.isAuthenticated) return NotificationPreferences();
-  try {
-    final response = await _supabase.profiles
-        .select('notification_preferences')
-        .eq('id', _authService.userId)
-        .maybeSingle();
-    if (response == null || response['notification_preferences'] == null) {
+final notificationPreferencesProvider = FutureProvider<NotificationPreferences>(
+  (ref) async {
+    final authService = ref.read(authServiceProvider);
+    final supabase = ref.read(supabaseServiceProvider);
+    if (!authService.isAuthenticated) return NotificationPreferences();
+    try {
+      final response = await supabase.profiles
+          .select('notification_preferences')
+          .eq('id', authService.userId)
+          .maybeSingle();
+      if (response == null || response['notification_preferences'] == null) {
+        return NotificationPreferences();
+      }
+      return NotificationPreferences.fromJson(
+        response['notification_preferences'] as Map<String, dynamic>,
+      );
+    } catch (e) {
       return NotificationPreferences();
     }
-    return NotificationPreferences.fromJson(
-      response['notification_preferences'] as Map<String, dynamic>,
-    );
-  } catch (e) {
-    return NotificationPreferences();
-  }
-});
+  },
+);
 
 final updateNotificationPreferenceProvider =
     FutureProvider.family<void, (String key, bool value)>((ref, params) async {
-  final (key, value) = params;
-  if (!_authService.isAuthenticated) return;
+      final (key, value) = params;
+      final authService = ref.read(authServiceProvider);
+      final supabase = ref.read(supabaseServiceProvider);
+      if (!authService.isAuthenticated) return;
 
-  final currentPrefs = await ref.read(notificationPreferencesProvider.future);
-  final updatedMap = currentPrefs.toJson();
-  updatedMap[key] = value;
+      final currentPrefs = await ref.read(
+        notificationPreferencesProvider.future,
+      );
+      final updatedMap = currentPrefs.toJson();
+      updatedMap[key] = value;
 
-  await _supabase.profiles.update({
-    'notification_preferences': updatedMap,
-    'updated_at': DateTime.now().toIso8601String(),
-  }).eq('id', _authService.userId);
+      await supabase.profiles
+          .update({
+            'notification_preferences': updatedMap,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', authService.userId);
 
-  ref.invalidate(notificationPreferencesProvider);
-});
+      ref.invalidate(notificationPreferencesProvider);
+    });

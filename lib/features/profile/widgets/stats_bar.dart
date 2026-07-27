@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class StatItem {
   final String label;
   final int count;
@@ -19,7 +18,10 @@ class StatsBar extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
-      padding: const EdgeInsetsDirectional.symmetric(vertical: 16, horizontal: 8),
+      padding: const EdgeInsetsDirectional.symmetric(
+        vertical: 16,
+        horizontal: 8,
+      ),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerLow,
         borderRadius: BorderRadiusDirectional.all(Radius.circular(12)),

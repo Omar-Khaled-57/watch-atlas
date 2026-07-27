@@ -28,5 +28,6 @@ abstract class UserModel with _$UserModel {
     @Default(0) @JsonKey(name: 'reviews_count') int reviewsCount,
   }) = _UserModel;
 
-  factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
+  factory UserModel.fromJson(Map<String, dynamic> json) =>
+      _$UserModelFromJson(json);
 }

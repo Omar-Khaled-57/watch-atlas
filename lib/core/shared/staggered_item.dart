@@ -19,7 +19,11 @@ class StaggeredItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return child
         .animate()
-        .fadeIn(duration: duration, delay: delay * index, curve: Curves.easeOutCubic)
+        .fadeIn(
+          duration: duration,
+          delay: delay * index,
+          curve: Curves.easeOutCubic,
+        )
         .slideY(
           begin: 0.04,
           end: 0,

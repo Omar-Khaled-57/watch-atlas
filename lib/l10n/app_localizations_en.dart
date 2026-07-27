@@ -84,6 +84,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navLists => 'Lists';
 
   @override
+  String get navTracking => 'Tracking';
+
+  @override
   String get navProfile => 'Profile';
 
   @override
@@ -292,6 +295,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get collaborative => 'Collaborative';
 
   @override
+  String get inviteCollaborator => 'Invite Collaborator';
+
+  @override
+  String get inviteCollaboratorHint => 'Enter username to invite';
+
+  @override
+  String collaborators(Object count) {
+    return '$count collaborators';
+  }
+
+  @override
+  String get noCollaborators => 'No collaborators yet';
+
+  @override
+  String get inviteSent => 'Invitation sent';
+
+  @override
   String addToListTitle(Object title) {
     return 'Add $title to List';
   }
@@ -464,6 +484,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recommendationsAndPrivacy => 'Recommendations & Privacy';
+
+  @override
+  String get privacySettings => 'Privacy Settings';
+
+  @override
+  String get publicProfile => 'Public Profile';
+
+  @override
+  String get publicProfileDesc => 'Allow other users to view your profile';
+
+  @override
+  String get showActivity => 'Show Activity';
+
+  @override
+  String get showActivityDesc =>
+      'Display your recently watched items to others';
 
   @override
   String get personalizedRecommendations => 'Personalized Recommendations';
@@ -1581,6 +1617,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get likeLabel => 'Like';
 
   @override
+  String get dislikeLabel => 'Dislike';
+
+  @override
   String get previousSlide => 'Previous slide';
 
   @override
@@ -1779,4 +1818,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get showLess => 'Show less';
+
+  @override
+  String get containsSpoilers => 'Contains spoilers';
+
+  @override
+  String get allReviews => 'All Reviews';
+
+  @override
+  String get noUserReviews => 'You haven\'t written any reviews yet.';
+
+  @override
+  String get clearSearch => 'Clear search';
+
+  @override
+  String get clearAllFilters => 'Clear all filters';
+
+  @override
+  String votes(int count) {
+    return '$count votes';
+  }
+
+  @override
+  String percentScore(int percent) {
+    return '$percent percent score';
+  }
+
+  @override
+  String tapToRate(int current, int total) {
+    return 'Tap to rate, currently $current out of $total stars';
+  }
+
+  @override
+  String ratingLabel(String rating) {
+    return 'Rating: $rating out of 10';
+  }
 }

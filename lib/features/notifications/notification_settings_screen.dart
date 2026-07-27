@@ -16,9 +16,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
     final prefsAsync = ref.watch(notificationPreferencesProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.notificationPreferences),
-      ),
+      appBar: AppBar(title: Text(context.l10n.notificationPreferences)),
       body: prefsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
@@ -30,7 +28,8 @@ class NotificationSettingsScreen extends ConsumerWidget {
               Text(context.l10n.failedToLoadPreferences, style: tt.bodyLarge),
               const SizedBox(height: Spacing.sm),
               TextButton(
-                onPressed: () => ref.invalidate(notificationPreferencesProvider),
+                onPressed: () =>
+                    ref.invalidate(notificationPreferencesProvider),
                 child: Text(context.l10n.retry),
               ),
             ],
@@ -41,7 +40,10 @@ class NotificationSettingsScreen extends ConsumerWidget {
           children: [
             Text(
               context.l10n.pushNotifications,
-              style: tt.titleSmall?.copyWith(color: cs.primary, fontWeight: FontWeight.w600),
+              style: tt.titleSmall?.copyWith(
+                color: cs.primary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: Spacing.sm),
             Card(
@@ -52,34 +54,58 @@ class NotificationSettingsScreen extends ConsumerWidget {
                     subtitle: context.l10n.newFollowersDescription,
                     value: prefs.newFollowers,
                     onChanged: (value) => ref.read(
-                      updateNotificationPreferenceProvider(('new_followers', value)),
+                      updateNotificationPreferenceProvider((
+                        'new_followers',
+                        value,
+                      )),
                     ),
                   ),
-                  Divider(height: 1, indent: 56, color: cs.outline.withValues(alpha: 0.2)),
+                  Divider(
+                    height: 1,
+                    indent: 56,
+                    color: cs.outline.withValues(alpha: 0.2),
+                  ),
                   _PreferenceSwitch(
                     title: context.l10n.activityUpdates,
                     subtitle: context.l10n.activityUpdatesDescription,
                     value: prefs.activityUpdates,
                     onChanged: (value) => ref.read(
-                      updateNotificationPreferenceProvider(('activity_updates', value)),
+                      updateNotificationPreferenceProvider((
+                        'activity_updates',
+                        value,
+                      )),
                     ),
                   ),
-                  Divider(height: 1, indent: 56, color: cs.outline.withValues(alpha: 0.2)),
+                  Divider(
+                    height: 1,
+                    indent: 56,
+                    color: cs.outline.withValues(alpha: 0.2),
+                  ),
                   _PreferenceSwitch(
                     title: context.l10n.recommendations,
                     subtitle: context.l10n.recommendationsDescription,
                     value: prefs.recommendations,
                     onChanged: (value) => ref.read(
-                      updateNotificationPreferenceProvider(('recommendations', value)),
+                      updateNotificationPreferenceProvider((
+                        'recommendations',
+                        value,
+                      )),
                     ),
                   ),
-                  Divider(height: 1, indent: 56, color: cs.outline.withValues(alpha: 0.2)),
+                  Divider(
+                    height: 1,
+                    indent: 56,
+                    color: cs.outline.withValues(alpha: 0.2),
+                  ),
                   _PreferenceSwitch(
                     title: context.l10n.listUpdates,
                     subtitle: context.l10n.listUpdatesDescription,
                     value: prefs.listUpdates,
                     onChanged: (value) => ref.read(
-                      updateNotificationPreferenceProvider(('list_updates', value)),
+                      updateNotificationPreferenceProvider((
+                        'list_updates',
+                        value,
+                      )),
                     ),
                   ),
                 ],
@@ -88,7 +114,10 @@ class NotificationSettingsScreen extends ConsumerWidget {
             const SizedBox(height: Spacing.xl),
             Text(
               context.l10n.emailNotifications,
-              style: tt.titleSmall?.copyWith(color: cs.primary, fontWeight: FontWeight.w600),
+              style: tt.titleSmall?.copyWith(
+                color: cs.primary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: Spacing.sm),
             Card(
@@ -99,16 +128,26 @@ class NotificationSettingsScreen extends ConsumerWidget {
                     subtitle: context.l10n.weeklyDigestDescription,
                     value: prefs.weeklyDigest,
                     onChanged: (value) => ref.read(
-                      updateNotificationPreferenceProvider(('weekly_digest', value)),
+                      updateNotificationPreferenceProvider((
+                        'weekly_digest',
+                        value,
+                      )),
                     ),
                   ),
-                  Divider(height: 1, indent: 56, color: cs.outline.withValues(alpha: 0.2)),
+                  Divider(
+                    height: 1,
+                    indent: 56,
+                    color: cs.outline.withValues(alpha: 0.2),
+                  ),
                   _PreferenceSwitch(
                     title: context.l10n.marketingEmails,
                     subtitle: context.l10n.marketingEmailsDescription,
                     value: prefs.marketingEmails,
                     onChanged: (value) => ref.read(
-                      updateNotificationPreferenceProvider(('marketing_emails', value)),
+                      updateNotificationPreferenceProvider((
+                        'marketing_emails',
+                        value,
+                      )),
                     ),
                   ),
                 ],

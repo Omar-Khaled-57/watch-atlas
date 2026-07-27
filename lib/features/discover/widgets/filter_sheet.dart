@@ -17,7 +17,8 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
   late RangeValues _ratingRange;
   late String? _selectedCountry;
 
-  Map<String, String> get _countries => Localizations.localeOf(context).languageCode == 'ar'
+  Map<String, String> get _countries =>
+      Localizations.localeOf(context).languageCode == 'ar'
       ? {
           'US': 'الولايات المتحدة',
           'GB': 'المملكة المتحدة',
@@ -67,10 +68,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
       (filters.yearFrom ?? 1970).toDouble(),
       (filters.yearTo ?? 2026).toDouble(),
     );
-    _ratingRange = RangeValues(
-      filters.ratingFrom ?? 0,
-      filters.ratingTo ?? 10,
-    );
+    _ratingRange = RangeValues(filters.ratingFrom ?? 0, filters.ratingTo ?? 10);
     _selectedCountry = filters.country;
   }
 
@@ -97,7 +95,9 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               height: 4,
               margin: EdgeInsetsDirectional.only(bottom: 20),
               decoration: BoxDecoration(
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.3,
+                ),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -129,7 +129,10 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               hintText: context.l10n.allCountries,
             ),
             items: [
-              DropdownMenuItem(value: null, child: Text(context.l10n.allCountries)),
+              DropdownMenuItem(
+                value: null,
+                child: Text(context.l10n.allCountries),
+              ),
               ..._countries.entries.map(
                 (e) => DropdownMenuItem(
                   value: e.key,

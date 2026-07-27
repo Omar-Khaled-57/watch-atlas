@@ -13,8 +13,8 @@ class AppTheme {
   // Light theme – warm, eye-friendly palette
   static const Color _lightBg = Color(0xFFFDFBF7);
   static const Color _lightSurface = Color(0xFFF5F0EB);
-  static const Color _lightText = Color(0xFF292524);
-  static const Color _lightSecondary = Color(0xFF78716C);
+  static const Color _lightText = Color(0xFF252120);
+  static const Color _lightSecondary = Color(0xFF6B6460);
 
   // Accent & states
   static const Color _accent = Color(0xFF00B8FF);
@@ -24,7 +24,7 @@ class AppTheme {
   static const Color _logoPurple = Color(0xFF8B5CF6);
 
   // Semantic
-  static const Color _error = Color(0xFFEF4444);
+  static const Color _error = Color(0xFFF04646);
 
   static const _radiusSmall = 8.0;
   static const _radiusMedium = 12.0;
@@ -210,10 +210,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(_radiusSmall)),
           ),
-          textStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -229,23 +226,19 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(_radiusSmall)),
           ),
-          textStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: _accent,
-          textStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: isDark ? _darkSurfaceSecondary : const Color(0xFFF0F0F0),
+        backgroundColor: isDark
+            ? _darkSurfaceSecondary
+            : const Color(0xFFF0F0F0),
         selectedColor: _accent.withValues(alpha: 0.2),
         labelStyle: TextStyle(
           fontSize: 12,
@@ -255,7 +248,10 @@ class AppTheme {
           fontSize: 12,
           color: isDark ? _darkMuted : _lightSecondary,
         ),
-        padding: const EdgeInsetsDirectional.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: 12,
+          vertical: 6,
+        ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(20)),
         ),
@@ -287,9 +283,7 @@ class AppTheme {
           fontSize: 11,
           fontWeight: FontWeight.w600,
         ),
-        unselectedLabelStyle: const TextStyle(
-          fontSize: 11,
-        ),
+        unselectedLabelStyle: const TextStyle(fontSize: 11),
         landscapeLayout: BottomNavigationBarLandscapeLayout.linear,
       ),
       navigationRailTheme: NavigationRailThemeData(
@@ -329,19 +323,16 @@ class AppTheme {
         labelColor: isDark ? _darkText : _lightText,
         unselectedLabelColor: isDark ? _darkMuted : _lightSecondary,
         indicatorColor: _accent,
-        labelStyle: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        ),
-        unselectedLabelStyle: const TextStyle(
-          fontSize: 14,
-        ),
+        labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: const TextStyle(fontSize: 14),
       ),
       sliderTheme: SliderThemeData(
         activeTrackColor: _accent,
         thumbColor: _accent,
         overlayColor: _accent.withValues(alpha: 0.15),
-        inactiveTrackColor: isDark ? _darkSurfaceSecondary : const Color(0xFFE5E7EB),
+        inactiveTrackColor: isDark
+            ? _darkSurfaceSecondary
+            : const Color(0xFFE5E7EB),
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
@@ -349,7 +340,8 @@ class AppTheme {
           return isDark ? _darkMuted : _lightSecondary;
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return _accent.withValues(alpha: 0.3);
+          if (states.contains(WidgetState.selected))
+            return _accent.withValues(alpha: 0.3);
           return isDark ? _darkSurfaceSecondary : const Color(0xFFE5E7EB);
         }),
       ),

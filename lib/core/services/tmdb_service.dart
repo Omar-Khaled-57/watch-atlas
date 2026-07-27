@@ -4,22 +4,23 @@ import '../constants/app_constants.dart';
 import '../constants/api_endpoints.dart';
 
 class TmdbService {
-  static final TmdbService instance = TmdbService._();
-  TmdbService._();
+  static final TmdbService instance = TmdbService();
+  TmdbService();
 
   late final Dio _dio;
 
   void init() {
-    _dio = Dio(BaseOptions(
-      baseUrl: AppConstants.tmdbBaseUrl,
-      queryParameters: {
-        'api_key': Secrets.tmdbApiKey,
-        'language': 'en-US',
-      },
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
-    ));
-    _dio.interceptors.add(LogInterceptor(requestBody: false, responseBody: false));
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: AppConstants.tmdbBaseUrl,
+        queryParameters: {'api_key': Secrets.tmdbApiKey, 'language': 'en-US'},
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+      ),
+    );
+    _dio.interceptors.add(
+      LogInterceptor(requestBody: false, responseBody: false),
+    );
   }
 
   String imageUrl(String? path, {String size = 'w500'}) {
@@ -31,12 +32,18 @@ class TmdbService {
   String posterUrl(String? path) => imageUrl(path, size: 'w500');
   String profileUrl(String? path) => imageUrl(path, size: 'w185');
 
-  Future<Map<String, dynamic>> get(String endpoint, {Map<String, dynamic>? params}) async {
+  Future<Map<String, dynamic>> get(
+    String endpoint, {
+    Map<String, dynamic>? params,
+  }) async {
     final response = await _dio.get(endpoint, queryParameters: params);
     return response.data;
   }
 
-  Future<List<dynamic>> getList(String endpoint, {Map<String, dynamic>? params}) async {
+  Future<List<dynamic>> getList(
+    String endpoint, {
+    Map<String, dynamic>? params,
+  }) async {
     final data = await get(endpoint, params: params);
     return data['results'] as List<dynamic>;
   }
@@ -59,34 +66,45 @@ class TmdbService {
   Future<Map<String, dynamic>> upcoming({int page = 1}) async =>
       get(ApiEndpoints.upcoming, params: {'page': page});
 
-  Future<Map<String, dynamic>> movieDetails(int id) async =>
-      get(ApiEndpoints.movieDetails.replaceFirst('{id}', id.toString()),
-          params: {'append_to_response': 'credits,videos,recommendations,similar'});
+  Future<Map<String, dynamic>> movieDetails(int id) async => get(
+    ApiEndpoints.movieDetails.replaceFirst('{id}', id.toString()),
+    params: {'append_to_response': 'credits,videos,recommendations,similar'},
+  );
 
-  Future<Map<String, dynamic>> tvDetails(int id) async =>
-      get(ApiEndpoints.tvDetails.replaceFirst('{id}', id.toString()),
-          params: {'append_to_response': 'credits,videos,recommendations,similar'});
+  Future<Map<String, dynamic>> tvDetails(int id) async => get(
+    ApiEndpoints.tvDetails.replaceFirst('{id}', id.toString()),
+    params: {'append_to_response': 'credits,videos,recommendations,similar'},
+  );
 
   Future<List<dynamic>> search(String query, {int page = 1}) async {
-    final data = await get(ApiEndpoints.searchMulti, params: {'query': query, 'page': page});
+    final data = await get(
+      ApiEndpoints.searchMulti,
+      params: {'query': query, 'page': page},
+    );
     return data['results'] as List<dynamic>;
   }
 
-  Future<Map<String, dynamic>> discoverMovie({Map<String, dynamic>? filters}) async =>
-      get(ApiEndpoints.discoverMovie, params: filters);
+  Future<Map<String, dynamic>> discoverMovie({
+    Map<String, dynamic>? filters,
+  }) async => get(ApiEndpoints.discoverMovie, params: filters);
 
-  Future<Map<String, dynamic>> discoverTv({Map<String, dynamic>? filters}) async =>
-      get(ApiEndpoints.discoverTv, params: filters);
+  Future<Map<String, dynamic>> discoverTv({
+    Map<String, dynamic>? filters,
+  }) async => get(ApiEndpoints.discoverTv, params: filters);
 
-  Future<Map<String, dynamic>> searchMovie(String query, {int page = 1}) async =>
+  Future<Map<String, dynamic>> searchMovie(
+    String query, {
+    int page = 1,
+  }) async =>
       get(ApiEndpoints.searchMovie, params: {'query': query, 'page': page});
 
   Future<Map<String, dynamic>> searchTv(String query, {int page = 1}) async =>
       get(ApiEndpoints.searchTv, params: {'query': query, 'page': page});
 
-  Future<Map<String, dynamic>> personDetails(int id) async =>
-      get(ApiEndpoints.personDetails.replaceFirst('{id}', id.toString()),
-          params: {'append_to_response': 'movie_credits,tv_credits'});
+  Future<Map<String, dynamic>> personDetails(int id) async => get(
+    ApiEndpoints.personDetails.replaceFirst('{id}', id.toString()),
+    params: {'append_to_response': 'movie_credits,tv_credits'},
+  );
 
   Future<List<dynamic>> genres() async {
     final data = await get(ApiEndpoints.genres);
@@ -99,12 +117,16 @@ class TmdbService {
   }
 
   Future<List<dynamic>> movieVideos(int id) async {
-    final data = await get(ApiEndpoints.movieVideos.replaceFirst('{id}', id.toString()));
+    final data = await get(
+      ApiEndpoints.movieVideos.replaceFirst('{id}', id.toString()),
+    );
     return data['results'] as List<dynamic>;
   }
 
   Future<List<dynamic>> tvVideos(int id) async {
-    final data = await get(ApiEndpoints.tvVideos.replaceFirst('{id}', id.toString()));
+    final data = await get(
+      ApiEndpoints.tvVideos.replaceFirst('{id}', id.toString()),
+    );
     return data['results'] as List<dynamic>;
   }
 }

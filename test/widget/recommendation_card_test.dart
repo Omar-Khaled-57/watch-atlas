@@ -53,7 +53,9 @@ void main() {
       expect(find.byIcon(Icons.thumb_up_alt_outlined), findsNothing);
     });
 
-    testWidgets('renders unselected thumb down icon by default', (tester) async {
+    testWidgets('renders unselected thumb down icon by default', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -103,10 +105,19 @@ void main() {
             body: Builder(
               builder: (context) {
                 final l10n = _MockLocalizations();
-                expect(_localizedReasonHelper('Popular trending', l10n), 'Popular Trending');
+                expect(
+                  _localizedReasonHelper('Popular trending', l10n),
+                  'Popular Trending',
+                );
                 expect(_localizedReasonHelper('Top rated', l10n), 'Top Rated');
-                expect(_localizedReasonHelper('Critically acclaimed', l10n), 'Critically Acclaimed');
-                expect(_localizedReasonHelper('Recently released', l10n), 'Recently Released');
+                expect(
+                  _localizedReasonHelper('Critically acclaimed', l10n),
+                  'Critically Acclaimed',
+                );
+                expect(
+                  _localizedReasonHelper('Recently released', l10n),
+                  'Recently Released',
+                );
                 expect(_localizedReasonHelper(null, l10n), '');
                 return const SizedBox();
               },
@@ -123,7 +134,10 @@ void main() {
             body: Builder(
               builder: (context) {
                 final l10n = _MockLocalizations();
-                expect(_localizedReasonHelper('Some unknown reason', l10n), 'Some unknown reason');
+                expect(
+                  _localizedReasonHelper('Some unknown reason', l10n),
+                  'Some unknown reason',
+                );
                 return const SizedBox();
               },
             ),
@@ -136,8 +150,16 @@ void main() {
   group('RecCategory roundtrip', () {
     test('all categories have non-empty dbValue and displayName', () {
       for (final cat in RecCategory.values) {
-        expect(cat.dbValue.isNotEmpty, true, reason: 'Empty dbValue for ${cat.name}');
-        expect(cat.displayName.isNotEmpty, true, reason: 'Empty displayName for ${cat.name}');
+        expect(
+          cat.dbValue.isNotEmpty,
+          true,
+          reason: 'Empty dbValue for ${cat.name}',
+        );
+        expect(
+          cat.displayName.isNotEmpty,
+          true,
+          reason: 'Empty displayName for ${cat.name}',
+        );
       }
     });
   });
@@ -206,7 +228,9 @@ class _TestFeedbackButton extends StatelessWidget {
         iconSize: 18,
         icon: Icon(
           isSelected ? selectedIcon : icon,
-          color: isSelected ? color : Theme.of(context).colorScheme.onSurfaceVariant,
+          color: isSelected
+              ? color
+              : Theme.of(context).colorScheme.onSurfaceVariant,
         ),
         onPressed: onTap,
       ),

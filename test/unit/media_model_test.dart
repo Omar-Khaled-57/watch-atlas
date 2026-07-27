@@ -96,11 +96,7 @@ void main() {
     });
 
     test('handles null optional fields', () {
-      final json = {
-        'id': 1,
-        'mediaType': 'movie',
-        'title': 'Test',
-      };
+      final json = {'id': 1, 'mediaType': 'movie', 'title': 'Test'};
 
       final model = MediaModel.fromJson(json);
 

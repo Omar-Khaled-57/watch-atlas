@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/constants/app_colors.dart';
 import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/extensions/string_extensions.dart';
@@ -26,7 +27,14 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
   String _categoryFilter = 'all';
   String _statusFilter = 'all';
 
-  final _statuses = ['all', 'watching', 'completed', 'planToWatch', 'onHold', 'dropped'];
+  final _statuses = [
+    'all',
+    'watching',
+    'completed',
+    'planToWatch',
+    'onHold',
+    'dropped',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +50,12 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
       appBar: AppBar(title: Text(context.l10n.allCollections)),
       body: itemsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => Center(child: Text(context.l10n.failedToLoadItems, style: textTheme.bodyMedium?.copyWith(color: colorScheme.error))),
+        error: (_, __) => Center(
+          child: Text(
+            context.l10n.failedToLoadItems,
+            style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
+          ),
+        ),
         data: (items) {
           final userMedia = userMediaAsync.value ?? [];
           final lists = listsAsync.value ?? [];
@@ -50,13 +63,41 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
 
           return CustomScrollView(
             slivers: [
-              SliverToBoxAdapter(child: _buildCover(items.length, colorScheme, textTheme)),
-              SliverToBoxAdapter(child: _buildMeta(items.length, lists.length, colorScheme, textTheme)),
-              SliverToBoxAdapter(child: _buildCategoryTabs(categories, colorScheme, textTheme)),
-              SliverToBoxAdapter(child: _buildStatusChips(colorScheme, textTheme)),
-              SliverToBoxAdapter(child: _buildFilterToolbar(items.length, colorScheme, textTheme)),
-              _buildItemsGrid(items, userMedia, isDesktop, isTablet, colorScheme, textTheme),
-              const SliverPadding(padding: EdgeInsetsDirectional.only(bottom: 80)),
+              SliverToBoxAdapter(
+                child: _buildCover(items.length, colorScheme, textTheme),
+              ),
+              SliverToBoxAdapter(
+                child: _buildMeta(
+                  items.length,
+                  lists.length,
+                  colorScheme,
+                  textTheme,
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: _buildCategoryTabs(categories, colorScheme, textTheme),
+              ),
+              SliverToBoxAdapter(
+                child: _buildStatusChips(colorScheme, textTheme),
+              ),
+              SliverToBoxAdapter(
+                child: _buildFilterToolbar(
+                  items.length,
+                  colorScheme,
+                  textTheme,
+                ),
+              ),
+              _buildItemsGrid(
+                items,
+                userMedia,
+                isDesktop,
+                isTablet,
+                colorScheme,
+                textTheme,
+              ),
+              const SliverPadding(
+                padding: EdgeInsetsDirectional.only(bottom: 80),
+              ),
             ],
           );
         },
@@ -65,22 +106,35 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
   }
 
   List<String> _extractCategories(List<Map<String, dynamic>> items) {
-    final cats = items.map((i) => i['media_type'] as String? ?? 'unknown').toSet();
+    final cats = items
+        .map((i) => i['media_type'] as String? ?? 'unknown')
+        .toSet();
     final ordered = <String>[];
     if (cats.contains('tv')) ordered.add(context.l10n.tvShows);
     if (cats.contains('movie')) ordered.add(context.l10n.movies);
     if (cats.contains('anime')) ordered.add(context.l10n.anime);
-    ordered.addAll(cats.where((c) => c != 'tv' && c != 'movie' && c != 'anime').map((c) => c[0].toUpperCase() + c.substring(1)));
+    ordered.addAll(
+      cats
+          .where((c) => c != 'tv' && c != 'movie' && c != 'anime')
+          .map((c) => c[0].toUpperCase() + c.substring(1)),
+    );
     return ordered;
   }
 
-  Widget _buildCover(int totalItems, ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildCover(
+    int totalItems,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
     return SizedBox(
       height: 200,
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [colorScheme.primaryContainer, colorScheme.secondaryContainer],
+            colors: [
+              colorScheme.primaryContainer,
+              colorScheme.secondaryContainer,
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -88,7 +142,11 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
         child: Stack(
           children: [
             Center(
-              child: Icon(Icons.collections_bookmark_rounded, size: 72, color: Colors.white.withValues(alpha: 0.15)),
+              child: Icon(
+                Icons.collections_bookmark_rounded,
+                size: 72,
+                color: Colors.white.withValues(alpha: 0.15),
+              ),
             ),
             Positioned(
               left: 20,
@@ -102,14 +160,22 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
                     context.l10n.allCollections,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                    ),
                   ),
-                    const SizedBox(height: Spacing.xs),
+                  const SizedBox(height: Spacing.xs),
                   Text(
                     '${totalItems == 1 ? '$totalItems ${context.l10n.item}' : '$totalItems ${context.l10n.items}'}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 14),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontSize: 14,
+                    ),
                   ),
                 ],
               ),
@@ -120,27 +186,56 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
     );
   }
 
-  Widget _buildMeta(int totalItems, int listCount, ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildMeta(
+    int totalItems,
+    int listCount,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(Spacing.xl, Spacing.md, Spacing.xl, Spacing.xs),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        Spacing.xl,
+        Spacing.md,
+        Spacing.xl,
+        Spacing.xs,
+      ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            _chip(Icons.collections_bookmark_rounded, '${context.l10n.across} $listCount list${listCount == 1 ? '' : 's'}', colorScheme, textTheme),
+            _chip(
+              Icons.collections_bookmark_rounded,
+              '${context.l10n.across} $listCount list${listCount == 1 ? '' : 's'}',
+              colorScheme,
+              textTheme,
+            ),
             const SizedBox(width: 6),
-            _chip(Icons.movie_outlined, '${totalItems == 1 ? '$totalItems ${context.l10n.item}' : '$totalItems ${context.l10n.items}'}', colorScheme, textTheme),
+            _chip(
+              Icons.movie_outlined,
+              '${totalItems == 1 ? '$totalItems ${context.l10n.item}' : '$totalItems ${context.l10n.items}'}',
+              colorScheme,
+              textTheme,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCategoryTabs(List<String> categories, ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildCategoryTabs(
+    List<String> categories,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
     if (categories.isEmpty) return const SizedBox.shrink();
     final all = ['all', ...categories];
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(Spacing.xl, Spacing.md, 0, Spacing.xs),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        Spacing.xl,
+        Spacing.md,
+        0,
+        Spacing.xs,
+      ),
       child: SizedBox(
         height: 36,
         child: HorizontalCarousel(
@@ -152,7 +247,12 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
             final c = all[index];
             final isSelected = _categoryFilter == c;
             return FilterChip(
-              label: Text(c == 'all' ? context.l10n.allFilter : c, style: textTheme.labelMedium?.copyWith(fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400)),
+              label: Text(
+                c == 'all' ? context.l10n.allFilter : c,
+                style: textTheme.labelMedium?.copyWith(
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                ),
+              ),
               selected: isSelected,
               onSelected: (_) => setState(() => _categoryFilter = c),
               showCheckmark: false,
@@ -167,7 +267,12 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
 
   Widget _buildStatusChips(ColorScheme colorScheme, TextTheme textTheme) {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(Spacing.xl, Spacing.sm, 0, 0),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        Spacing.xl,
+        Spacing.sm,
+        0,
+        0,
+      ),
       child: SizedBox(
         height: 32,
         child: HorizontalCarousel(
@@ -178,23 +283,32 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
           itemBuilder: (context, index) {
             final s = _statuses[index];
             final isSelected = _statusFilter == s;
-            final label = s == 'all' ? context.l10n.allFilter : switch (s) {
-              'watching' => context.l10n.watching,
-              'completed' => context.l10n.completed,
-              'planToWatch' => context.l10n.planToWatch,
-              'onHold' => context.l10n.onHold,
-              'dropped' => context.l10n.dropped,
-              'rewatching' => context.l10n.rewatching,
-              _ => s,
-            };
+            final label = s == 'all'
+                ? context.l10n.allFilter
+                : switch (s) {
+                    'watching' => context.l10n.watching,
+                    'completed' => context.l10n.completed,
+                    'planToWatch' => context.l10n.planToWatch,
+                    'onHold' => context.l10n.onHold,
+                    'dropped' => context.l10n.dropped,
+                    'rewatching' => context.l10n.rewatching,
+                    _ => s,
+                  };
             return FilterChip(
-              label: Text(label, style: textTheme.labelSmall?.copyWith(fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400)),
+              label: Text(
+                label,
+                style: textTheme.labelSmall?.copyWith(
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                ),
+              ),
               selected: isSelected,
               onSelected: (_) => setState(() => _statusFilter = s),
               showCheckmark: false,
               visualDensity: VisualDensity.compact,
               selectedColor: colorScheme.secondaryContainer,
-              backgroundColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              backgroundColor: colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.5,
+              ),
             );
           },
         ),
@@ -202,17 +316,40 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
     );
   }
 
-  Widget _buildFilterToolbar(int totalItems, ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _buildFilterToolbar(
+    int totalItems,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(Spacing.xl, Spacing.sm, Spacing.xl, 0),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        Spacing.xl,
+        Spacing.sm,
+        Spacing.xl,
+        0,
+      ),
       child: Row(
         children: [
-          Text(context.l10n.itemCount(totalItems), style: textTheme.labelMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
+          Text(
+            context.l10n.itemCount(totalItems),
+            style: textTheme.labelMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
           const Spacer(),
           IconButton(
-            icon: Icon(_viewMode == _ViewMode.grid ? Icons.view_list_rounded : Icons.grid_view_rounded, size: 20),
+            icon: Icon(
+              _viewMode == _ViewMode.grid
+                  ? Icons.view_list_rounded
+                  : Icons.grid_view_rounded,
+              size: 20,
+            ),
             tooltip: context.l10n.toggleView,
-            onPressed: () => setState(() => _viewMode = _viewMode == _ViewMode.grid ? _ViewMode.list : _ViewMode.grid),
+            onPressed: () => setState(
+              () => _viewMode = _viewMode == _ViewMode.grid
+                  ? _ViewMode.list
+                  : _ViewMode.grid,
+            ),
           ),
         ],
       ),
@@ -228,9 +365,12 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
     TextTheme textTheme,
   ) {
     var filtered = items.where((item) {
-      if (_categoryFilter != 'all' && !_matchesCategory(item, _categoryFilter)) return false;
+      if (_categoryFilter != 'all' && !_matchesCategory(item, _categoryFilter))
+        return false;
       if (_statusFilter == 'all') return true;
-      final um = userMedia.where((u) => u.mediaId == (item['media_id'] as int)).firstOrNull;
+      final um = userMedia
+          .where((u) => u.mediaId == (item['media_id'] as int))
+          .firstOrNull;
       return um?.status.name == _statusFilter;
     }).toList();
 
@@ -241,20 +381,38 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.search_off_rounded, size: 48, color: colorScheme.onSurfaceVariant),
-                const SizedBox(height: Spacing.md),
-              Text(context.l10n.noItemsMatch, style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
+              Icon(
+                Icons.search_off_rounded,
+                size: 48,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(height: Spacing.md),
+              Text(
+                context.l10n.noItemsMatch,
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
             ],
           ),
         ),
       );
     }
 
-    final crossAxisCount = isDesktop ? 6 : isTablet ? 5 : 3;
+    final crossAxisCount = isDesktop
+        ? 6
+        : isTablet
+        ? 5
+        : 3;
 
     if (_viewMode == _ViewMode.grid) {
       return SliverPadding(
-        padding: const EdgeInsetsDirectional.fromSTEB(Spacing.xl, Spacing.sm, Spacing.xl, 0),
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          Spacing.xl,
+          Spacing.sm,
+          Spacing.xl,
+          0,
+        ),
         sliver: SliverGrid(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
@@ -273,7 +431,10 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
                 onTap: () {
                   final item = filtered[index];
                   final mediaData = item['media'] as Map<String, dynamic>?;
-                  final type = mediaData?['media_type'] as String? ?? item['media_type'] as String? ?? 'movie';
+                  final type =
+                      mediaData?['media_type'] as String? ??
+                      item['media_type'] as String? ??
+                      'movie';
                   context.push('/media/$type/${item['media_id']}');
                 },
               ),
@@ -285,7 +446,12 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
     }
 
     return SliverPadding(
-      padding: const EdgeInsetsDirectional.fromSTEB(Spacing.xl, Spacing.xs, Spacing.xl, 0),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        Spacing.xl,
+        Spacing.xs,
+        Spacing.xl,
+        0,
+      ),
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate(
           (context, index) => StaggeredItem(
@@ -298,7 +464,10 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
               onTap: () {
                 final item = filtered[index];
                 final mediaData = item['media'] as Map<String, dynamic>?;
-                final type = mediaData?['media_type'] as String? ?? item['media_type'] as String? ?? 'movie';
+                final type =
+                    mediaData?['media_type'] as String? ??
+                    item['media_type'] as String? ??
+                    'movie';
                 context.push('/media/$type/${item['media_id']}');
               },
             ),
@@ -317,10 +486,17 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
     return true;
   }
 
-  Widget _chip(IconData icon, String label, ColorScheme colorScheme, TextTheme textTheme) {
+  Widget _chip(
+    IconData icon,
+    String label,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+  ) {
     return Container(
       padding: const EdgeInsetsDirectional.symmetric(
-            horizontal: Spacing.sm, vertical: Spacing.xs),
+        horizontal: Spacing.sm,
+        vertical: Spacing.xs,
+      ),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadiusDirectional.all(Radius.circular(20)),
@@ -330,7 +506,12 @@ class _AllItemsScreenState extends ConsumerState<AllItemsScreen> {
         children: [
           Icon(icon, size: 12, color: colorScheme.onSurfaceVariant),
           const SizedBox(width: 4),
-          Text(label, style: textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+          Text(
+            label,
+            style: textTheme.labelSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
         ],
       ),
     );
@@ -357,7 +538,9 @@ class _GridTile extends StatelessWidget {
     final mediaId = item['media_id'] as int;
     final um = userMedia.where((u) => u.mediaId == mediaId).firstOrNull;
     final mediaData = item['media'] as Map<String, dynamic>?;
-    final title = mediaData?['title'] as String? ?? context.l10n.mediaWithId(mediaId.toString());
+    final title =
+        mediaData?['title'] as String? ??
+        context.l10n.mediaWithId(mediaId.toString());
     final posterPath = mediaData?['poster_path'] as String?;
 
     return Card(
@@ -379,12 +562,24 @@ class _GridTile extends StatelessWidget {
                       fit: BoxFit.cover,
                       errorWidget: (_, __, ___) => Container(
                         color: colorScheme.surfaceContainerHighest,
-                        child: Center(child: Icon(Icons.movie_outlined, size: 32, color: colorScheme.onSurfaceVariant)),
+                        child: Center(
+                          child: Icon(
+                            Icons.movie_outlined,
+                            size: 32,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                       ),
                     )
                   : Container(
                       color: colorScheme.surfaceContainerHighest,
-                      child: Center(child: Icon(Icons.movie_outlined, size: 32, color: colorScheme.onSurfaceVariant)),
+                      child: Center(
+                        child: Icon(
+                          Icons.movie_outlined,
+                          size: 32,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                     ),
             ),
             Padding(
@@ -393,12 +588,17 @@ class _GridTile extends StatelessWidget {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
+                style: textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
             if (um != null)
               Container(
-                padding: const EdgeInsetsDirectional.symmetric(horizontal: 6, vertical: 3),
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: 6,
+                  vertical: 3,
+                ),
                 color: colorScheme.surfaceContainerLow,
                 child: Row(
                   children: [
@@ -438,7 +638,11 @@ class _GridTile extends StatelessWidget {
       'dropped' => const Color(0xFFF44336),
       _ => colorScheme.onSurfaceVariant,
     };
-    return Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle));
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    );
   }
 }
 
@@ -463,9 +667,14 @@ class _ListTile extends StatelessWidget {
     final note = item['note'] as String?;
     final um = userMedia.where((u) => u.mediaId == mediaId).firstOrNull;
     final mediaData = item['media'] as Map<String, dynamic>?;
-    final title = mediaData?['title'] as String? ?? context.l10n.mediaWithId(mediaId.toString());
+    final title =
+        mediaData?['title'] as String? ??
+        context.l10n.mediaWithId(mediaId.toString());
     final posterPath = mediaData?['poster_path'] as String?;
-    final mediaType = mediaData?['media_type'] as String? ?? item['media_type'] as String? ?? 'movie';
+    final mediaType =
+        mediaData?['media_type'] as String? ??
+        item['media_type'] as String? ??
+        'movie';
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -491,9 +700,19 @@ class _ListTile extends StatelessWidget {
                       ? CachedNetworkImage(
                           imageUrl: posterPath.posterUrl,
                           fit: BoxFit.cover,
-                          errorWidget: (_, __, ___) => Icon(Icons.movie_outlined, size: 24, color: colorScheme.onSurfaceVariant),
+                          errorWidget: (_, __, ___) => Icon(
+                            Icons.movie_outlined,
+                            size: 24,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
                         )
-                      : Center(child: Icon(Icons.movie_outlined, size: 24, color: colorScheme.onSurfaceVariant)),
+                      : Center(
+                          child: Icon(
+                            Icons.movie_outlined,
+                            size: 24,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(width: 14),
@@ -501,24 +720,51 @@ class _ListTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(
+                      title,
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     if (note != null && note.isNotEmpty) ...[
                       const SizedBox(height: 2),
-                      Text(note, style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text(
+                        note,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ],
                     const SizedBox(height: 6),
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsetsDirectional.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: colorScheme.primaryContainer.withValues(alpha: 0.5),
-                            borderRadius: BorderRadiusDirectional.all(Radius.circular(4)),
+                          padding: const EdgeInsetsDirectional.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
                           ),
-                          child: Text(mediaType.toUpperCase(), style: textTheme.labelSmall?.copyWith(fontSize: 9, color: colorScheme.onPrimaryContainer)),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primaryContainer.withValues(
+                              alpha: 0.5,
+                            ),
+                            borderRadius: BorderRadiusDirectional.all(
+                              Radius.circular(4),
+                            ),
+                          ),
+                          child: Text(
+                            mediaType.toUpperCase(),
+                            style: textTheme.labelSmall?.copyWith(
+                              fontSize: 9,
+                              color: colorScheme.onPrimaryContainer,
+                            ),
+                          ),
                         ),
                         if (um != null) ...[
-                            const SizedBox(width: Spacing.sm),
+                          const SizedBox(width: Spacing.sm),
                           _statusDot(um.status.name),
                           const SizedBox(width: Spacing.xs),
                           Text(
@@ -531,10 +777,23 @@ class _ListTile extends StatelessWidget {
                               'rewatching' => context.l10n.rewatching,
                               _ => um.status.name,
                             },
-                            style: textTheme.labelSmall?.copyWith(color: _statusColor(um.status.name)),
+                            style: textTheme.labelSmall?.copyWith(
+                              color: statusColorFromString(
+                                um.status.name,
+                                fallback: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
                           ),
                           if (um.episodeProgress > 0)
-                            Text(context.l10n.episodeProgress(um.episodeProgress, um.totalEpisodes), style: textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+                            Text(
+                              context.l10n.episodeProgress(
+                                um.episodeProgress,
+                                um.totalEpisodes,
+                              ),
+                              style: textTheme.labelSmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
                         ],
                       ],
                     ),
@@ -549,17 +808,16 @@ class _ListTile extends StatelessWidget {
   }
 
   Widget _statusDot(String status) {
-    return Container(width: 8, height: 8, decoration: BoxDecoration(color: _statusColor(status), shape: BoxShape.circle));
-  }
-
-  Color _statusColor(String status) {
-    return switch (status) {
-      'watching' => const Color(0xFF4CAF50),
-      'completed' => const Color(0xFF2196F3),
-      'planToWatch' => const Color(0xFF9C27B0),
-      'onHold' => const Color(0xFFFF9800),
-      'dropped' => const Color(0xFFF44336),
-      _ => colorScheme.onSurfaceVariant,
-    };
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        color: statusColorFromString(
+          status,
+          fallback: colorScheme.onSurfaceVariant,
+        ),
+        shape: BoxShape.circle,
+      ),
+    );
   }
 }

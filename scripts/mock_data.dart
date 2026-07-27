@@ -27,10 +27,7 @@ MediaModel createMockMedia({
   );
 }
 
-UserModel createMockUser({
-  String id = 'user_1',
-  String username = 'testuser',
-}) {
+UserModel createMockUser({String id = 'user_1', String username = 'testuser'}) {
   return UserModel(
     id: id,
     email: '$username@example.com',

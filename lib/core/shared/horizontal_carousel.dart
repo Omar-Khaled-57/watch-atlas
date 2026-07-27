@@ -32,7 +32,8 @@ class _HorizontalCarouselState extends State<HorizontalCarousel> {
   bool get _useGrabToScroll {
     if (kIsWeb) return true;
     final platform = Theme.of(context).platform;
-    if (platform != TargetPlatform.android && platform != TargetPlatform.iOS) return true;
+    if (platform != TargetPlatform.android && platform != TargetPlatform.iOS)
+      return true;
     return MediaQuery.of(context).orientation == Orientation.landscape;
   }
 
@@ -93,9 +94,7 @@ class _HorizontalCarouselState extends State<HorizontalCarousel> {
         padding: widget.padding,
         itemCount: widget.itemCount,
         itemExtent: widget.itemExtent,
-        physics: _isDragging
-            ? const NeverScrollableScrollPhysics()
-            : null,
+        physics: _isDragging ? const NeverScrollableScrollPhysics() : null,
         itemBuilder: (context, index) {
           final child = widget.itemBuilder(context, index);
           if (widget.separatorWidth != null && index < widget.itemCount - 1) {
@@ -120,7 +119,9 @@ class _HorizontalCarouselState extends State<HorizontalCarousel> {
     }
 
     return MouseRegion(
-      cursor: _isDragging ? SystemMouseCursors.grabbing : SystemMouseCursors.grab,
+      cursor: _isDragging
+          ? SystemMouseCursors.grabbing
+          : SystemMouseCursors.grab,
       child: GestureDetector(
         onHorizontalDragStart: _onDragStart,
         onHorizontalDragUpdate: _onDragUpdate,

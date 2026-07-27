@@ -6,6 +6,40 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.11.0] - 2026-07-27
+
+### Fixed
+
+- **DI providers returned uninitialized singletons.** `supabaseServiceProvider`, `tmdbServiceProvider`, and `anilistServiceProvider` now return their respective `.instance` singletons instead of creating new instances. This fixes lists not persisting and media not being added to tracking.
+- **13 silent `catch (_)` blocks** replaced with `debugPrint` containing context-specific error messages across `BehaviorService`, `SyncService`, `AuthService`, `RecommendationRepository`, `HomeProviders`, `DiscoverProviders`, `ListsProviders`.
+- **Exponential backoff** added to `SyncService` for failed sync retries.
+
+### Added
+
+- **Input sanitization.** `sanitizeUserInput()` extension strips HTML tags and collapses whitespace. Applied to profile display name, bio, and list title/description.
+- **Offline banner.** `TrackingScreen` shows a `MaterialBanner` when the device is offline, with retry button.
+- **Persistent cache.** `CacheService` backed by SQLite via `sqflite_common_ffi` for offline-first data. `UserMediaNotifier` serves cached data immediately, then refreshes from network.
+- **Notification bell** icon with unread badge on the home screen header.
+- **Privacy settings** (public/private profile) on the profile screen.
+- **List collaboration** — invite collaborators via dialog in list detail screen.
+- **Analytics promotion** — analytics button added to the tracking screen app bar.
+- **Desktop keyboard shortcuts** — Ctrl+1 through Ctrl+5 switch nav tabs.
+- **Inno Setup installer** for Windows (`windows/installer/`).
+- **Firebase config files** added (`google-services.json`, `GoogleService-Info.plist`).
+- **Tests:** 185 passing — unit tests for sanitization, cache, WCAG contrast, router redirects, recommendation models, auth validation, number extensions, app constants, media enums; widget tests for MediaCard, RecommendationCard, FeedbackButton; integration test for app launch and nav.
+
+### Changed
+
+- `behaviorServiceProvider` centralized in `service_providers.dart` with proper DI (Supabase + Auth injected).
+- All feature code using `BehaviorService.instance` migrated to `ref.read(behaviorServiceProvider)`.
+- `reviews_screen.dart` migrated from `Supabase.instance.client` to `ref.read(supabaseServiceProvider).client`.
+- `auth_providers.dart` migrated from `NotificationService.instance.clearToken()` to `ref.read(notificationServiceProvider).clearToken()`.
+- Unused imports cleaned across `recommendation_card.dart`, `recommendation_row.dart`, `reviews_screen.dart`, `auth_providers.dart`.
+- `.gitignore` expanded: Firebase configs, platform generated files, dev build outputs, `ephemeral/` dirs.
+- Version bumped to `0.11.0+1`.
+
+---
+
 ## [0.10.0] - 2026-07-22
 
 ### Security

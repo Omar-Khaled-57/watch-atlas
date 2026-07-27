@@ -22,7 +22,9 @@ class BarChartWidget extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final color = barColor ?? colorScheme.primary;
-    final maxY = data.isEmpty ? 1.0 : data.map((d) => d.value).reduce((a, b) => a > b ? a : b);
+    final maxY = data.isEmpty
+        ? 1.0
+        : data.map((d) => d.value).reduce((a, b) => a > b ? a : b);
 
     return SizedBox(
       height: height,
@@ -64,7 +66,8 @@ class BarChartWidget extends StatelessWidget {
                 reservedSize: 32,
                 getTitlesWidget: (value, meta) {
                   final index = value.toInt();
-                  if (index < 0 || index >= data.length) return const SizedBox.shrink();
+                  if (index < 0 || index >= data.length)
+                    return const SizedBox.shrink();
                   return Padding(
                     padding: const EdgeInsetsDirectional.only(top: 8),
                     child: Text(
@@ -102,7 +105,9 @@ class BarChartWidget extends StatelessWidget {
           gridData: FlGridData(
             show: true,
             drawVerticalLine: false,
-            horizontalInterval: maxY > 0 ? (maxY * 1.3 / 4).ceilToDouble().clamp(1, double.infinity) : 1,
+            horizontalInterval: maxY > 0
+                ? (maxY * 1.3 / 4).ceilToDouble().clamp(1, double.infinity)
+                : 1,
             getDrawingHorizontalLine: (value) => FlLine(
               color: isDark ? Colors.white10 : Colors.black12,
               strokeWidth: 0.5,
@@ -136,5 +141,9 @@ class BarChartDataPoint {
   final double value;
   final String? filterKey;
 
-  const BarChartDataPoint({required this.label, required this.value, this.filterKey});
+  const BarChartDataPoint({
+    required this.label,
+    required this.value,
+    this.filterKey,
+  });
 }

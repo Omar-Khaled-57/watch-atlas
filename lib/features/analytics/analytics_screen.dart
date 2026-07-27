@@ -4,6 +4,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/constants/app_colors.dart';
+import 'package:intl/intl.dart';
+
 import '../../core/constants/dimensions.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../l10n/l10n.dart';
@@ -11,6 +14,12 @@ import 'providers/analytics_providers.dart';
 import 'widgets/bar_chart_widget.dart';
 import 'widgets/stats_card.dart';
 
+/// Analytics dashboard showing watch statistics, charts, and insights.
+///
+/// Displays stats grid (total watched, hours, average rating), bar/pie/line
+/// charts for monthly activity, genre distribution, rating distribution,
+/// decade breakdown, and favorite genres. Supports weekly/monthly/yearly
+/// filtering via [FilteredAnalyticsScreen].
 class AnalyticsScreen extends ConsumerStatefulWidget {
   const AnalyticsScreen({super.key});
 
@@ -45,9 +54,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final ratingDistAsync = ref.watch(ratingDistributionProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.statistics),
-      ),
+      appBar: AppBar(title: Text(context.l10n.statistics)),
       body: RefreshIndicator(
         onRefresh: () async {
           await Future.wait([
@@ -75,34 +82,47 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             SizedBox(height: Spacing.sm),
             statsAsync.when(
               loading: () => const _StatsGridShimmer(),
-              error: (e, _) => Center(child: Text(context.l10n.errorWithDetails(e.toString()))),
+              error: (e, _) => Center(
+                child: Text(context.l10n.errorWithDetails(e.toString())),
+              ),
               data: (stats) => _buildStatsGrid(stats, colorScheme, textTheme),
             ),
             SizedBox(height: Spacing.xl),
-            favoriteGenreAsync.whenData((fg) => fg).maybeWhen(
-              data: (fg) {
-                if (fg == null) return const SizedBox.shrink();
-                return _buildFavoriteCard(
-                  context.l10n.favoriteGenre,
-                  fg.label,
-                  Icons.category_rounded,
-                  colorScheme,
-                  textTheme,
-                ).animate().fadeIn(duration: 300.ms);
-              },
-              orElse: () => const SizedBox.shrink(),
-            ),
+            favoriteGenreAsync
+                .whenData((fg) => fg)
+                .maybeWhen(
+                  data: (fg) {
+                    if (fg == null) return const SizedBox.shrink();
+                    return _buildFavoriteCard(
+                      context.l10n.favoriteGenre,
+                      fg.label,
+                      Icons.category_rounded,
+                      colorScheme,
+                      textTheme,
+                    ).animate().fadeIn(duration: 300.ms);
+                  },
+                  orElse: () => const SizedBox.shrink(),
+                ),
             SizedBox(height: Spacing.xl),
-            _buildSectionHeader(context.l10n.weeklyActivity, Icons.show_chart_rounded),
+            _buildSectionHeader(
+              context.l10n.weeklyActivity,
+              Icons.show_chart_rounded,
+            ),
             SizedBox(height: Spacing.md),
             weeklyAsync.when(
               loading: () => const _ChartShimmer(),
-              error: (e, _) => Center(child: Text(context.l10n.errorWithDetails(e.toString()))),
+              error: (e, _) => Center(
+                child: Text(context.l10n.errorWithDetails(e.toString())),
+              ),
               data: (data) {
                 final points = data.map((d) {
                   final parts = d.date.split('-');
                   final label = '${int.parse(parts[1])}/${int.parse(parts[2])}';
-                  return BarChartDataPoint(label: label, value: d.count.toDouble(), filterKey: d.date);
+                  return BarChartDataPoint(
+                    label: label,
+                    value: d.count.toDouble(),
+                    filterKey: d.date,
+                  );
                 }).toList();
                 return BarChartWidget(
                   data: points,
@@ -111,7 +131,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     if (index >= 0 && index < points.length) {
                       final filterKey = points[index].filterKey;
                       if (filterKey != null) {
-                        context.push('/analytics/filtered', extra: ('weekly', filterKey));
+                        context.push(
+                          '/analytics/filtered',
+                          extra: ('weekly', filterKey),
+                        );
                       }
                     }
                   },
@@ -119,18 +142,24 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               },
             ),
             SizedBox(height: Spacing.xl),
-            _buildSectionHeader(context.l10n.monthlyActivity, Icons.bar_chart_rounded),
+            _buildSectionHeader(
+              context.l10n.monthlyActivity,
+              Icons.bar_chart_rounded,
+            ),
             SizedBox(height: Spacing.md),
             monthlyAsync.when(
               loading: () => const _ChartShimmer(),
-              error: (e, _) => Center(child: Text(context.l10n.errorWithDetails(e.toString()))),
+              error: (e, _) => Center(
+                child: Text(context.l10n.errorWithDetails(e.toString())),
+              ),
               data: (data) {
                 final points = data.map((d) {
                   final parts = d.month.split('-');
-                  final months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                  final locale = Localizations.localeOf(context).languageCode;
+                  final monthDate = DateTime(2024, int.parse(parts[1]));
+                  final monthLabel = DateFormat.MMM(locale).format(monthDate);
                   return BarChartDataPoint(
-                    label: months[int.parse(parts[1])],
+                    label: monthLabel,
                     value: d.count.toDouble(),
                     filterKey: d.month,
                   );
@@ -142,7 +171,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     if (index >= 0 && index < points.length) {
                       final filterKey = points[index].filterKey;
                       if (filterKey != null) {
-                        context.push('/analytics/filtered', extra: ('monthly', filterKey));
+                        context.push(
+                          '/analytics/filtered',
+                          extra: ('monthly', filterKey),
+                        );
                       }
                     }
                   },
@@ -150,69 +182,97 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               },
             ),
             SizedBox(height: Spacing.xl),
-            _buildSectionHeader(context.l10n.genreDistribution, Icons.pie_chart_rounded),
+            _buildSectionHeader(
+              context.l10n.genreDistribution,
+              Icons.pie_chart_rounded,
+            ),
             SizedBox(height: Spacing.md),
             genreDistAsync.when(
               loading: () => const _ChartShimmer(),
-              error: (e, _) => Center(child: Text(context.l10n.errorWithDetails(e.toString()))),
+              error: (e, _) => Center(
+                child: Text(context.l10n.errorWithDetails(e.toString())),
+              ),
               data: (data) {
                 if (data.isEmpty) return const EmptyAnalytics();
                 return _buildPieChart(data, colorScheme);
               },
             ),
             SizedBox(height: Spacing.xl),
-            _buildSectionHeader(context.l10n.countryDistribution, Icons.public_rounded),
+            _buildSectionHeader(
+              context.l10n.countryDistribution,
+              Icons.public_rounded,
+            ),
             SizedBox(height: Spacing.md),
             countryDistAsync.when(
               loading: () => const _ChartShimmer(),
-              error: (e, _) => Center(child: Text(context.l10n.errorWithDetails(e.toString()))),
+              error: (e, _) => Center(
+                child: Text(context.l10n.errorWithDetails(e.toString())),
+              ),
               data: (data) {
                 if (data.isEmpty) return const EmptyAnalytics();
                 return _buildPieChart(data, colorScheme);
               },
             ),
             SizedBox(height: Spacing.xl),
-            _buildSectionHeader(context.l10n.yearlyActivity, Icons.trending_up_rounded),
+            _buildSectionHeader(
+              context.l10n.yearlyActivity,
+              Icons.trending_up_rounded,
+            ),
             SizedBox(height: Spacing.md),
             yearlyAsync.when(
               loading: () => const _ChartShimmer(),
-              error: (e, _) => Center(child: Text(context.l10n.errorWithDetails(e.toString()))),
+              error: (e, _) => Center(
+                child: Text(context.l10n.errorWithDetails(e.toString())),
+              ),
               data: (data) {
                 if (data.isEmpty) return const EmptyAnalytics();
                 return _buildLineChart(data, colorScheme, isDark);
               },
             ),
             SizedBox(height: Spacing.xl),
-            favoriteCountryAsync.whenData((fc) => fc).maybeWhen(
-              data: (fc) {
-                if (fc == null) return const SizedBox.shrink();
-                return _buildFavoriteCard(
-                  context.l10n.favoriteCountry,
-                  fc.label,
-                  Icons.flag_rounded,
-                  colorScheme,
-                  textTheme,
-                ).animate().fadeIn(duration: 300.ms);
-              },
-              orElse: () => const SizedBox.shrink(),
-            ),
+            favoriteCountryAsync
+                .whenData((fc) => fc)
+                .maybeWhen(
+                  data: (fc) {
+                    if (fc == null) return const SizedBox.shrink();
+                    return _buildFavoriteCard(
+                      context.l10n.favoriteCountry,
+                      fc.label,
+                      Icons.flag_rounded,
+                      colorScheme,
+                      textTheme,
+                    ).animate().fadeIn(duration: 300.ms);
+                  },
+                  orElse: () => const SizedBox.shrink(),
+                ),
             SizedBox(height: Spacing.xl),
-            _buildSectionHeader(context.l10n.ratingDistribution, Icons.star_rounded),
+            _buildSectionHeader(
+              context.l10n.ratingDistribution,
+              Icons.star_rounded,
+            ),
             SizedBox(height: Spacing.md),
             ratingDistAsync.when(
               loading: () => const _ChartShimmer(),
-              error: (e, _) => Center(child: Text(context.l10n.errorWithDetails(e.toString()))),
-              data: (data) => _buildRatingDistribution(data, colorScheme, textTheme),
+              error: (e, _) => Center(
+                child: Text(context.l10n.errorWithDetails(e.toString())),
+              ),
+              data: (data) =>
+                  _buildRatingDistribution(data, colorScheme, textTheme),
             ),
             SizedBox(height: Spacing.xl),
-            decadeAsync.whenData((d) => d).maybeWhen(
-              data: (decade) {
-                if (decade == null) return const SizedBox.shrink();
-                return _buildMostWatchedDecade(decade, colorScheme, textTheme)
-                    .animate().fadeIn(duration: 300.ms);
-              },
-              orElse: () => const SizedBox.shrink(),
-            ),
+            decadeAsync
+                .whenData((d) => d)
+                .maybeWhen(
+                  data: (decade) {
+                    if (decade == null) return const SizedBox.shrink();
+                    return _buildMostWatchedDecade(
+                      decade,
+                      colorScheme,
+                      textTheme,
+                    ).animate().fadeIn(duration: 300.ms);
+                  },
+                  orElse: () => const SizedBox.shrink(),
+                ),
             SizedBox(height: Spacing.xl),
           ],
         ),
@@ -228,8 +288,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           crossAxisCount: crossAxisCount,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: Spacing.md,
-              crossAxisSpacing: Spacing.md,
+          mainAxisSpacing: Spacing.md,
+          crossAxisSpacing: Spacing.md,
           childAspectRatio: 1.3,
           children: [
             StatsCard(
@@ -248,7 +308,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               title: context.l10n.totalHours,
               value: '${stats.totalHours}h',
               icon: Icons.schedule_rounded,
-              iconColor: Colors.amber,
+              iconColor: AppColors.star,
             ),
             StatsCard(
               title: context.l10n.avgRating,
@@ -278,17 +338,31 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
   Widget _buildPieChart(List<DistributionItem> data, ColorScheme cs) {
     final chartColors = [
-      cs.primary, cs.secondary, cs.tertiary,
-      Colors.amber, Colors.green, Colors.blue,
-      Colors.purple, Colors.teal, Colors.pink,
-      Colors.indigo, Colors.cyan, Colors.orange,
+      cs.primary,
+      cs.secondary,
+      cs.tertiary,
+      AppColors.star,
+      Colors.green,
+      Colors.blue,
+      Colors.purple,
+      Colors.teal,
+      Colors.pink,
+      Colors.indigo,
+      Colors.cyan,
+      Colors.orange,
     ];
 
     final total = data.fold<int>(0, (sum, d) => sum + d.count);
     final displayed = data.length > 12 ? data.sublist(0, 11) : data;
     if (data.length > 12) {
       final otherCount = data.sublist(11).fold<int>(0, (s, d) => s + d.count);
-      displayed.add(DistributionItem(label: context.l10n.other, count: otherCount, percentage: otherCount / total));
+      displayed.add(
+        DistributionItem(
+          label: context.l10n.other,
+          count: otherCount,
+          percentage: otherCount / total,
+        ),
+      );
     }
 
     return SizedBox(
@@ -336,14 +410,19 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       height: 10,
                       decoration: BoxDecoration(
                         color: chartColors[index % chartColors.length],
-                        borderRadius: BorderRadiusDirectional.all(Radius.circular(2)),
+                        borderRadius: BorderRadiusDirectional.all(
+                          Radius.circular(2),
+                        ),
                       ),
                     ),
                     SizedBox(width: Spacing.sm),
                     Expanded(
                       child: Text(
                         item.label,
-                        style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: cs.onSurfaceVariant,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -371,7 +450,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       return FlSpot(entry.key.toDouble(), entry.value.count.toDouble());
     }).toList();
 
-    final maxY = data.isEmpty ? 1.0 : data.map((d) => d.count.toDouble()).reduce((a, b) => a > b ? a : b);
+    final maxY = data.isEmpty
+        ? 1.0
+        : data.map((d) => d.count.toDouble()).reduce((a, b) => a > b ? a : b);
 
     return SizedBox(
       height: 200,
@@ -397,12 +478,16 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 interval: data.length > 8 ? 2 : 1,
                 getTitlesWidget: (value, meta) {
                   final index = value.toInt();
-                  if (index < 0 || index >= data.length) return const SizedBox.shrink();
+                  if (index < 0 || index >= data.length)
+                    return const SizedBox.shrink();
                   return Padding(
                     padding: const EdgeInsetsDirectional.only(top: Spacing.sm),
                     child: Text(
                       '${data[index].year}',
-                      style: TextStyle(color: cs.onSurfaceVariant, fontSize: 10),
+                      style: TextStyle(
+                        color: cs.onSurfaceVariant,
+                        fontSize: 10,
+                      ),
                     ),
                   );
                 },
@@ -430,7 +515,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               getTooltipItems: (touchedSpots) {
                 return touchedSpots.map((spot) {
                   final index = spot.x.toInt();
-                  final year = index >= 0 && index < data.length ? data[index].year : 0;
+                  final year = index >= 0 && index < data.length
+                      ? data[index].year
+                      : 0;
                   return LineTooltipItem(
                     '$year\n${spot.y.toInt()}',
                     TextStyle(
@@ -521,7 +608,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     ColorScheme cs,
     TextTheme tt,
   ) {
-    final maxCount = data.isEmpty ? 1 : data.map((d) => d.count).reduce((a, b) => a > b ? a : b);
+    final maxCount = data.isEmpty
+        ? 1
+        : data.map((d) => d.count).reduce((a, b) => a > b ? a : b);
     return Column(
       children: data.map((bucket) {
         final fraction = maxCount > 0 ? bucket.count / maxCount : 0.0;
@@ -548,10 +637,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       bucket.label == '9-10'
                           ? Colors.green
                           : bucket.label == '7-8'
-                              ? cs.primary
-                              : bucket.label == '5-6'
-                                  ? Colors.amber
-                                  : Colors.redAccent,
+                          ? cs.primary
+                          : bucket.label == '5-6'
+                          ? AppColors.star
+                          : Colors.redAccent,
                     ),
                   ),
                 ),
@@ -562,9 +651,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 child: Text(
                   '${bucket.count}',
                   textAlign: TextAlign.end,
-                  style: tt.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: tt.bodySmall?.copyWith(fontWeight: FontWeight.w600),
                 ),
               ),
             ],
@@ -584,10 +671,14 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.amber.withValues(alpha: 0.12),
+                color: AppColors.star.withValues(alpha: 0.12),
                 borderRadius: BorderRadiusDirectional.all(Radius.circular(12)),
               ),
-              child: Icon(Icons.date_range_rounded, color: Colors.amber, size: 24),
+              child: Icon(
+                Icons.date_range_rounded,
+                color: AppColors.star,
+                size: 24,
+              ),
             ),
             SizedBox(width: Spacing.lg),
             Expanded(
@@ -624,7 +715,11 @@ class EmptyAnalytics extends StatelessWidget {
         padding: const EdgeInsetsDirectional.symmetric(vertical: Spacing.xl),
         child: Column(
           children: [
-            Icon(Icons.info_outline_rounded, color: cs.onSurfaceVariant, size: 32),
+            Icon(
+              Icons.info_outline_rounded,
+              color: cs.onSurfaceVariant,
+              size: 32,
+            ),
             SizedBox(height: Spacing.sm),
             Text(
               context.l10n.noDataAvailable,
@@ -650,15 +745,18 @@ class _StatsGridShimmer extends StatelessWidget {
           crossAxisCount: crossAxisCount,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: Spacing.md,
-              crossAxisSpacing: Spacing.md,
+          mainAxisSpacing: Spacing.md,
+          crossAxisSpacing: Spacing.md,
           childAspectRatio: 1.3,
-          children: List.generate(4, (_) => Container(
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerHighest,
-              borderRadius: BorderRadiusDirectional.all(Radius.circular(12)),
+          children: List.generate(
+            4,
+            (_) => Container(
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHighest,
+                borderRadius: BorderRadiusDirectional.all(Radius.circular(12)),
+              ),
             ),
-          )),
+          ),
         );
       },
     );

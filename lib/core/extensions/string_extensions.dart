@@ -11,7 +11,17 @@ extension StringExtensions on String {
 
   String toSearchQuery() => trim().toLowerCase();
 
-  bool get isArabic => RegExp(r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]+').hasMatch(this);
+  bool get isArabic =>
+      RegExp(r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]+').hasMatch(this);
+
+  /// Sanitizes user-generated text by stripping HTML tags, collapsing
+  /// whitespace, and trimming.  Prevents XSS and HTML injection.
+  String sanitizeUserInput() {
+    return replaceAll(
+      RegExp(r'<[^>]*>'),
+      '',
+    ).replaceAll(RegExp(r'\s+'), ' ').trim();
+  }
 
   String get posterUrl => 'https://image.tmdb.org/t/p/w500$this';
   String get backdropUrl => 'https://image.tmdb.org/t/p/w1280$this';

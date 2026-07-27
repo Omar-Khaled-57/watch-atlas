@@ -9,9 +9,7 @@ class LicensesScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.licenses),
-      ),
+      appBar: AppBar(title: Text(l10n.licenses)),
       body: SingleChildScrollView(
         padding: EdgeInsetsDirectional.all(24),
         child: Column(
@@ -26,10 +24,30 @@ class LicensesScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 24),
-            _section(context, theme, l10n.openSourceNotice, l10n.openSourceNoticeBody),
-            _section(context, theme, l10n.thirdPartyLibraries, l10n.thirdPartyLibrariesBody),
-            _section(context, theme, l10n.mediaOwnership, l10n.mediaOwnershipBody),
-            _section(context, theme, l10n.aiGeneratedLogo, l10n.aiGeneratedLogoBody),
+            _section(
+              context,
+              theme,
+              l10n.openSourceNotice,
+              l10n.openSourceNoticeBody,
+            ),
+            _section(
+              context,
+              theme,
+              l10n.thirdPartyLibraries,
+              l10n.thirdPartyLibrariesBody,
+            ),
+            _section(
+              context,
+              theme,
+              l10n.mediaOwnership,
+              l10n.mediaOwnershipBody,
+            ),
+            _section(
+              context,
+              theme,
+              l10n.aiGeneratedLogo,
+              l10n.aiGeneratedLogoBody,
+            ),
             _section(context, theme, l10n.trademarks, l10n.trademarksBody),
           ],
         ),
@@ -37,13 +55,23 @@ class LicensesScreen extends StatelessWidget {
     );
   }
 
-  Widget _section(BuildContext context, ThemeData theme, String title, String body) {
+  Widget _section(
+    BuildContext context,
+    ThemeData theme,
+    String title,
+    String body,
+  ) {
     return Padding(
       padding: EdgeInsetsDirectional.only(bottom: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+          Text(
+            title,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           SizedBox(height: 8),
           Text(body, style: theme.textTheme.bodyMedium?.copyWith(height: 1.5)),
         ],

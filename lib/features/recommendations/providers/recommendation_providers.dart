@@ -2,27 +2,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/recommendation_models.dart';
 import '../../../core/providers/app_providers.dart';
-import '../../../core/services/tmdb_service.dart';
 import '../../../core/repositories/recommendation_repository.dart';
-import '../../../core/services/behavior_service.dart';
 import '../../../core/services/recommendation_engine.dart';
-import '../../../core/services/supabase_service.dart';
 
 // ---------------------------------------------------------------------------
 // Service / engine providers
 // ---------------------------------------------------------------------------
 
-final behaviorServiceProvider = Provider<BehaviorService>((ref) => BehaviorService(
-      supabase: SupabaseService.instance,
-    ));
+final recommendationRepositoryProvider = Provider<RecommendationRepository>(
+  (ref) => RecommendationRepository(
+    supabase: ref.read(supabaseServiceProvider),
+    tmdb: ref.read(tmdbServiceProvider),
+  ),
+);
 
-final recommendationRepositoryProvider =
-    Provider<RecommendationRepository>((ref) => RecommendationRepository(
-          supabase: SupabaseService.instance,
-        ));
-
-final recommendationEngineProvider =
-    Provider<RecommendationEngine>((ref) {
+final recommendationEngineProvider = Provider<RecommendationEngine>((ref) {
   final repo = ref.read(recommendationRepositoryProvider);
   return RecommendationEngine(repository: repo);
 });
@@ -37,30 +31,33 @@ final recommendationEngineProvider =
 /// personalised recommendations are disabled.
 final recommendationsProvider =
     FutureProvider<Map<RecCategory, List<ScoredMedia>>>((ref) async {
-  final uid = ref.watch(authServiceProvider).userId;
-  if (uid.isEmpty) return {};
+      final uid = ref.watch(authServiceProvider).userId;
+      if (uid.isEmpty) return {};
 
-  final recsEnabled = ref.watch(recsEnabledProvider).value ?? true;
-  if (!recsEnabled) return {};
+      final recsEnabled = ref.watch(recsEnabledProvider).value ?? true;
+      if (!recsEnabled) return {};
 
-  final engine = ref.read(recommendationEngineProvider);
-  final recs = await engine.generateAll(uid);
-  return recs;
-});
+      final engine = ref.read(recommendationEngineProvider);
+      final recs = await engine.generateAll(uid);
+      return recs;
+    });
 
 /// Returns recommendations for a single category.
 final recommendationCategoryProvider =
-    FutureProvider.family<List<ScoredMedia>, RecCategory>(
-        (ref, category) async {
-  final all = ref.watch(recommendationsProvider).value ?? {};
-  return all[category] ?? [];
-});
+    FutureProvider.family<List<ScoredMedia>, RecCategory>((
+      ref,
+      category,
+    ) async {
+      final all = ref.watch(recommendationsProvider).value ?? {};
+      return all[category] ?? [];
+    });
 
 /// Fallback non-personalised recommendations for new users with no history.
 /// Uses TMDB API when Supabase media table is unavailable.
-final coldStartRecommendationsProvider =
-    FutureProvider<List<ScoredMedia>>((ref) async {
-  final tmdb = TmdbService.instance;
+final coldStartRecommendationsProvider = FutureProvider<List<ScoredMedia>>((
+  ref,
+) async {
+  final tmdb = ref.read(tmdbServiceProvider);
   try {
     final response = await tmdb.get('/movie/popular');
     final results = response['results'] as List<dynamic>;
@@ -94,7 +91,8 @@ final recsEnabledProvider = FutureProvider<bool>((ref) async {
   try {
     final behavior = ref.read(behaviorServiceProvider);
     return await behavior.isRecsEnabled();
-  } catch (_) {
+  } catch (e) {
+    debugPrint('recsEnabledProvider: $e');
     return true;
   }
 });

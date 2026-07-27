@@ -2,7 +2,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('FilteredAnalyticsScreen _getTitle logic', () {
-    String getTitle(String filterType, String filterKey, {String mediaFor = 'Media for'}) {
+    String getTitle(
+      String filterType,
+      String filterKey, {
+      String mediaFor = 'Media for',
+    }) {
       if (filterType == 'weekly') {
         final parts = filterKey.split('-');
         if (parts.length >= 3) {
@@ -12,8 +16,19 @@ void main() {
         final parts = filterKey.split('-');
         if (parts.length >= 2) {
           final months = [
-            '', 'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December',
+            '',
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December',
           ];
           final monthIndex = int.tryParse(parts[1]) ?? 0;
           if (monthIndex > 0 && monthIndex < months.length) {

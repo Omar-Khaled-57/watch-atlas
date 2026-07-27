@@ -5,9 +5,24 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'supabase_service.dart';
 import 'auth_service.dart';
 
+/// Handles Firebase Cloud Messaging (FCM) and local notifications.
+///
+/// Manages FCM token registration, message handling, and local notification
+/// display via [flutter_local_notifications]. Tokens are stored in Supabase
+/// for server-side push delivery.
+///
+/// Call [init] once at app startup after Firebase initialization.
+///
+/// Use [instance] for quick access; inject configured instances for tests.
 class NotificationService {
-  static final NotificationService instance = NotificationService._();
-  NotificationService._();
+  static final NotificationService instance = NotificationService();
+
+  NotificationService({SupabaseService? supabase, AuthService? auth})
+    : _supabase = supabase ?? SupabaseService.instance,
+      _auth = auth ?? AuthService.instance;
+
+  final SupabaseService _supabase;
+  final AuthService _auth;
 
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
@@ -16,7 +31,9 @@ class NotificationService {
   Future<void> init() async {
     await Firebase.initializeApp();
     _messaging = FirebaseMessaging.instance;
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -51,9 +68,9 @@ class NotificationService {
   Future<void> _saveToken(String? token) async {
     if (token == null) return;
     try {
-      final userId = AuthService.instance.userId;
+      final userId = _auth.userId;
       if (userId.isEmpty) return;
-      await SupabaseService.instance.profiles.upsert({
+      await _supabase.profiles.upsert({
         'id': userId,
         'fcm_token': token,
         'updated_at': DateTime.now().toIso8601String(),
@@ -65,9 +82,9 @@ class NotificationService {
 
   Future<void> clearToken() async {
     try {
-      final userId = AuthService.instance.userId;
+      final userId = _auth.userId;
       if (userId.isEmpty) return;
-      await SupabaseService.instance.profiles.upsert({
+      await _supabase.profiles.upsert({
         'id': userId,
         'fcm_token': null,
         'updated_at': DateTime.now().toIso8601String(),
