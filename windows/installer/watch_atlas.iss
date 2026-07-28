@@ -4,10 +4,10 @@
 ; Then open this .iss file in Inno Setup Compiler
 
 #define MyAppName "WatchAtlas"
-#define MyAppVersion "0.10.0"
+#define MyAppVersion "0.11.0"
 #define MyAppPublisher "WatchAtlas"
 #define MyAppURL "https://watchatlas.app"
-#define MyAppExeName "watch_atlas.exe"
+#define MyAppExeName "WatchAtlas.exe"
 
 [Setup]
 AppId={{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}

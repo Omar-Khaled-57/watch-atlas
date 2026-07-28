@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.watchatlas" "\0"
-            VALUE "FileDescription", "watch_atlas" "\0"
+            VALUE "CompanyName", "WatchAtlas" "\0"
+            VALUE "FileDescription", "WatchAtlas" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "watch_atlas" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.watchatlas. All rights reserved." "\0"
-            VALUE "OriginalFilename", "watch_atlas.exe" "\0"
-            VALUE "ProductName", "watch_atlas" "\0"
+            VALUE "InternalName", "WatchAtlas" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 WatchAtlas. All rights reserved." "\0"
+            VALUE "OriginalFilename", "WatchAtlas.exe" "\0"
+            VALUE "ProductName", "WatchAtlas" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
