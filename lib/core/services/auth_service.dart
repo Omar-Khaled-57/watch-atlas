@@ -123,38 +123,42 @@ class AuthService {
     await _supabase.auth.signInWithOAuth(OAuthProvider.apple);
   }
 
+  /// Fixed port for the desktop OAuth callback server.
+  /// Must be registered in the Supabase dashboard → Auth → URL Configuration
+  /// → Redirect URLs as `http://localhost:5555`.
+  static const int _oauthPort = 5555;
+
   Future<void> _signInWithOAuthDesktop(
     OAuthProvider provider, {
     String? loginHint,
   }) async {
-    // Bind to both IPv4 (127.0.0.1) and IPv6 (::1) since Windows can resolve
-    // 'localhost' to either one. Use port 0 so the OS assigns an available port,
-    // avoiding conflicts if a previous OAuth session didn't close cleanly.
     final servers = <HttpServer>[];
     for (final addr in [
       InternetAddress.loopbackIPv4,
       InternetAddress.loopbackIPv6,
     ]) {
       try {
-        servers.add(await HttpServer.bind(addr, 0));
+        servers.add(await HttpServer.bind(addr, _oauthPort));
       } on SocketException {
         // address family not available on this system
+      } on OSError {
+        // port already in use
       }
     }
     if (servers.isEmpty) {
-      debugPrint('[OAuth] Failed to bind to any address');
-      return;
+      throw Exception(
+        '[OAuth] Port $_oauthPort is unavailable. '
+        'Close any process using it and try again.',
+      );
     }
-    // All servers bind to the same random port; use the first one.
-    final port = servers.first.port;
     debugPrint(
-      '[OAuth] Server listening on port $port (${servers.length} address(es))',
+      '[OAuth] Server listening on port $_oauthPort (${servers.length} address(es))',
     );
 
     try {
       await _supabase.auth.signInWithOAuth(
         provider,
-        redirectTo: 'http://localhost:$port',
+        redirectTo: 'http://localhost:$_oauthPort',
         queryParams: {
           if (loginHint != null) 'login_hint': loginHint,
           'prompt': 'select_account',
@@ -190,18 +194,15 @@ class AuthService {
       debugPrint('[OAuth] URI query params: ${request.uri.queryParameters}');
 
       if (request.uri.queryParameters.containsKey('code')) {
-        try {
-          await _supabase.auth.getSessionFromUrl(request.uri);
-          debugPrint('[OAuth] Session exchange succeeded');
-          final user = currentUser;
-          if (user?.email != null) {
-            await _saveGoogleAccount(user!.email!);
-          }
-        } catch (e) {
-          debugPrint('[OAuth] Session exchange failed: $e');
+        await _supabase.auth.getSessionFromUrl(request.uri);
+        debugPrint('[OAuth] Session exchange succeeded');
+        final user = currentUser;
+        if (user?.email != null) {
+          await _saveGoogleAccount(user!.email!);
         }
       } else {
         debugPrint('[OAuth] No code parameter in redirect URI');
+        throw Exception('OAuth redirect did not contain an authorization code');
       }
 
       request.response.statusCode = 200;
@@ -226,6 +227,7 @@ class AuthService {
       debugPrint('[OAuth] Response sent, server closing');
     } catch (e) {
       debugPrint('[OAuth] Error: $e');
+      rethrow;
     } finally {
       for (final s in servers) {
         await s.close();
