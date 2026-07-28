@@ -90,16 +90,15 @@ class AuthNotifier extends Notifier<AuthState> {
     state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
     try {
       await _authService.signInWithGoogle(loginHint: loginHint);
-      if (!kIsWeb) {
-        await _authService.importOAuthProfile();
-        final profile = await _authService.getProfile();
-        final needsOnboarding =
-            profile?.gender == null && profile?.dateOfBirth == null;
-        state = state.copyWith(
-          status: AuthStatus.authenticated,
-          isNewUser: needsOnboarding,
-        );
-      }
+      if (!_authService.isOAuthSynchronous) return;
+      await _authService.importOAuthProfile();
+      final profile = await _authService.getProfile();
+      final needsOnboarding =
+          profile?.gender == null && profile?.dateOfBirth == null;
+      state = state.copyWith(
+        status: AuthStatus.authenticated,
+        isNewUser: needsOnboarding,
+      );
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
@@ -112,16 +111,15 @@ class AuthNotifier extends Notifier<AuthState> {
     state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
     try {
       await _authService.signInWithApple();
-      if (!kIsWeb) {
-        await _authService.importOAuthProfile();
-        final profile = await _authService.getProfile();
-        final needsOnboarding =
-            profile?.gender == null && profile?.dateOfBirth == null;
-        state = state.copyWith(
-          status: AuthStatus.authenticated,
-          isNewUser: needsOnboarding,
-        );
-      }
+      if (!_authService.isOAuthSynchronous) return;
+      await _authService.importOAuthProfile();
+      final profile = await _authService.getProfile();
+      final needsOnboarding =
+          profile?.gender == null && profile?.dateOfBirth == null;
+      state = state.copyWith(
+        status: AuthStatus.authenticated,
+        isNewUser: needsOnboarding,
+      );
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
