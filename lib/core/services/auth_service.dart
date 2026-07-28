@@ -80,6 +80,7 @@ class AuthService {
     if (kIsWeb) {
       await _supabase.auth.signInWithOAuth(
         OAuthProvider.google,
+        redirectTo: kIsWeb ? Uri.base.origin : null,
         queryParams: {
           if (loginHint != null) 'login_hint': loginHint,
           'prompt': 'select_account',
@@ -92,7 +93,10 @@ class AuthService {
 
   Future<void> signInWithApple() async {
     if (kIsWeb) {
-      await _supabase.auth.signInWithOAuth(OAuthProvider.apple);
+      await _supabase.auth.signInWithOAuth(
+        OAuthProvider.apple,
+        redirectTo: kIsWeb ? Uri.base.origin : null,
+      );
       return;
     }
     await _signInWithOAuthDesktop(OAuthProvider.apple);
