@@ -76,11 +76,18 @@ class AuthService {
     await _supabase.auth.signInWithPassword(email: email, password: password);
   }
 
+  static bool get _isDesktop =>
+      !kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux);
+
+  /// Whether the OAuth flow completes synchronously (desktop localhost server)
+  /// vs fire-and-forget (mobile/web deep links).
+  bool get isOAuthSynchronous => _isDesktop;
+
   Future<void> signInWithGoogle({String? loginHint}) async {
     if (kIsWeb) {
       await _supabase.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: kIsWeb ? Uri.base.origin : null,
+        redirectTo: Uri.base.origin,
         queryParams: {
           if (loginHint != null) 'login_hint': loginHint,
           'prompt': 'select_account',
@@ -88,18 +95,32 @@ class AuthService {
       );
       return;
     }
-    await _signInWithOAuthDesktop(OAuthProvider.google, loginHint: loginHint);
+    if (_isDesktop) {
+      await _signInWithOAuthDesktop(OAuthProvider.google, loginHint: loginHint);
+      return;
+    }
+    await _supabase.auth.signInWithOAuth(
+      OAuthProvider.google,
+      queryParams: {
+        if (loginHint != null) 'login_hint': loginHint,
+        'prompt': 'select_account',
+      },
+    );
   }
 
   Future<void> signInWithApple() async {
     if (kIsWeb) {
       await _supabase.auth.signInWithOAuth(
         OAuthProvider.apple,
-        redirectTo: kIsWeb ? Uri.base.origin : null,
+        redirectTo: Uri.base.origin,
       );
       return;
     }
-    await _signInWithOAuthDesktop(OAuthProvider.apple);
+    if (_isDesktop) {
+      await _signInWithOAuthDesktop(OAuthProvider.apple);
+      return;
+    }
+    await _supabase.auth.signInWithOAuth(OAuthProvider.apple);
   }
 
   Future<void> _signInWithOAuthDesktop(
