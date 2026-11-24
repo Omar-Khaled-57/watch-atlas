@@ -1,7 +1,7 @@
 <p>
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/images/logo/logo.png">
-    <img src="assets/images/logo/logo.png" width="120" alt="WatchAtlas">
+    <source media="(prefers-color-scheme: dark)" srcset="assets/images/logo/logo-docs.webp">
+    <img src="assets/images/logo/logo-docs.webp" width="120" alt="WatchAtlas">
   </picture>
 </p>
 
