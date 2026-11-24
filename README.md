@@ -23,7 +23,7 @@
 
 ## Overview
 
-**WatchAtlas** is a full-featured media companion that lets you track movies, TV shows, and anime; discover new content through a hybrid recommendation engine; build and share lists; write reviews; and follow friends — all with a polished Material 3 UI that adapts to mobile, tablet, and desktop layouts.
+**WatchAtlas** is a full-featured media companion that lets you track movies, TV shows, and anime; discover new content through a hybrid recommendation engine; build and share lists; and write reviews — all with a polished Material 3 UI that adapts to mobile, tablet, and desktop layouts.
 
 The app uses **Supabase** for auth (magic-link, Google, Apple), data persistence, and real-time sync, with **TMDB** and **AniList** as media data sources. An offline-first architecture powered by **ISAR** ensures the app works without connectivity, with a background sync service to reconcile changes when the network returns.
 
@@ -37,12 +37,10 @@ The app uses **Supabase** for auth (magic-link, Google, Apple), data persistence
 | **Recommendations** | Hybrid engine combining behaviour, content, collaborative, and demographic signals into 15+ curated categories |
 | **Rating & Reviews** | 1–10 scale with per-media reviews, likes, spoiler tags, threaded comments |
 | **Lists** | Public, private, and collaborative lists with drag-to-reorder items |
-| **Social** | Follow other users, activity feeds, friend-based recommendations |
 | **Analytics** | Watch statistics, genre/country distribution, weekly/monthly/yearly activity charts |
 | **Discover** | Search movies/TV/anime, filter by genre/country/year/rating, infinite scroll |
-| **Notifications** | Firebase push + in-app for new seasons, episodes, follows, list updates |
-| **Moderation** | Report system with pending/reviewed/resolved workflow, role-based access |
-| **Offline-First** | ISAR local cache, background sync queue with retry, optimistic UI updates |
+| **Notifications** | In-app notification centre via Supabase `notifications` table |
+| **Offline-First** | SQLite local cache (`sqflite_common_ffi`), sync queue with retry, optimistic UI updates |
 | **Adaptive UI** | Mobile bottom nav, desktop navigation rail, responsive layouts throughout |
 | **Themes** | Dark & light modes with dynamic colour support, custom cyan–purple accent palette |
 
@@ -64,8 +62,6 @@ The app uses **Supabase** for auth (magic-link, Google, Apple), data persistence
 | `/recommendations` | **Recommendations** | All 15+ category feeds in portrait & landscape layouts |
 | `/analytics` | **Analytics** | Fl-chart statistics dashboard |
 | `/notifications` | **Notifications** | In-app notification centre |
-| `/moderation` | **Moderation** | Report queue (moderator/admin only) |
-| `/social` | **Social** | Friend activity feed |
 | `/auth` | **Auth** | Magic-link, Google, Apple sign-in |
 | `/onboarding` | **Onboarding** | New-user flow |
 | `/splash`, `/privacy`, `/terms`, `/licenses`, `/attribution` | Legal & splash | Splash, privacy policy, terms, OSS licences, data attribution |
@@ -121,20 +117,23 @@ recsEnabledProvider ✔/✘     recommendationsProvider → UI providers
 
 | Layer | Technology |
 |---|---|
-| **Framework** | Flutter 3.11+ / Dart 3.11+ |
-| **State Management** | Riverpod 2.6 (`StateNotifierProvider`, `FutureProvider`, `Provider`) |
-| **Routing** | go_router 14.8 (shell routes, nested routes, `refreshListenable` for auth guards) |
+| **Framework** | Flutter with Dart SDK `^3.11.3` (`pubspec.yaml`; no Flutter version pinned) |
+| **State Management** | Riverpod 3.3 (`NotifierProvider`, `FutureProvider`, `Provider`) |
+| **Routing** | go_router 17.3 (shell routes, nested routes, `refreshListenable` for auth guards) |
 | **Backend** | Supabase (auth, PostgreSQL, real-time, storage) |
 | **Media Data** | TMDB API (movies/TV) + AniList GraphQL (anime) |
-| **Local DB** | ISAR 3.1 (offline cache for profiles, lists, tracked media) |
-| **Analytics** | Firebase Analytics + fl_chart (in-app dashboards) |
-| **Notifications** | Firebase Messaging + flutter_local_notifications |
+| **Local DB** | SQLite cache via sqflite_common_ffi (user media, media metadata, lists) |
+| **Analytics** | fl_chart 1.2 (in-app dashboards) |
+| **Notifications** | flutter_local_notifications 22.0 (local-only) |
 | **CI/CD** | GitHub Actions (analysis, tests, builds) |
 | **Platform** | Android, iOS, Web, macOS, Linux, Windows |
 
 ### Key Packages
 
-`flutter_riverpod` · `go_router` · `supabase_flutter` · `dio` · `isar` · `cached_network_image` · `freezed` · `json_serializable` · `fl_chart` · `flutter_animate` · `lottie` · `shimmer` · `flutter_markdown` · `infinite_scroll_pagination` · `firebase_core/messaging/analytics` · `google_sign_in` · `sign_in_with_apple` · `flutter_dotenv` · `share_plus` · `image_picker`
+`flutter_riverpod` · `go_router` · `supabase_flutter` · `dio` · `sqflite_common_ffi` · `cached_network_image` · `freezed` · `json_serializable` · `fl_chart` · `flutter_animate` · `lottie` · `shimmer` · `infinite_scroll_pagination` · `url_launcher` · `share_plus` · `image_picker`
+
+Google and Apple sign-in use Supabase OAuth via `auth_service.dart`; there are no
+`google_sign_in` or `sign_in_with_apple` dependencies.
 
 ---
 
@@ -142,7 +141,7 @@ recsEnabledProvider ✔/✘     recommendationsProvider → UI providers
 
 ### Prerequisites
 
-- Flutter **3.11+** with Dart 3.11+
+- Flutter tooling with Dart SDK **^3.11.3** (`pubspec.yaml`; no Flutter version pinned)
 - A Supabase project (free tier works)
 - TMDB API key (free)
 - AniList client ID & secret (optional, for anime features)
@@ -224,13 +223,14 @@ lib/
 │   └── app_router.dart           # GoRouter config, auth redirects, shell scaffold
 ├── core/
 │   ├── config/
-│   │   └── recommendation_config.dart   # All recommendation weights & limits
+│   │   ├── recommendation_config.dart   # All recommendation weights & limits
+│   │   └── secrets.dart                 # Compile-time --dart-define values
 │   ├── constants/
 │   │   ├── api_constants.dart
 │   │   ├── api_endpoints.dart
+│   │   ├── app_colors.dart
 │   │   ├── app_constants.dart
-│   │   ├── dimensions.dart
-│   │   └── isar_constants.dart
+│   │   └── dimensions.dart
 │   ├── extensions/               # BuildContext extensions (l10n, theme, media query)
 │   ├── models/                   # Recommendation engine models (ScoredMedia, RecCategory, UserRecProfile)
 │   ├── providers/                # App-wide providers (theme, locale, auth state)
@@ -242,7 +242,7 @@ lib/
 │   │   ├── anilist_service.dart  # AniList GraphQL anime API
 │   │   ├── recommendation_engine.dart  # Hybrid scoring engine
 │   │   ├── behavior_service.dart # User event sourcing + cache clearing
-│   │   ├── isar_service.dart     # Local ISAR database operations
+│   │   ├── cache_service.dart    # Local SQLite cache via sqflite_common_ffi
 │   │   ├── sync_service.dart     # Offline → online sync reconciliation
 │   │   ├── notification_service.dart
 │   │   └── connectivity_service.dart
@@ -268,12 +268,10 @@ lib/
 │   ├── legal/                    # Privacy, terms, licences, attribution
 │   ├── lists/                    # User lists, list detail, drag reorder
 │   ├── media/                    # Media detail, cast, trailers, reviews
-│   ├── moderation/               # Report queue (moderator/admin)
 │   ├── notifications/            # In-app notification centre
 │   ├── profile/                  # Profile, edit profile, settings
 │   ├── recommendations/          # All recommendation feeds
 │   ├── reviews/                  # Review creation & listing
-│   ├── social/                   # Friend activity, user feeds
 │   ├── splash/                   # Splash screen
 │   └── tracking/                 # Media tracking tabbed view
 ├── l10n/                         # ARB-based localisation (generated)
@@ -285,13 +283,11 @@ lib/
 │   ├── user_list_model.dart
 │   ├── notification_model.dart
 │   └── sync_queue_model.dart
-└── supabase/                     # SQL migrations & schema
-    ├── schema.sql
-    ├── migration.sql
-    ├── grants_core.sql
-    ├── grants.sql
-    └── recommendation_tables.sql
 ```
+
+The SQL migrations are at the project root in `supabase/` (`schema.sql`,
+`migration.sql`, `grants_core.sql`, `grants.sql`, `recommendation_tables.sql`),
+outside `lib/`.
 
 ---
 
@@ -338,7 +334,7 @@ lib/
 ### Offline-First
 
 ```
-User Action → Optimistic UI Update → ISAR (local) + Sync Queue
+User Action → Optimistic UI Update → SQLite cache (local) + Sync Queue
                                          ↕
                               Supabase (remote) ← Background Sync (15min)
 ```
@@ -357,6 +353,17 @@ flutter test
 flutter test --coverage
 genhtml coverage/lcov.info -o coverage/html
 ```
+
+See [docs/testing.md](docs/testing.md) for the suite inventory and known gaps.
+
+---
+
+## Documentation
+
+- [Documentation index](docs/README.md) — product, architecture, development,
+  configuration, testing, deployment and changelog pages
+- [Visual identity](docs/visual-identity.md) — palette and theme sources
+- [Release notes](CHANGELOG.md) — project changelog
 
 ---
 
